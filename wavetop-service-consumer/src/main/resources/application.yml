@@ -1,0 +1,24 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name:  service-consumer # 将来作为服务的名称，注入到eureka的中心
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 6000 # （熔断延迟） 设置hystrix的超时时间为6000ms ，默认为1000ms，根据需求可以把延迟调大点
+
+  # feign默认关闭熔断，需要开启
+  feign:
+    hystrix:
+      enabled: true # 开启Feign的熔断功能
