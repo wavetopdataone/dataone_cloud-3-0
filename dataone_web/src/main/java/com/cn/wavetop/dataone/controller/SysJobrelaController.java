@@ -1,6 +1,8 @@
 package com.cn.wavetop.dataone.controller;
 
 
+import com.cn.wavetop.dataone.client.ToBackClient;
+import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysJobrela;
 import com.cn.wavetop.dataone.service.SysJobinfoService;
 import com.cn.wavetop.dataone.service.SysJobrelaService;
@@ -22,6 +24,9 @@ public class SysJobrelaController {
     private SysJobrelaService service;
     @Autowired
     private SysUserJobrelaService sysUserJobrelaService;
+
+    private ToBackClient toBackClient = (ToBackClient) SpringContextUtil.getBean("toBackClient");
+
 
     @ApiOperation(value = "根据用户权限不同显示不同任务", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "查询用户信息")
     @PostMapping("/jobrela_all")
@@ -83,6 +88,7 @@ public class SysJobrelaController {
     @ApiImplicitParam
     @PostMapping("/start")
     public Object start(Long id) {
+        toBackClient.startThread(id);
         return service.start(id);
     }
 

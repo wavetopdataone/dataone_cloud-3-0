@@ -225,8 +225,10 @@ public class SysUserServiceImpl implements SysUserService {
             opsForValue.set("logintime" + name + index, String.valueOf(new Date().getTime()), 300, TimeUnit.SECONDS);
             map.put("date", opsForValue.get("logintime" + name + "1"));
         } catch (Exception e) {
-            lefttime = Integer.parseInt(opsForValue.get("lefttime" + name));
-            lefttime--;
+            if(opsForValue.get("lefttime" + name)!=null) {
+                lefttime = Integer.parseInt(opsForValue.get("lefttime" + name));
+                lefttime--;
+            }
             opsForValue.set("lefttime" + name, String.valueOf(lefttime));
             map.put("status", "2");
             map.put("message", "密码错误");
