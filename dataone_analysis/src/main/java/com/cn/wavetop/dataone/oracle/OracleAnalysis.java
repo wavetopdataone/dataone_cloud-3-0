@@ -4,10 +4,10 @@ package com.cn.wavetop.dataone.oracle;
  * oracle的解析
  */
 public class OracleAnalysis extends Thread{
-    private Integer jobId;
+    private Long jobId;
     private String tableName;
     private boolean flag=true;
-    public OracleAnalysis(Integer jobId,String tableName) {
+    public OracleAnalysis(Long jobId,String tableName) {
         this.jobId=jobId;
         this.tableName=tableName;
     }

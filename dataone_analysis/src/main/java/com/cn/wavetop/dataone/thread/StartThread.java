@@ -7,6 +7,7 @@ import com.cn.wavetop.dataone.entity.SysJobrela;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.oracle.OracleAnalysis;
+import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +24,18 @@ public class StartThread extends Thread{
 
     private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 
-    private Integer jobId;
-    public StartThread(Integer jobId) {
+    private Long jobId;
+    public StartThread(Long jobId) {
         this.jobId=jobId;
     }
     private static Map<String, OracleAnalysis> jobProducerThread = new HashMap<String, OracleAnalysis>();
     private JdbcTemplate jdbcTemplate;
     private RestTemplate restTemplate = new RestTemplate();
-
+    JobRelaServiceImpl jobRelaServiceImpl=new JobRelaServiceImpl();
     @Override
     public void run() {
         System.out.println(SpringContextUtil.class);
-        SysDbinfo sysDbinfo= sysJobrelaRespository.findSourcesDbinfoById(jobId.longValue());
+        SysDbinfo sysDbinfo= jobRelaServiceImpl.findSourcesDbinfoById(jobId);
         try {
             jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         } catch (Exception e) {
@@ -43,7 +44,7 @@ public class StartThread extends Thread{
         System.out.println(jobId);
         System.out.println(sysDbinfo);
         //根据jobId查询同步的类型是增量，全量，全量+增量 用 rate代替
-        SysJobrela sysJobrela=sysJobrelaRespository.findById(jobId);
+        SysJobrela sysJobrela=jobRelaServiceImpl.findById(jobId);
         switch (sysJobrela.getSyncRange().intValue()){
             //全量
             case 1:
@@ -70,7 +71,7 @@ public class StartThread extends Thread{
     }
 
     //全量
-    public void AllOracleOrMysql(Integer jobId ,SysJobrela sysJobrela,JdbcTemplate jdbcTemplate,SysDbinfo sysDbinfo){
+    public void AllOracleOrMysql(Long jobId ,SysJobrela sysJobrela,JdbcTemplate jdbcTemplate,SysDbinfo sysDbinfo){
             //oracle
             if(sysJobrela.getSourceType()==1){
                 //根据jobID查询任务有多少张表sum代替//标的名字是什么
@@ -134,9 +135,9 @@ public class StartThread extends Thread{
     }
       public static void main(String[]args){
 
-        StartThread startThread=new StartThread(15);
-        startThread.run();
-          StartThread startThread2=new StartThread(17);
-          startThread2.run();
+//        StartThread startThread=new StartThread(15);
+//        startThread.run();
+//          StartThread startThread2=new StartThread(17);
+//          startThread2.run();
       }
 }
