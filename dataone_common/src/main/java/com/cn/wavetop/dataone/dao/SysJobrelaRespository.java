@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -101,7 +102,8 @@ public interface SysJobrelaRespository   extends JpaRepository<SysJobrela,Long>
 
     @Query(value = "select sd from SysDbinfo sd,SysJobrela sj where  sj.destId=sd.id and sj.id=:id ")
     SysDbinfo findDbinfoById(Long id);
-
+    @Query(value = "select sd from SysDbinfo sd,SysJobrela sj where  sj.sourceId=sd.id and sj.id=:id ")
+    SysDbinfo findSourcesDbinfoById(Long id);
     @Query(value = "select new com.cn.wavetop.dataone.entity.vo.EmailJobrelaVo(m.jobId,sj.jobName,m.jobError,m.errorQueueAlert,m.errorQueuePause,m.sourceChange) from MailnotifySettings m,SysJobrela sj where m.jobId=sj.id  and sj.jobStatus='1'")
     List<EmailJobrelaVo> findEmailJobRelaUser();
 

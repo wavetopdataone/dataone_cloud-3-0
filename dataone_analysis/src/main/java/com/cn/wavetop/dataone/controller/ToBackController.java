@@ -1,14 +1,11 @@
-package com.cn.wavetop.dataone_analysis.controller;
+package com.cn.wavetop.dataone.controller;
 
 import com.cn.wavetop.dataone.dao.*;
-import com.cn.wavetop.dataone.entity.*;
+import com.cn.wavetop.dataone.config.SpringContextUtil;
+import com.cn.wavetop.dataone.thread.StartThread;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @RestController
 @RequestMapping("/toback")
@@ -20,9 +17,8 @@ public class ToBackController {
      * @return
      */
     @ApiOperation(value = "開啓任務", httpMethod = "GET", protocols = "HTTP", produces = "application/json", notes = "開啓任務")
-    @GetMapping("/start_thread/{jobId}")
+    @PostMapping("/start_thread/{jobId}")
     public void startThread(@PathVariable Long jobId) {
-
-//        new OracleThread(jobId).start();
+        new StartThread(jobId.intValue()).start();
     }
 }

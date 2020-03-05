@@ -4,13 +4,14 @@ package com.cn.wavetop.dataone.controller;
 import com.cn.wavetop.dataone.client.ToBackClient;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysJobrela;
-import com.cn.wavetop.dataone.service.SysJobinfoService;
 import com.cn.wavetop.dataone.service.SysJobrelaService;
 import com.cn.wavetop.dataone.service.SysUserJobrelaService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * @Author yongz
@@ -24,9 +25,8 @@ public class SysJobrelaController {
     private SysJobrelaService service;
     @Autowired
     private SysUserJobrelaService sysUserJobrelaService;
-
-    private ToBackClient toBackClient = (ToBackClient) SpringContextUtil.getBean("toBackClient");
-
+    @Autowired
+    private ToBackClient toBackClient;
 
     @ApiOperation(value = "根据用户权限不同显示不同任务", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "查询用户信息")
     @PostMapping("/jobrela_all")
@@ -43,7 +43,7 @@ public class SysJobrelaController {
 
     @ApiOperation(value = "添加任务", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "添加任务")
     @PostMapping("/add_jobrela")
-    public Object add_jobrela(@RequestBody  SysJobrela sysJobrela) {
+    public Object add_jobrela(@RequestBody SysJobrela sysJobrela) {
 
         return service.addJobrela(sysJobrela);
     }
