@@ -570,7 +570,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                 return map;
             }
         } else if (type == 1) {
-            sql = "SELECT COLUMN_NAME, DATA_TYPE, NVL(DATA_LENGTH,0), NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tablename + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
+            sql = "SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then DATA_PRECISION Else DATA_LENGTH End ) as DATA_LENGTH , NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tablename + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
 
             try {
                 conn = DBConns.getOracleConn(sysDbinfo);
@@ -580,8 +580,8 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                     sysFieldrule = new SysFieldrule();
                     sysFieldrule.setFieldName(rs.getString("COLUMN_NAME"));
                     sysFieldrule.setType(rs.getString("DATA_TYPE"));
-                    if (rs.getString("NVL(DATA_LENGTH,0)") != null && !"".equals(rs.getString("NVL(DATA_LENGTH,0)"))) {
-                        sysFieldrule.setScale(rs.getString("NVL(DATA_LENGTH,0)"));
+                    if (rs.getString("DATA_LENGTH") != null && !"".equals(rs.getString("DATA_LENGTH"))) {
+                        sysFieldrule.setScale(rs.getString("DATA_LENGTH"));
                     } else {
                         sysFieldrule.setScale("0");
                     }

@@ -205,7 +205,7 @@ public class DBConns {
                   sysFieldrule=new SysFieldrule();
                   sysFieldrule.setFieldName(rs.getString("COLUMN_NAME"));
                   sysFieldrule.setType(rs.getString("DATA_TYPE"));
-                sysFieldrule.setScale(rs.getString("NVL(DATA_LENGTH,0)"));
+                sysFieldrule.setScale(rs.getString("DATA_LENGTH"));
                  // sysFieldrule.setAccuracy(rs.getString("NVL(DATA_SCALE,0)"));
                 //  sysFieldrule.setNotNull(rs.getLong("NULLABLE"));
                   stringList.add(sysFieldrule);

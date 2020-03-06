@@ -15,7 +15,7 @@ public class OracleAnalysis extends Thread{
     public void run() {
        while(flag){
            System.out.println("开始解析咯"+jobId+tableName);
-//           stopMe();
+           stopMe();
        }
     }
 

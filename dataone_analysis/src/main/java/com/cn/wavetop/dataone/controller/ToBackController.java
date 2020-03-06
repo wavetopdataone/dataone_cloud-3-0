@@ -19,6 +19,6 @@ public class ToBackController {
     @ApiOperation(value = "開啓任務", httpMethod = "GET", protocols = "HTTP", produces = "application/json", notes = "開啓任務")
     @PostMapping("/start_thread/{jobId}")
     public void startThread(@PathVariable Long jobId) {
-        new StartThread(jobId.intValue()).start();
+        new StartThread(jobId).start();
     }
 }

@@ -18,5 +18,6 @@ public interface SysFilterTableRepository extends JpaRepository<SysFilterTable,L
     List<SysFilterTable> findJobId(Long job_id);
 
     int deleteByJobIdAndFilterTableAndFilterField(Long job_id, String filterTable, String FilterField);
-
+    @Query(nativeQuery = true ,value="select filter_field from sys_filter_table where job_id=:job_id and filter_table=:filter_table and filter_field is not null")
+    List<String> findFiledJobId(Long job_id,String filter_table);
 }

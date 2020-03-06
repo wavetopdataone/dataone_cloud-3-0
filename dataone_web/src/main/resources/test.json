@@ -1,0 +1,63 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "field": "ID",
+        "optional": true,
+        "type": "int64"
+      },
+      {
+        "field": "FNAME",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "field": "LNAME",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "field": "BIRTH",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "field": "HIRED",
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "optional": true,
+        "type": "int64",
+        "version": 1
+      },
+      {
+        "field": "SEPARATED",
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "optional": true,
+        "type": "int64",
+        "version": 1
+      },
+      {
+        "field": "JOB_CODE",
+        "optional": true,
+        "type": "int64"
+      },
+      {
+        "field": "STORE_ID",
+        "optional": true,
+        "type": "int64"
+      }
+    ],
+    "optional": false,
+    "name": "EMPLOYEES"
+  },
+  "payload": {
+    "SEPARATED": 1570550400000,
+    "JOB_CODE": 1,
+    "LNAME": "haixiang30041",
+    "HIRED": 1570550400000,
+    "STORE_ID": 30041,
+    "ID": 30041,
+    "BIRTH": "2019-10-09 23:15:17",
+    "FNAME": "chen30041"
+  }
+}
