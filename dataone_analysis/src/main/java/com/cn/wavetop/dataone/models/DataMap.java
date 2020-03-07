@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 @Builder
 public class DataMap {
-
+    private Map payload2;
     private Map payload;
     private Map message;
 }
