@@ -12,6 +12,9 @@ import java.util.List;
 public interface SysFieldruleRepository extends JpaRepository<SysFieldrule,Long> {
      List<SysFieldrule> findByJobId(long job_id);
     List<SysFieldrule> findByJobIdAndSourceName(long job_id, String sourceName);
+    @Query("select s from SysFieldrule s where s.jobId=:job_id and s.sourceName=:sourceName and s.primaryKey=1")
+    List<SysFieldrule> findPremaryKey(long job_id, String sourceName);
+
     List<SysFieldrule> findByJobIdAndSourceNameAndAddFlag(Long jobId, String sourceName, Integer addFlag);
     List<SysFieldrule> findByJobIdAndDestNameAndAddFlag(Long jobId, String destName, Integer addFlag);
 

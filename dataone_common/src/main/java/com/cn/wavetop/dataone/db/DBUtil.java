@@ -34,15 +34,15 @@ public class DBUtil {
 //            DBConn.getInstance().closeConnection(con);
 //        }
 
-//        public static void update(String sql, Connection con) throws Exception {
-//            Statement st = null;
-//            st = con.createStatement();
-//            log.info(sql);
-//            st.executeUpdate(sql);
-//            st.close();
-//
-//
-//        }
+        public static void update(String sql, Connection con) throws Exception {
+            Statement st = null;
+            st = con.createStatement();
+            log.info(sql);
+            st.executeUpdate(sql);
+            st.close();
+
+
+        }
 
     public static String[][] query(String sql, Connection con) throws Exception {
         return query(sql, con, 0);
