@@ -3,6 +3,13 @@ package com.cn.wavetop.dataone.service;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.dao.*;
+import com.cn.wavetop.dataone.db.DBUtil;
+import com.cn.wavetop.dataone.db.ResultMap;
+import com.cn.wavetop.dataone.destCreateTable.SuperCreateTable;
+import com.cn.wavetop.dataone.destCreateTable.impl.DMCreateSql;
+import com.cn.wavetop.dataone.destCreateTable.impl.MysqlCreateSql;
+import com.cn.wavetop.dataone.destCreateTable.impl.OracleCreateSql;
+import com.cn.wavetop.dataone.destCreateTable.impl.SqlserverCreateSql;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.entity.SysFilterTable;
 import com.cn.wavetop.dataone.entity.SysJobrela;
@@ -14,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 @Service
@@ -39,6 +48,13 @@ public class JobRelaServiceImpl {
      */
     public SysDbinfo findSourcesDbinfoById(Long jobId) {
         return sysJobrelaRespository.findSourcesDbinfoById(jobId.longValue());
+    }
+
+    /**
+     * 根据jobId查询目标端数据源信息
+     */
+    public SysDbinfo findDestDbinfoById(Long jobId) {
+        return sysJobrelaRespository.findDbinfoById(jobId.longValue());
     }
 
     /**
@@ -108,22 +124,41 @@ public class JobRelaServiceImpl {
     }
 
     /**
-     * 查看源端表字段，类型，长度，精度，是否为null
+     * 查看源端映射字段的类型，长度，精度，是否为null
      *
      * @param jobId
      * @param tableName
      * @return list里面套的map
      */
-    public List findSourceFiled(Long jobId, String tableName) {
+    public ResultMap findSourceFiled(Long jobId, String tableName) {
 //            sql =
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
-        List filedNameList = new ArrayList();
+        Connection conn = null;
+        ResultMap filedNameList = null;
         List<String> filedNames = new ArrayList<>();
-        if (sysDbinfo.getType() == 1) {
-            filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then DATA_PRECISION Else DATA_LENGTH End ) as DATA_LENGTH , NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
-            logger.info("所有的表有：" + filedNameList);
-        } else if (sysDbinfo.getType() == 2) {
+        try {
+            if (sysDbinfo.getType() == 1) {
+                conn = DBConns.getOracleConn(sysDbinfo);
+                filedNameList = DBUtil.query2("SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then NVL(DATA_PRECISION,0) Else NVL(DATA_LENGTH,0) End ) as DATA_LENGTH , NVL(DATA_PRECISION,0) as DATA_PRECISION , NVL(DATA_SCALE,0) as DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'", conn);
+                filedNames = findFilterFiledByJobId(jobId, tableName);//过滤的字段
+                for (int i = 0; i < filedNames.size(); i++) {
+                    for (int j = 0; j < filedNameList.size(); j++) {
+                        if (filedNames.get(i).toUpperCase().equals(filedNameList.get(j).get("COLUMN_NAME").toString().toUpperCase())) {
+                            filedNameList.remove(j);
+                        }
+                    }
+                }
+            } else if (sysDbinfo.getType() == 2) {
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                DBConns.close(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return filedNameList;
     }
@@ -138,7 +173,6 @@ public class JobRelaServiceImpl {
         List<String> filedNames = new ArrayList<>();
         if (sysDbinfo.getType() == 1) {
             filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
-            logger.info("所有的表有：" + filedNameList);
             Map map = null;
             for (int i = 0; i < filedNameList.size(); i++) {
                 map = (Map) filedNameList.get(i);
@@ -192,16 +226,31 @@ public class JobRelaServiceImpl {
         }
     }
 
+
+    /**
+     * 目标端表名为
+     */
+    public String destTableName(Long jobId, String sourceTable) {
+        String table = null;
+        List<SysTablerule> sysTableruleList = sysTableruleRepository.findBySourceTableAndJobId(sourceTable, jobId);
+        if (sysTableruleList != null && sysTableruleList.size() > 0) {
+            table = sysTableruleList.get(0).getDestTable();
+        } else {
+            table = sourceTable;
+        }
+        return table;
+    }
+
     /**
      * 验证目标端是否存在表
      *
      * @param job_id
      * @param source_name//表名
-     * @return
+     * @return 0是不存在, 1是存在
      */
     public Integer VerifyDb(Long job_id, String source_name) {
         String sqlss = "";
-        String table = "";
+        String destTable = "";
         Integer flag = 1;//0是不存在,1是存在
         SysDbinfo sysDbinfo = findSourcesDbinfoById(job_id);
         //若目标端存在此表则提示用户
@@ -218,14 +267,9 @@ public class JobRelaServiceImpl {
             //dameng select distinct object_name TABLE_SCHEMA from all_objects where object_type = 'SCH'
             sqlss = "SELECT TABLE_NAME FROM USER_TABLES";
         }
-        List<SysTablerule> sysTableruleList = sysTableruleRepository.findBySourceTableAndJobId(source_name, job_id);
-        if (sysTableruleList != null && sysTableruleList.size() > 0) {
-            table = sysTableruleList.get(0).getDestTable();
-        } else {
-            table = source_name;
-        }
+        destTable = destTableName(job_id, source_name);//目标端表名字
         //查询目标端是否出现此表
-        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, table);
+        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, destTable);
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             flag = 1;
@@ -238,13 +282,91 @@ public class JobRelaServiceImpl {
 
     /**
      * 根据任务id和源端表名查询映射的字段中是否含有大字段
-     * <p>
-     * <p>
-     * 上面查询映射字段时候应该吧类型长度精度不为null也要查出来为拼接建表做准备
+     * 返回值是list数组，内容为大字段名称
      */
     public List<String> BlobOrClob(Long jobId, String sourceTable) {
-
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
+        ResultMap list = findSourceFiled(jobId, sourceTable);
+        List<String> blobOrClob = new ArrayList<>();
+        Map map = null;
+        if (sysDbinfo.getType() == 1) {
+            for (int i = 0; i < list.size(); i++) {
+                map = list.get(i);
+                if (map.get("DATA_TYPE").equals("blob".toUpperCase()) || map.get("DATA_TYPE").equals("clob".toUpperCase())) {
+                    blobOrClob.add((String) map.get("COLUMN_NAME"));
+                }
+            }
+        } else if (sysDbinfo.getType() == 2) {
+            return null;
+        }
         return null;
+    }
+
+
+    /**
+     * 数据库的建表语句
+     * <p>
+     * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
+     */
+    public String createTable(Long jobId, String sourceTable) {
+        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
+        SuperCreateTable createSql=null;
+        switch (sysDbinfo.getType().intValue()){
+            case 1:
+                //oracle
+                createSql=new OracleCreateSql();
+                break;
+            case 2:
+                //mysql
+                createSql=new MysqlCreateSql();
+                break;
+            case 3:
+                //sqlserver
+                createSql=new SqlserverCreateSql();
+                break;
+            case 4:
+                //DM
+                createSql=new DMCreateSql();
+                break;
+            default:
+                logger.error("不存在目标端类型");
+        }
+        String sql=createSql.createTable(jobId,sourceTable);
+        return sql;
+    }
+
+    /**
+     * 执行sql返回sql
+     * @param jobId
+     * @param sourceTable
+     * @return
+     */
+    public String excuteSql(Long jobId, String sourceTable) {
+        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
+        SuperCreateTable createSql=null;
+        switch (sysDbinfo.getType().intValue()){
+            case 1:
+                //oracle
+                createSql=new OracleCreateSql();
+                break;
+            case 2:
+                //mysql
+                createSql=new MysqlCreateSql();
+                break;
+            case 3:
+                //sqlserver
+                createSql=new SqlserverCreateSql();
+                break;
+            case 4:
+                //DM
+                createSql=new DMCreateSql();
+                break;
+            default:
+                logger.error("不存在目标端类型");
+        }
+        String sql= createSql.excuteSql(jobId,sourceTable);
+        System.out.println("sql执行成功");
+        return sql;
     }
 
     /**

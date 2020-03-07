@@ -570,7 +570,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                 return map;
             }
         } else if (type == 1) {
-            sql = "SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then DATA_PRECISION Else DATA_LENGTH End ) as DATA_LENGTH , NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tablename + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
+            sql = "SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then NVL(DATA_PRECISION,0) Else NVL(DATA_LENGTH,0) End ) as DATA_LENGTH , NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tablename + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
 
             try {
                 conn = DBConns.getOracleConn(sysDbinfo);
