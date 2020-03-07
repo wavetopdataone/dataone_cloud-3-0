@@ -12,18 +12,27 @@ import com.cn.wavetop.dataone.entity.SysFieldrule;
 import com.cn.wavetop.dataone.entity.SysFiledType;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class DMCreateSql implements SuperCreateTable {
-    private SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
-    private SysFieldruleRepository sysFieldruleRepository = (SysFieldruleRepository) SpringContextUtil.getBean("sysFieldruleRepository");
-    private SysFiledTypeRepository sysFiledTypeRepository = (SysFiledTypeRepository) SpringContextUtil.getBean("sysFiledTypeRepository");
+    private final SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
+    private final SysFieldruleRepository sysFieldruleRepository = (SysFieldruleRepository) SpringContextUtil.getBean("sysFieldruleRepository");
+    private final SysFiledTypeRepository sysFiledTypeRepository = (SysFiledTypeRepository) SpringContextUtil.getBean("sysFiledTypeRepository");
+    private JobRelaServiceImpl jobRelaServiceImpl;
 
-
+//    private JobRelaServiceImpl jobRelaServiceImpl = new JobRelaServiceImpl();
     /**
      * DM不能携带长度的类型
      */
@@ -70,7 +79,12 @@ public class DMCreateSql implements SuperCreateTable {
 
     @Override
     public String createTable(Long jobId, String tableName) {
-        JobRelaServiceImpl jobRelaServiceImpl=new JobRelaServiceImpl();
+
+        System.out.println("jobRelaServiceImpl"+jobRelaServiceImpl);
+        System.out.println("sysTableruleRepository"+sysTableruleRepository);
+
+
+//        JobRelaServiceImpl jobRelaServiceImpl=new JobRelaServiceImpl();
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
         SysDbinfo sourceSysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
         ResultMap list =jobRelaServiceImpl.findSourceFiled(jobId, tableName);//源端的字段信息

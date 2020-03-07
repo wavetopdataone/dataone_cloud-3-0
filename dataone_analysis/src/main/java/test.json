@@ -1,15 +1,24 @@
 {
   "payload": {
-    "LOC": "NEW YORK",
-    "DEPTNO": "10",
-    "DNAME": "ACCOUNTING"
+    "ENAME": "JAMES",
+    "COMM": "",
+    "HIREDATE": "1981-12-03",
+    "EMPNO": "7900",
+    "MGR": "7698",
+    "JOB": "CLERK",
+    "DEPTNO": "30",
+    "SAL": "950"
   },
   "message": {
-    "destTable": "DEPT",
-    "sourceTable": "DEPT",
-    "creatTable": "等待薛梓浩的建表语句",
-    "big_data": "该阶段暂时不使用",
+    "destTable": "EMP",
+    "sourceTable": "EMP",
+    "creatTable": "CREATE TABLE SYSDBA.EMP(EMPNO NUMBER(4) NOT NULL,ENAME VARCHAR2(10) NOT NULL,JOB VARCHAR2(9) NOT NULL,MGR NUMBER(4),HIREDATE TIMESTAMP,SAL NUMBER(7,2),COMM NUMBER(7,2),DEPTNO NUMBER(2),CONSTRAINT PK_EMPNO PRIMARY KEY (EMPNO,ENAME,JOB));",
+    "big_data": null,
     "stop_flag": "等待定义",
-    "key": "等待薛梓浩"
+    "key": [
+      "EMPNO",
+      "ENAME",
+      "JOB"
+    ]
   }
 }
