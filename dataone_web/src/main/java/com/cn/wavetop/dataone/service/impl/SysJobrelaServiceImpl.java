@@ -687,7 +687,8 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
                 //状态是待激活0和暂停中2和终止中3则启动任务
                 if(byId.getSyncRange()!=null){
                 if ("0".equals(jobStatus) || "2".equals(jobStatus) || "3".equals(jobStatus)) {
-                    byId.setJobStatus("11"); // 1代表运行中，11代表开始动作
+//                    byId.setJobStatus("11"); // 1代表运行中，11代表开始动作
+                    byId.setJobStatus("1"); // 1代表运行中，11代表开始动作
                     repository.save(byId);
                     Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"启动任务"+byId.getJobName()).jobId(id1).build();
                     userlogRespository.save(build);
@@ -741,7 +742,8 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
 
         if (PermissionUtils.isPermitted("2") || PermissionUtils.isPermitted("3")) {
             if ("1".equals(jobStatus)) {
-                byId.setJobStatus("21"); //  2 代表暂停中，21代表暂停动作
+//                byId.setJobStatus("21"); //  2 代表暂停中，21代表暂停动作
+                byId.setJobStatus("2"); //  2 代表暂停中，21代表暂停动作
                 repository.save(byId);
                 Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"暂停任务"+byId.getJobName()).jobId(id).build();
                 userlogRespository.save(build);
@@ -782,7 +784,8 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
         String jobStatus = byId.getJobStatus();
         if (PermissionUtils.isPermitted("2") || PermissionUtils.isPermitted("3")) {
             if (!"1".equals(jobStatus)) {
-                byId.setJobStatus("31"); // 3代表终止，31 代表停止功能
+//                byId.setJobStatus("31"); // 3代表终止，31 代表停止功能
+                byId.setJobStatus("3"); // 3代表终止，31 代表停止功能
                 repository.save(byId);
                 Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"停止任务"+byId.getJobName()).jobId(id).build();
                 userlogRespository.save(build);

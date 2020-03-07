@@ -27,4 +27,5 @@ public interface SysTableruleRepository extends JpaRepository<SysTablerule,Long>
     List<SysTablerule> findByJobIdAndDestTable(Long jobId, String destTable);
     int  deleteByJobIdAndVarFlag(long job_id, Long varflag);
     int deleteByJobIdAndSourceTable(long job_id, String sourceName);
+
 }

@@ -16,6 +16,10 @@ public interface ToBackClient {
      * @param jobId
      * @return
      */
-    @PostMapping("/toback/start_thread/{jobId}")
-    public void startThread(@PathVariable Long jobId) ;
+    @PostMapping("/job/start/{jobId}")
+    public boolean startThread(@PathVariable Long jobId) ;
+    @PostMapping("/job/pause/{jobId}")
+    public boolean pauseThread(@PathVariable Long jobId) ;
+    @PostMapping("/job/stop/{jobId}")
+    public boolean stopThread(@PathVariable Long jobId) ;
 }

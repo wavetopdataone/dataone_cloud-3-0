@@ -92,17 +92,24 @@ public class SysJobrelaController {
         return service.start(id);
     }
 
+    @ApiImplicitParam
+    @PostMapping("/resume")
+    public Object resume(Long id) {
+        toBackClient.startThread(id);
+        return service.start(id);
+    }
 
     @ApiImplicitParam
     @PostMapping("/pause")
     public Object pause(Long id) {
+        toBackClient.pauseThread(id);
         return service.pause(id);
     }
-
 
     @ApiImplicitParam
     @PostMapping("/end")
     public Object end(Long id) {
+        toBackClient.stopThread(id);
         return service.end(id);
     }
 

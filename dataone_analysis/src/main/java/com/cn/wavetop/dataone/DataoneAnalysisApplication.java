@@ -1,7 +1,6 @@
 package com.cn.wavetop.dataone;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.thread.StartThread;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.SpringCloudApplication;

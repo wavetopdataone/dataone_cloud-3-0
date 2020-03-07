@@ -7,20 +7,31 @@ import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.entity.SysFilterTable;
 import com.cn.wavetop.dataone.entity.SysJobrela;
 import com.cn.wavetop.dataone.entity.SysTablerule;
-import com.cn.wavetop.dataone.entity.vo.ToDataMessage;
 import com.cn.wavetop.dataone.util.DBConns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class JobRelaServiceImpl {
-    private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");
+    //    private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
-    private SysDbinfoRespository sysDbinfoRespository = (SysDbinfoRespository) SpringContextUtil.getBean("sysDbinfoRespository");
-    private SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
+//    private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
+//    private SysDbinfoRespository sysDbinfoRespository = (SysDbinfoRespository) SpringContextUtil.getBean("sysDbinfoRespository");
+//    private SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
+
+    @Autowired
+    private SysJobrelaRespository sysJobrelaRespository;
+    @Autowired
+    private SysFilterTableRepository sysFilterTableRepository;
+    @Autowired
+    private SysDbinfoRespository sysDbinfoRespository;
+    @Autowired
+    private SysTableruleRepository sysTableruleRepository;
 
 
     /**
@@ -54,7 +65,7 @@ public class JobRelaServiceImpl {
      * 根据jobId查询映射的表名称
      */
     public List findTableById(Long jobId) {
-        SysDbinfo sysDbinfo= findSourcesDbinfoById(jobId);
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         List tableNameList = new ArrayList();
         List<String> tableNames = new ArrayList<>();
@@ -98,35 +109,37 @@ public class JobRelaServiceImpl {
 
     /**
      * 查看源端表字段，类型，长度，精度，是否为null
+     *
      * @param jobId
      * @param tableName
-     * @return   list里面套的map
+     * @return list里面套的map
      */
     public List findSourceFiled(Long jobId, String tableName) {
 //            sql =
-        SysDbinfo sysDbinfo= findSourcesDbinfoById(jobId);
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         List filedNameList = new ArrayList();
         List<String> filedNames = new ArrayList<>();
         if (sysDbinfo.getType() == 1) {
             filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then DATA_PRECISION Else DATA_LENGTH End ) as DATA_LENGTH , NVL(DATA_PRECISION,0), NVL(DATA_SCALE,0), NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
             logger.info("所有的表有：" + filedNameList);
-    }else if(sysDbinfo.getType()==2){
+        } else if (sysDbinfo.getType() == 2) {
         }
         return filedNameList;
     }
-     /**
+
+    /**
      * 根据jobId和表名查询映射的字段名称
      */
     public List findFiledByJobId(Long jobId, String tableName) {
-        SysDbinfo sysDbinfo= findSourcesDbinfoById(jobId);
-            JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
-            List filedNameList = new ArrayList();
-            List<String> filedNames = new ArrayList<>();
-            if (sysDbinfo.getType() == 1) {
-                filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
-                logger.info("所有的表有：" + filedNameList);
-                Map map = null;
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
+        JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
+        List filedNameList = new ArrayList();
+        List<String> filedNames = new ArrayList<>();
+        if (sysDbinfo.getType() == 1) {
+            filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
+            logger.info("所有的表有：" + filedNameList);
+            Map map = null;
             for (int i = 0; i < filedNameList.size(); i++) {
                 map = (Map) filedNameList.get(i);
                 filedNames.add((String) map.get("COLUMN_NAME"));
@@ -157,8 +170,8 @@ public class JobRelaServiceImpl {
     /**
      * 表名查询表主键
      */
-    public List findPrimaryKey(Long jobId,String tableName) {
-        SysDbinfo sysDbinfo= findSourcesDbinfoById(jobId);
+    public List findPrimaryKey(Long jobId, String tableName) {
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         List PrimaryKeyList = new ArrayList();
         List<String> PrimaryKeys = new ArrayList<>();
@@ -190,7 +203,7 @@ public class JobRelaServiceImpl {
         String sqlss = "";
         String table = "";
         Integer flag = 1;//0是不存在,1是存在
-        SysDbinfo sysDbinfo= findSourcesDbinfoById(job_id);
+        SysDbinfo sysDbinfo = findSourcesDbinfoById(job_id);
         //若目标端存在此表则提示用户
         if (sysDbinfo.getType() == 1) {
             //oracle
@@ -222,15 +235,36 @@ public class JobRelaServiceImpl {
             return flag;
         }
     }
+
     /**
      * 根据任务id和源端表名查询映射的字段中是否含有大字段
-     *
-     *
+     * <p>
+     * <p>
      * 上面查询映射字段时候应该吧类型长度精度不为null也要查出来为拼接建表做准备
      */
-    public List<String> BlobOrClob(Long jobId,String sourceTable){
+    public List<String> BlobOrClob(Long jobId, String sourceTable) {
 
-              return null;
+        return null;
     }
 
+    /**
+     * todo
+     * 根据源端表名获取目的端表名
+     *
+     * @param jobId
+     * @param tableName
+     * @return
+     */
+    public String getDestTable(Long jobId, String tableName) {
+        List<SysTablerule> SysTablerules = sysTableruleRepository.findBySourceTableAndJobId(tableName, jobId);
+        if (SysTablerules.size() < 1) {
+            return tableName;
+        }
+        String destTable = SysTablerules.get(0).getDestTable();
+        if (destTable == null || "".equals(destTable)) {
+            return SysTablerules.get(0).getSourceTable();
+        } else {
+            return destTable;
+        }
+    }
 }
