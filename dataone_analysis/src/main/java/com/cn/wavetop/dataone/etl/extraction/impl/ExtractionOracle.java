@@ -41,20 +41,16 @@ public class ExtractionOracle implements Extraction {
     private SysDbinfo sysDbinfo;
     private String destTable;
 
-    /**
-     * 全量抓取
-     * @throws Exception
-     */
     @Override
     public void fullRang() throws Exception {
-        System.out.println("Oracle 全量开始");
+        this.destTable = jobRelaServiceImpl.getDestTable(jobId, tableName);//获取目的端表名
         Producer producer = new Producer(null);
-        Map message = getMessage(); //传输的消息
+
         String select_sql = null;
         Connection conn = DBConns.getOracleConn(sysDbinfo);
 
 
-
+        System.out.println("Oracle 全量开始");
 
         List filedsList = jobRelaServiceImpl.findFiledByJobId(jobId, tableName);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
@@ -66,7 +62,7 @@ public class ExtractionOracle implements Extraction {
 
             DataMap data = DataMap.builder()
                     .payload(resultMap.get(i))
-                    .message(message).build();
+                    .message(getMessage()).build();
 
 //            System.out.println(JSONUtil.toJSONString(data));
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
@@ -77,9 +73,6 @@ public class ExtractionOracle implements Extraction {
 
     }
 
-    /**
-     * 增量抓取
-     */
     @Override
     public void incrementRang() {
         System.out.println("Oracle 增量开始");
@@ -93,7 +86,7 @@ public class ExtractionOracle implements Extraction {
     private Map getMessage() {
         HashMap<Object, Object> message = new HashMap<>();
         message.put("sourceTable", tableName);
-        message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
+        message.put("destTable", destTable);
 //        String table = createTable(jobId, tableName);
         message.put("creatTable",jobRelaServiceImpl.createTable(jobId, tableName));
         message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName));
@@ -162,7 +155,8 @@ public class ExtractionOracle implements Extraction {
                 break;
             case 4:
                 //DM
-                createSql = new DMCreateSql();
+               createSql =new DMCreateSql();
+
                 break;
             default:
 //                logger.error("不存在目标端类型");

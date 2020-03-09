@@ -28,8 +28,6 @@ public class DMCreateSql implements SuperCreateTable {
     private final SysFieldruleRepository sysFieldruleRepository = (SysFieldruleRepository) SpringContextUtil.getBean("sysFieldruleRepository");
     private final SysFiledTypeRepository sysFiledTypeRepository = (SysFiledTypeRepository) SpringContextUtil.getBean("sysFiledTypeRepository");
     private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");;
-
-//    private JobRelaServiceImpl jobRelaServiceImpl = new JobRelaServiceImpl();
     /**
      * DM不能携带长度的类型
      */
@@ -76,11 +74,6 @@ public class DMCreateSql implements SuperCreateTable {
 
     @Override
     public String createTable(Long jobId, String tableName) {
-
-
-
-
-//        JobRelaServiceImpl jobRelaServiceImpl=new JobRelaServiceImpl();
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
         SysDbinfo sourceSysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
         ResultMap list =jobRelaServiceImpl.findSourceFiled(jobId, tableName);//源端的字段信息

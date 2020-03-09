@@ -10,10 +10,7 @@ import com.cn.wavetop.dataone.destCreateTable.impl.DMCreateSql;
 import com.cn.wavetop.dataone.destCreateTable.impl.MysqlCreateSql;
 import com.cn.wavetop.dataone.destCreateTable.impl.OracleCreateSql;
 import com.cn.wavetop.dataone.destCreateTable.impl.SqlserverCreateSql;
-import com.cn.wavetop.dataone.entity.SysDbinfo;
-import com.cn.wavetop.dataone.entity.SysFilterTable;
-import com.cn.wavetop.dataone.entity.SysJobrela;
-import com.cn.wavetop.dataone.entity.SysTablerule;
+import com.cn.wavetop.dataone.entity.*;
 import com.cn.wavetop.dataone.util.DBConns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +38,8 @@ public class JobRelaServiceImpl {
     private SysDbinfoRespository sysDbinfoRespository;
     @Autowired
     private SysTableruleRepository sysTableruleRepository;
-
+    @Autowired
+    private SysFieldruleRepository sysFieldruleRepository;
 
     /**
      * 根据jobId查询源端数据源信息
@@ -292,10 +290,11 @@ public class JobRelaServiceImpl {
         if (sysDbinfo.getType() == 1) {
             for (int i = 0; i < list.size(); i++) {
                 map = list.get(i);
-                if (map.get("DATA_TYPE").equals("blob".toUpperCase()) || map.get("DATA_TYPE").equals("clob".toUpperCase())) {
+                if (map.get("DATA_TYPE").toString().toUpperCase().equals("blob".toUpperCase()) || map.get("DATA_TYPE").toString().toUpperCase().equals("clob".toUpperCase())) {
                     blobOrClob.add((String) map.get("COLUMN_NAME"));
                 }
             }
+            return blobOrClob;
         } else if (sysDbinfo.getType() == 2) {
             return null;
         }
@@ -310,61 +309,62 @@ public class JobRelaServiceImpl {
      */
     public String createTable(Long jobId, String sourceTable) {
         SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-        SuperCreateTable createSql=null;
-        switch (sysDbinfo.getType().intValue()){
+        SuperCreateTable createSql = null;
+        switch (sysDbinfo.getType().intValue()) {
             case 1:
                 //oracle
-                createSql=new OracleCreateSql();
+                createSql = new OracleCreateSql();
                 break;
             case 2:
                 //mysql
-                createSql=new MysqlCreateSql();
+                createSql = new MysqlCreateSql();
                 break;
             case 3:
                 //sqlserver
-                createSql=new SqlserverCreateSql();
+                createSql = new SqlserverCreateSql();
                 break;
             case 4:
                 //DM
-                createSql=new DMCreateSql();
+                createSql = new DMCreateSql();
                 break;
             default:
                 logger.error("不存在目标端类型");
         }
-        String sql=createSql.createTable(jobId,sourceTable);
+        String sql = createSql.createTable(jobId, sourceTable);
         return sql;
     }
 
     /**
      * 执行sql返回sql
+     *
      * @param jobId
      * @param sourceTable
      * @return
      */
     public String excuteSql(Long jobId, String sourceTable) {
         SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-        SuperCreateTable createSql=null;
-        switch (sysDbinfo.getType().intValue()){
+        SuperCreateTable createSql = null;
+        switch (sysDbinfo.getType().intValue()) {
             case 1:
                 //oracle
-                createSql=new OracleCreateSql();
+                createSql = new OracleCreateSql();
                 break;
             case 2:
                 //mysql
-                createSql=new MysqlCreateSql();
+                createSql = new MysqlCreateSql();
                 break;
             case 3:
                 //sqlserver
-                createSql=new SqlserverCreateSql();
+                createSql = new SqlserverCreateSql();
                 break;
             case 4:
                 //DM
-                createSql=new DMCreateSql();
+                createSql = new DMCreateSql();
                 break;
             default:
                 logger.error("不存在目标端类型");
         }
-        String sql= createSql.excuteSql(jobId,sourceTable);
+        String sql = createSql.excuteSql(jobId, sourceTable);
         System.out.println("sql执行成功");
         return sql;
     }
@@ -389,16 +389,49 @@ public class JobRelaServiceImpl {
             return destTable;
         }
     }
+
     /**
      * 参数：jobid和tableName
      * return map
      * key为源端表字段，对应的value为目的端表
      */
+    public Map findMapField(Long jobId, String sourceTable) {
+        //源端同步的所有字段
+        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable);
+        List<SysFieldrule> sysFieldruleList = null;
+        Map map = new HashMap();
+        for (String sourceFiled : sourceFiledList) {
+            sysFieldruleList = sysFieldruleRepository.findByJobIdAndSourceNameAndFieldName(jobId, sourceTable, sourceFiled);
+            //中台数据库是否能查到映射的目标端字段
+            if (sysFieldruleList != null && sysFieldruleList.size() > 0) {
+                map.put(sourceFiled, sysFieldruleList.get(0).getDestFieldName());
+            } else {
+                map.put(sourceFiled, sourceFiled);
+            }
+        }
+        return map;
+    }
 
 
     /**
      * 参数：jobid和tableName
      * return List
-     * 要求查源端需要同步的字段（不包含blod、clob。。。）
+     * 要求查源端需要同步的字段（不包含blob、clob。。。）
      */
+    public List findFiledNoBlob(Long jobId, String sourceTable) {
+        //源端同步的所有字段
+        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable);
+        //源端同步的大字段
+        List<String> BlobOrClob =  BlobOrClob(jobId, sourceTable);
+        if(BlobOrClob!=null&&BlobOrClob.size()>0) {
+            Iterator<String> iterator = sourceFiled.iterator();
+            while (iterator.hasNext()) {
+                String num = iterator.next();
+                if (BlobOrClob.contains(num)) {
+                    iterator.remove();
+                }
+            }
+        }
+        return sourceFiled;
+    }
 }
