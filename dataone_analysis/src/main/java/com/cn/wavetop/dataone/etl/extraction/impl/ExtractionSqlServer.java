@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.etl.extraction.impl;
 
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.Extraction;
+import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ExtractionSqlServer implements Extraction {
     private Long jobId;
     private String tableName;
     private SysDbinfo sysDbinfo;
+    private TransformationThread transformationThread;
     @Override
     public void fullRang() {
 
@@ -32,6 +34,21 @@ public class ExtractionSqlServer implements Extraction {
 
     @Override
     public void fullAndIncrementRang() {
+
+    }
+
+    @Override
+    public void resumeTrans() {
+
+    }
+
+    @Override
+    public void stopTrans() {
+
+    }
+
+    @Override
+    public void pasueTrans() {
 
     }
 }

@@ -10,6 +10,8 @@ import com.cn.wavetop.dataone.destCreateTable.impl.OracleCreateSql;
 import com.cn.wavetop.dataone.destCreateTable.impl.SqlserverCreateSql;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.Extraction;
+import com.cn.wavetop.dataone.etl.transformation.Transformation;
+import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.producer.Producer;
 import com.cn.wavetop.dataone.util.DBConns;
@@ -39,7 +41,7 @@ public class ExtractionOracle implements Extraction {
     private Long jobId;
     private String tableName;
     private SysDbinfo sysDbinfo;
-    private String destTable;
+    private TransformationThread transformationThread;
 
     /**
      * 全量抓取
@@ -62,13 +64,14 @@ public class ExtractionOracle implements Extraction {
 
         ResultMap resultMap = DBUtil.query2(select_sql, conn);
 
+        startTrans(resultMap.size());   //判断创建清洗线程并开启线程
+
         for (int i = 0; i < resultMap.size(); i++) {
 
             DataMap data = DataMap.builder()
                     .payload(resultMap.get(i))
                     .message(message).build();
 
-//            System.out.println(JSONUtil.toJSONString(data));
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
         }
 
@@ -76,6 +79,7 @@ public class ExtractionOracle implements Extraction {
         conn.close();
 
     }
+
 
     /**
      * 增量抓取
@@ -90,6 +94,35 @@ public class ExtractionOracle implements Extraction {
         System.out.println("Oracle 全量+增量开始");
     }
 
+
+
+
+    /**
+     * 创建清洗层线程并开始任务
+     * @param size
+     */
+    private void startTrans(int size) {
+        if (size>0){
+            this.transformationThread = new TransformationThread(jobId, tableName);
+            this.transformationThread.start();
+        }
+    }
+
+    @Override
+    public void resumeTrans() {
+        this.transformationThread.resume();
+    }
+
+    @Override
+    public void stopTrans() {
+        this.transformationThread.stop();
+    }
+
+    @Override
+    public void pasueTrans() {
+        this.transformationThread.suspend();
+    }
+
     private Map getMessage() {
         HashMap<Object, Object> message = new HashMap<>();
         message.put("sourceTable", tableName);
@@ -101,6 +134,10 @@ public class ExtractionOracle implements Extraction {
         message.put("stop_flag", "等待定义");
         return message;
     }
+
+
+
+
 
 
     /**

@@ -165,6 +165,7 @@ public class JobRelaServiceImpl {
 
     /**
      * 根据jobId和表名查询映射的字段名称
+     * 要求查源端需要同步的字段（包含blod、clob。。。）
      */
     public List findFiledByJobId(Long jobId, String tableName) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);

@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.etl.extraction;
 
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
+import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 
 /**
@@ -31,4 +32,20 @@ public interface Extraction {
      * 全量+增量
      */
     public void fullAndIncrementRang();
+
+
+    /**
+     * 开始清洗
+     */
+    public void resumeTrans();
+
+    /**
+     * 停止清洗
+     */
+    public void stopTrans();
+
+    /**
+     * 暂停清洗
+     */
+    public void pasueTrans();
 }
