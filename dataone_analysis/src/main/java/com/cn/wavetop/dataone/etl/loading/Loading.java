@@ -7,4 +7,8 @@ package com.cn.wavetop.dataone.etl.loading;
  * 导入模块接口
  */
 public interface Loading {
+
+
+  //导入达梦接口
+  public void loadingDM(String jsonString);
 }
