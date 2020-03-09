@@ -9,6 +9,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.util.Properties;
 
 public class Producer {
+    
     private Properties p = new Properties();
     private KafkaProducer kafkaProducer;
 
