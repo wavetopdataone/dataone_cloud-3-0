@@ -389,4 +389,16 @@ public class JobRelaServiceImpl {
             return destTable;
         }
     }
+    /**
+     * 参数：jobid和tableName
+     * return map
+     * key为源端表字段，对应的value为目的端表
+     */
+
+
+    /**
+     * 参数：jobid和tableName
+     * return List
+     * 要求查源端需要同步的字段（不包含blod、clob。。。）
+     */
 }
