@@ -22,6 +22,25 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * 1.findSourcesDbinfoById:根据jobId查询源端数据源信息
+ * 2.findDestDbinfoById:根据jobId查询目标端数据源信息
+ * 3.findById:根据jobId查询任务信息
+ * 4.findFileTableByJobId:根据jobId查询过滤的表
+ * 5.findTableById:根据jobId查询映射的表名称
+ * 6.findFilterFiledByJobId:根据jobId和表名查询过滤的字段名称
+ * 7.findSourceFiled:查看源端映射字段的类型，长度，精度，是否为null
+ * 8.findFiledByJobId:据jobId和表名查询映射的字段名称
+ * 9.findPrimaryKey:根据jobId和表名查询源端表主键
+ * 10.destTableName：根据jobId和表名查询目标端表名
+ * 11.VerifyDb：验证目标端是否存在表 0不存在 1存在
+ * 12.BlobOrClob：根据任务id和源端表名查询映射的字段中是否含有大字段 返回大字段的list集合
+ * 13.createTable：目的端的建表语句
+ * 14.excuteSql：执行目的端建表sql返回sql
+ * 15.getDestTable：根据源端表名返回目的端表名
+ * 16.findMapField：根据jobId和tableName查询源端对应的目标端表 返回map，key为源端表名 value为目标端
+ * 17.findFiledNoBlob：根据jobId和tableName查询同步的字段不包含大字段的字段集合
+ */
 @Service
 public class JobRelaServiceImpl {
     //    private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");
@@ -411,7 +430,6 @@ public class JobRelaServiceImpl {
         }
         return map;
     }
-
 
     /**
      * 参数：jobid和tableName

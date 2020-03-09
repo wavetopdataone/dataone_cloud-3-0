@@ -659,10 +659,6 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 //                    data.get(i).setDestFieldName(data.get(i).getDestFieldName());
 //                }
                 if (sysDbinfo.getType() != sysDbinfo2.getType()) {
-                    //oracle到达梦和oracle到oracle一样
-                    if (sysDbinfo.getType() == 1 && sysDbinfo2.getType() == 4) {
-                        System.out.println("oracle到达梦和oracle到oracle一样");
-                    } else {
                         //去找到映射的字段类型
                         sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), data.get(i).getType().toUpperCase());
                         if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
@@ -680,7 +676,6 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                                 data.get(i).setType(data.get(i).getType());
                             }
                         }
-                    }
                 }
             }
             if (sysFieldruleList != null && sysFieldruleList.size() > 0) {
