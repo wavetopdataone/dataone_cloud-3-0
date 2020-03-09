@@ -22,15 +22,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
+
 public class DMCreateSql implements SuperCreateTable {
     private final SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
     private final SysFieldruleRepository sysFieldruleRepository = (SysFieldruleRepository) SpringContextUtil.getBean("sysFieldruleRepository");
     private final SysFiledTypeRepository sysFiledTypeRepository = (SysFiledTypeRepository) SpringContextUtil.getBean("sysFiledTypeRepository");
-    private JobRelaServiceImpl jobRelaServiceImpl;
+    private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");;
 
 //    private JobRelaServiceImpl jobRelaServiceImpl = new JobRelaServiceImpl();
     /**
@@ -80,8 +77,7 @@ public class DMCreateSql implements SuperCreateTable {
     @Override
     public String createTable(Long jobId, String tableName) {
 
-        System.out.println("jobRelaServiceImpl"+jobRelaServiceImpl);
-        System.out.println("sysTableruleRepository"+sysTableruleRepository);
+
 
 
 //        JobRelaServiceImpl jobRelaServiceImpl=new JobRelaServiceImpl();

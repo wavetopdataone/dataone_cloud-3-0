@@ -165,6 +165,7 @@ public class JobRelaServiceImpl {
 
     /**
      * 根据jobId和表名查询映射的字段名称
+     * 要求查源端需要同步的字段（包含blod、clob。。。）
      */
     public List findFiledByJobId(Long jobId, String tableName) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
@@ -308,32 +309,32 @@ public class JobRelaServiceImpl {
      * <p>
      * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
      */
-//    public String createTable(Long jobId, String sourceTable) {
-//        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-//        SuperCreateTable createSql=null;
-//        switch (sysDbinfo.getType().intValue()){
-//            case 1:
-//                //oracle
-//                createSql=new OracleCreateSql();
-//                break;
-//            case 2:
-//                //mysql
-//                createSql=new MysqlCreateSql();
-//                break;
-//            case 3:
-//                //sqlserver
-//                createSql=new SqlserverCreateSql();
-//                break;
-//            case 4:
-//                //DM
-//                createSql=new DMCreateSql();
-//                break;
-//            default:
-//                logger.error("不存在目标端类型");
-//        }
-//        String sql=createSql.createTable(jobId,sourceTable);
-//        return sql;
-//    }
+    public String createTable(Long jobId, String sourceTable) {
+        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
+        SuperCreateTable createSql=null;
+        switch (sysDbinfo.getType().intValue()){
+            case 1:
+                //oracle
+                createSql=new OracleCreateSql();
+                break;
+            case 2:
+                //mysql
+                createSql=new MysqlCreateSql();
+                break;
+            case 3:
+                //sqlserver
+                createSql=new SqlserverCreateSql();
+                break;
+            case 4:
+                //DM
+                createSql=new DMCreateSql();
+                break;
+            default:
+                logger.error("不存在目标端类型");
+        }
+        String sql=createSql.createTable(jobId,sourceTable);
+        return sql;
+    }
 
     /**
      * 执行sql返回sql
@@ -341,33 +342,33 @@ public class JobRelaServiceImpl {
      * @param sourceTable
      * @return
      */
-//    public String excuteSql(Long jobId, String sourceTable) {
-//        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-//        SuperCreateTable createSql=null;
-//        switch (sysDbinfo.getType().intValue()){
-//            case 1:
-//                //oracle
-//                createSql=new OracleCreateSql();
-//                break;
-//            case 2:
-//                //mysql
-//                createSql=new MysqlCreateSql();
-//                break;
-//            case 3:
-//                //sqlserver
-//                createSql=new SqlserverCreateSql();
-//                break;
-//            case 4:
-//                //DM
-//                createSql=new DMCreateSql();
-//                break;
-//            default:
-//                logger.error("不存在目标端类型");
-//        }
-//        String sql= createSql.excuteSql(jobId,sourceTable);
-//        System.out.println("sql执行成功");
-//        return sql;
-//    }
+    public String excuteSql(Long jobId, String sourceTable) {
+        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
+        SuperCreateTable createSql=null;
+        switch (sysDbinfo.getType().intValue()){
+            case 1:
+                //oracle
+                createSql=new OracleCreateSql();
+                break;
+            case 2:
+                //mysql
+                createSql=new MysqlCreateSql();
+                break;
+            case 3:
+                //sqlserver
+                createSql=new SqlserverCreateSql();
+                break;
+            case 4:
+                //DM
+                createSql=new DMCreateSql();
+                break;
+            default:
+                logger.error("不存在目标端类型");
+        }
+        String sql= createSql.excuteSql(jobId,sourceTable);
+        System.out.println("sql执行成功");
+        return sql;
+    }
 
     /**
      * todo
@@ -389,4 +390,16 @@ public class JobRelaServiceImpl {
             return destTable;
         }
     }
+    /**
+     * 参数：jobid和tableName
+     * return map
+     * key为源端表字段，对应的value为目的端表
+     */
+
+
+    /**
+     * 参数：jobid和tableName
+     * return List
+     * 要求查源端需要同步的字段（不包含blod、clob。。。）
+     */
 }
