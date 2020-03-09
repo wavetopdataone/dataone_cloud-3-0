@@ -6,5 +6,5 @@ import com.cn.wavetop.dataone.etl.transformation.Transformation;
  * @Author yongz
  * @Date 2020/3/6、16:10
  */
-public class TransformationDM implements Transformation {
+public class TransformationDM extends Transformation {
 }

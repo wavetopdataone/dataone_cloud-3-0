@@ -22,7 +22,7 @@ public class ExtractionThread extends Thread {
     // 单表抓取线程
     private Long jobId;//jobid
     private String tableName;//表
-
+    private  Extraction extraction = null;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -55,7 +55,7 @@ public class ExtractionThread extends Thread {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-        Extraction extraction = null;
+
         //查看源端表的类型如Oracle、MySQL、sql server、DM,实例化抓取类
         switch (Math.toIntExact(sysDbinfo.getType())) {
             //Oracle
@@ -126,7 +126,17 @@ public class ExtractionThread extends Thread {
 
     }
 
+    public void resumeTrans() {
+        this.extraction.resumeTrans();
+    }
 
+    public void stopTrans() {
+        this.extraction.stopTrans();
+    }
+
+    public void pasueTrans() {
+        this.extraction.pasueTrans();
+    }
 //    //全量
 //    public void AllOracleOrMysql(Long jobId, SysJobrela sysJobrela, JdbcTemplate jdbcTemplate, SysDbinfo sysDbinfo) {
 //        List<String> tableNames = jobRelaServiceImpl.findTableById(jobId);

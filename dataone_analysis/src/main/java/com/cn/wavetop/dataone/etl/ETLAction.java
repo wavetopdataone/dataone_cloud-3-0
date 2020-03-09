@@ -23,14 +23,24 @@ public class ETLAction {
      * 外层Key为任务{jobid}
      * 内存map的key为对应的任务的表名
      */
-    private Map<Object, Map<Object, ExtractionThread>> jobExtraction = new HashMap<Object, Map<Object, ExtractionThread>>();
+    private Map<Object, Map<Object, ExtractionThread>> jobExtractionThreads = new HashMap<Object, Map<Object, ExtractionThread>>();
+
+
+//    /**
+//     * 保存每个任务的所有清洗线程
+//     * <p>
+//     * 外层Key为任务{jobid}
+//     * 内存map的key为对应的任务的表名
+//     */
+//    private Map<Object, Map<Object, ExtractionThread>> jobExtraction = new HashMap<Object, Map<Object, ExtractionThread>>();
+
 
     @Autowired
     private JobRelaServiceImpl JobRelaServiceImpl ;
 
     //开始任务
     public boolean start(Long jobId) {
-        if (jobExtraction.get(jobId) == null) {
+        if (jobExtractionThreads.get(jobId) == null) {
             // 第一次开启，激活
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
@@ -40,12 +50,13 @@ public class ETLAction {
                 ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName));
                 ExtractionThreads.get(tableName).start();
             }
-            jobExtraction.put(jobId, ExtractionThreads);
+            jobExtractionThreads.put(jobId, ExtractionThreads);
         } else {
             // 重启，resume
-            ExtractionThreads = jobExtraction.get(jobId);
+            ExtractionThreads = jobExtractionThreads.get(jobId);
             for (Object o : ExtractionThreads.keySet()) {
-                ExtractionThreads.get(o).resume();
+                ExtractionThreads.get(o).resume(); //重启抓取线程
+                ExtractionThreads.get(o).resumeTrans();//重启清洗线程
             }
         }
         return true;
@@ -53,28 +64,30 @@ public class ETLAction {
 
     //暂停任务
     public boolean pause(Long jobId) {
-        ExtractionThreads = jobExtraction.get(jobId);
+        ExtractionThreads = jobExtractionThreads.get(jobId);
         if (ExtractionThreads == null){
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
-            ExtractionThreads.get(o).suspend();
+            ExtractionThreads.get(o).suspend();//暂停抓取进程
+            ExtractionThreads.get(o).pasueTrans();//暂停清洗进程
         }
         return true;
     }
 
     //终止任务
     public boolean stop(Long jobId) {
-        ExtractionThreads = jobExtraction.get(jobId);
+        ExtractionThreads = jobExtractionThreads.get(jobId);
         if (ExtractionThreads == null){
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
-            ExtractionThreads.get(o).stop();
+            ExtractionThreads.get(o).stop();//终止抓取进程
+            ExtractionThreads.get(o).stopTrans();//终止清洗进程
         }
         ExtractionThreads.clear();
-        jobExtraction.put(jobId,null);
-        jobExtraction.remove(jobId);
+        jobExtractionThreads.put(jobId,null);
+        jobExtractionThreads.remove(jobId);
         return true;
     }
 

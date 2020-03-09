@@ -6,5 +6,5 @@ import com.cn.wavetop.dataone.etl.transformation.Transformation;
  * @Author yongz
  * @Date 2020/3/6、16:10
  */
-public class TransformationSqlServer implements Transformation {
+public class TransformationSqlServer extends Transformation {
 }

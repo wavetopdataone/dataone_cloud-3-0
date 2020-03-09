@@ -1,24 +1,18 @@
 {
   "payload": {
-    "ENAME": "JAMES",
-    "COMM": "",
-    "HIREDATE": "1981-12-03",
-    "EMPNO": "7900",
-    "MGR": "7698",
-    "JOB": "CLERK",
-    "DEPTNO": "30",
-    "SAL": "950"
+    "APPROVAL_DOC_ID": "",
+    "ATTACHMENT_TYPE": "",
+    "ATTACHMENT_NAME": "",
+    "APPROVAL_ATTACHMENT_ID": ""
   },
   "message": {
-    "destTable": "EMP",
-    "sourceTable": "EMP",
-    "creatTable": "CREATE TABLE SYSDBA.EMP(EMPNO NUMBER(4) NOT NULL,ENAME VARCHAR2(10) NOT NULL,JOB VARCHAR2(9) NOT NULL,MGR NUMBER(4),HIREDATE TIMESTAMP,SAL NUMBER(7,2),COMM NUMBER(7,2),DEPTNO NUMBER(2),CONSTRAINT PK_EMPNO PRIMARY KEY (EMPNO,ENAME,JOB));",
-    "big_data": null,
+    "destTable": "4dd4REGION_APPROVE_DOC_ATT_INFO",
+    "sourceTable": "REGION_APPROVE_DOC_ATT_INFO",
+    "creatTable": "CREATE TABLE SYSDBA.4dd4REGION_APPROVE_DOC_ATT_INFO(APPROVAL_ATTACHMENT_IDss VARCHAR2(50),APPROVAL_DOC_IDss VARCHAR2(50),ATTACHMENT_NAMEss NVARCHAR2(512),ATTACHMENT_TYPEss VARCHAR2(64),ATTACHMENT_CONTENTss BLOB(4000));",
+    "big_data": [
+      "ATTACHMENT_CONTENT"
+    ],
     "stop_flag": "等待定义",
-    "key": [
-      "EMPNO",
-      "ENAME",
-      "JOB"
-    ]
+    "key": []
   }
 }
