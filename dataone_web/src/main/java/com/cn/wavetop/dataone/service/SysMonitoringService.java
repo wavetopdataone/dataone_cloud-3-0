@@ -19,7 +19,7 @@ public interface SysMonitoringService {
     void updateReadMonitoring(long id, Long readData,String table);
 
     void updateWriteMonitoring(long id, Long writeData,String table);
-    Object dataChangeView(long job_id,Integer date);
+    Object dataChangeView(long job_id,String date);
     Object statusMonitoring(Long job_id,Integer jobStatus);
     //写入设置查询表名
     Object selTable(Long jobId);

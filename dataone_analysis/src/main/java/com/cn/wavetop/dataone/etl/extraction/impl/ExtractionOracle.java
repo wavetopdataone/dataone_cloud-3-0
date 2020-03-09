@@ -77,7 +77,6 @@ public class ExtractionOracle implements Extraction {
     public void incrementRang() {
         System.out.println("Oracle 增量开始");
     }
-
     @Override
     public void fullAndIncrementRang() {
         System.out.println("Oracle 全量+增量开始");

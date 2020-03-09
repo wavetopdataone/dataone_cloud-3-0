@@ -105,7 +105,7 @@ public class SysMonitoringController {
      */
     @ApiOperation(value = "折线图数据", protocols = "POST", produces = "application/json", notes = "折线图数据")
     @PostMapping("/dataChangeView")
-    public Object dataChangeView(@RequestParam long job_id,@RequestParam Integer date){
+    public Object dataChangeView(@RequestParam long job_id,@RequestParam String date){
         return sysMonitoringService.dataChangeView(job_id,date);
     }
 
