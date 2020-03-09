@@ -11,7 +11,7 @@ import java.util.Properties;
  */
 public class Consumer {
 
-    public KafkaConsumer getConsumer(Long jobId, String tableName){
+    public static KafkaConsumer getConsumer(Long jobId, String tableName){
          Properties props = new Properties();
         props.put("bootstrap.servers", "192.168.1.156:9092");
         props.put("group.id", jobId+tableName);

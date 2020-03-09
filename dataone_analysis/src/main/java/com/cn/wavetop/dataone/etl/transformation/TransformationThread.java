@@ -28,7 +28,7 @@ public class TransformationThread extends Thread {
     @SneakyThrows
     @Override
     public void run() {
-        KafkaConsumer<String, String> consumer = new Consumer().getConsumer(jobId, tableName);
+        KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, tableName);
         consumer.subscribe(Arrays.asList(tableName+"_"+jobId));
 
         while (true){

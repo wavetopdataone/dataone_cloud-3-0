@@ -121,7 +121,13 @@ public class LoadingDM implements Loading {
           payload.remove(field);
           pstmt.setObject(index++,value);
         }
-        pstmt.executeUpdate();
+        try {
+          pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+
+          e.printStackTrace();
+        }
       }//如果有大字段则执行,则执行全字段匹配插入,大字段再单独插入
       else {
         //大字段单独去查数据库,先从源端拿出大字段.再预编译插入到目的端
