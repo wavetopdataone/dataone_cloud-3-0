@@ -22,6 +22,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * JobRelaServiceImpl.findSourcesDbinfoById(Long jobId):
+ *
+ */
 @Service
 public class JobRelaServiceImpl {
     //    private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");

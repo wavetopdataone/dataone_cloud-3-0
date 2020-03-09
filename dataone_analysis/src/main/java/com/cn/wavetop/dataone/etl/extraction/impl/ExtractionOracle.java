@@ -57,8 +57,7 @@ public class ExtractionOracle implements Extraction {
 
 
 
-
-        List filedsList = jobRelaServiceImpl.findFiledByJobId(jobId, tableName);
+        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
         select_sql = SELECT + _fileds + FROM + tableName;
 
