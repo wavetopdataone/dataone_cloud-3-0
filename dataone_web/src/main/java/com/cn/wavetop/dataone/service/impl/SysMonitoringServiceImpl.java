@@ -617,107 +617,112 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
      */
     @Transactional
     @Override
-    public Object dataChangeView(long job_id, Integer date) {
-        Integer data = date - 1;
-        HashMap<String, List> map1 = new HashMap<>();
-        HashMap<String, List> map2 = new HashMap<>();
-        HashMap<String, List> map3 = new HashMap<>();
-        HashMap<String, List> map4 = new HashMap<>();
-        List<Map> list = new ArrayList<>();
-        //定义一个list集合，存放过去date天
-        List<String> days = new ArrayList<>();
-        //定义一个list集合，存放过去date天每天的数据量
-        List<Long> writes = new ArrayList<>();
-        List<Long> reads = new ArrayList<>();
-        List<Long> errors = new ArrayList<>();
-        //获取日历对象
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -data);
+    public Object dataChangeView(long job_id, String date) {
+        if (!"undefined".equals(date)) {
+            Integer data = Integer.parseInt(date) - 1;
+            HashMap<String, List> map1 = new HashMap<>();
+            HashMap<String, List> map2 = new HashMap<>();
+            HashMap<String, List> map3 = new HashMap<>();
+            HashMap<String, List> map4 = new HashMap<>();
+            List<Map> list = new ArrayList<>();
+            //定义一个list集合，存放过去date天
+            List<String> days = new ArrayList<>();
+            //定义一个list集合，存放过去date天每天的数据量
+            List<Long> writes = new ArrayList<>();
+            List<Long> reads = new ArrayList<>();
+            List<Long> errors = new ArrayList<>();
+            //获取日历对象
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -data);
        /* //获取每天的时间
         Date time = calendar.getTime();
         //获取每天
         String dayd= new SimpleDateFormat("yyyy-MM-dd").format(time);
         SysDataChange sysDataChange = sysDataChangeRepository.findByJobIdAndDate(job_id,dayd);*/
 
-        for (int i = 0; i < date; i++) {
-            Long x = 0L;
-            //获取每天的时间
-            Date time = calendar.getTime();
-            //获取每天
-            String dayd = new SimpleDateFormat("yyyy-MM-dd").format(time);
-            String daya = new SimpleDateFormat("MM-dd").format(time);
-            Date parse = null;
-            try {
-                parse = new SimpleDateFormat("yyyy-MM-dd").parse(dayd);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            if (i < data) {
-                List<SysDataChange> sysDataChange = sysDataChangeRepository.findByJobIdAndDate(job_id, parse);
-//                SysDataChange sysDataChange = sysDataChangeRepository.findByJobIdAndDate(job_id, parse);
-                if (sysDataChange!=null&&sysDataChange.size()>0 ) {
-                    writes.add(sysDataChange.get(0).getWriteData());
-                    reads.add(sysDataChange.get(0).getReadData());
-                    errors.add(sysDataChange.get(0).getErrorData());
-                } else {
-                    writes.add(x);
-                    reads.add(x);
-                    errors.add(x);
+            for (int i = 0; i < Integer.parseInt(date); i++) {
+                Long x = 0L;
+                //获取每天的时间
+                Date time = calendar.getTime();
+                //获取每天
+                String dayd = new SimpleDateFormat("yyyy-MM-dd").format(time);
+                String daya = new SimpleDateFormat("MM-dd").format(time);
+                Date parse = null;
+                try {
+                    parse = new SimpleDateFormat("yyyy-MM-dd").parse(dayd);
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
-            } else {
-                List<SysMonitoring> sysMonitorings = sysMonitoringRepository.findByIdAndDate(job_id, parse);
+                if (i < data) {
+                    List<SysDataChange> sysDataChange = sysDataChangeRepository.findByJobIdAndDate(job_id, parse);
+//                SysDataChange sysDataChange = sysDataChangeRepository.findByJobIdAndDate(job_id, parse);
+                    if (sysDataChange != null && sysDataChange.size() > 0) {
+                        writes.add(sysDataChange.get(0).getWriteData());
+                        reads.add(sysDataChange.get(0).getReadData());
+                        errors.add(sysDataChange.get(0).getErrorData());
+                    } else {
+                        writes.add(x);
+                        reads.add(x);
+                        errors.add(x);
+                    }
+                } else {
+                    List<SysMonitoring> sysMonitorings = sysMonitoringRepository.findByIdAndDate(job_id, parse);
 
-                if (sysMonitorings != null && sysMonitorings.size() > 0) {
-                    Long writeData = 0L;
-                    Long readData = 0L;
-                    Long errorData = 0L;
-                    for (SysMonitoring sysMonitoring : sysMonitorings) {
+                    if (sysMonitorings != null && sysMonitorings.size() > 0) {
+                        Long writeData = 0L;
+                        Long readData = 0L;
+                        Long errorData = 0L;
+                        for (SysMonitoring sysMonitoring : sysMonitorings) {
 
-                        if (null != sysMonitoring) {
-                            if (sysMonitoring.getWriteData() != null) {
+                            if (null != sysMonitoring) {
+                                if (sysMonitoring.getWriteData() != null) {
 
-                                writeData += sysMonitoring.getWriteData();
+                                    writeData += sysMonitoring.getWriteData();
 
-                            }
-                            if (sysMonitoring.getReadData() != null) {
-                                readData += sysMonitoring.getReadData();
+                                }
+                                if (sysMonitoring.getReadData() != null) {
+                                    readData += sysMonitoring.getReadData();
 
-                            }
-                            if (sysMonitoring.getErrorData() != null) {
-                                errorData += sysMonitoring.getErrorData();
+                                }
+                                if (sysMonitoring.getErrorData() != null) {
+                                    errorData += sysMonitoring.getErrorData();
 
-                            }
-                        }/*else {
+                                }
+                            }/*else {
                             writes.add(x);
                             reads.add(x);
                             errors.add(x);
                         }*/
+                        }
+                        writes.add(/*sysMonitoring.getWriteData()*/writeData);
+                        reads.add(/*sysMonitoring.getReadData()*/readData);
+                        errors.add(/*sysMonitoring.getErrorData()*/errorData);
+                    } else {
+                        writes.add(x);
+                        reads.add(x);
+                        errors.add(x);
                     }
-                    writes.add(/*sysMonitoring.getWriteData()*/writeData);
-                    reads.add(/*sysMonitoring.getReadData()*/readData);
-                    errors.add(/*sysMonitoring.getErrorData()*/errorData);
-                } else {
-                    writes.add(x);
-                    reads.add(x);
-                    errors.add(x);
                 }
+                //添加每一天
+                days.add(daya);
+
+                //每次循环都在日历的天数+1
+                calendar.add(Calendar.DATE, +1);
+
             }
-            //添加每一天
-            days.add(daya);
-
-            //每次循环都在日历的天数+1
-            calendar.add(Calendar.DATE, +1);
-
+            map1.put("data", days);
+            map2.put("data", writes);
+            map3.put("data", reads);
+            map4.put("data", errors);
+            list.add(map1);
+            list.add(map3);
+            list.add(map2);
+            list.add(map4);
+            return list;
+        }else{
+            return ToDataMessage.builder().status("0").message("天数不能为空").build();
         }
-        map1.put("data", days);
-        map2.put("data", writes);
-        map3.put("data", reads);
-        map4.put("data", errors);
-        list.add(map1);
-        list.add(map3);
-        list.add(map2);
-        list.add(map4);
-        return list;
+
     }
 
     //写入设置显示同步表的接口
