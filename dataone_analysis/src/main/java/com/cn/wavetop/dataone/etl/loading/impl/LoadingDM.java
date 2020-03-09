@@ -68,21 +68,6 @@ public class LoadingDM implements Loading {
     List key = (List) message.get("key");
     int primarykeySize = key.size();
 
-    //所有的value值放在一个数组中
-    //这里能拿到所有的key
-    Set set = payload.keySet();
-    String[] keys = (String[]) set.toArray(new String[0]);
-    //Set set1 = payload.entrySet();
-    //Object[] values1 = set1.toArray();
-    System.out.println("set = " + keys);
-    //System.out.println("set1 = " + values1);
-    Collection values = payload.values();
-    List<String> fieldvalues = new ArrayList<>();
-    //将values的值放入到list中
-
-    for (Object value : values) {
-      fieldvalues.add((String) value);
-    }
     //连接oracle和达梦数据库连接
     Connection oracleConn = null;
     Connection daMengConn = null;
@@ -109,7 +94,7 @@ public class LoadingDM implements Loading {
       StringBuffer preTable = new StringBuffer("");
 
       //解析map的schame得到list集合
-      int columnCountNew = values.size();
+      int columnCountNew = payload.size();
       //把他的key放在一个list中,把value放在一个list中
       List<String> fieldkeys = new ArrayList<>();
 
@@ -126,9 +111,15 @@ public class LoadingDM implements Loading {
         //预编译设置值
         pstmt = daMengConn.prepareStatement(insertSql);
         int index = 1;
-        for (String fieldvalue : fieldvalues) {
-
-          pstmt.setObject(index++,fieldvalue);
+        //for (String fieldvalue : fieldvalues) {
+//
+        //  pstmt.setObject(index++,fieldvalue);
+        //}
+        Object value;
+        for (Object field : payload.keySet()) {
+          value = payload.get(field);
+          payload.remove(field);
+          pstmt.setObject(index++,value);
         }
         pstmt.executeUpdate();
       }//如果有大字段则执行,则执行全字段匹配插入,大字段再单独插入
@@ -183,9 +174,11 @@ public class LoadingDM implements Loading {
         pstmt = daMengConn.prepareStatement(insertComSql);
 
         int index = 1;
-        for (String fieldvalue : fieldvalues) {
-
-          pstmt.setObject(index++,fieldvalue);
+        Object value;
+        for (Object field : payload.keySet()) {
+          value = payload.get(field);
+          payload.remove(field);
+          pstmt.setObject(index++,value);
         }
       }
 
