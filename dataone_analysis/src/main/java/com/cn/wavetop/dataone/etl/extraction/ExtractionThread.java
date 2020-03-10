@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 
 public class ExtractionThread extends Thread {
-    private JobRelaServiceImpl gesasda = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     // 单表抓取线程
     private Long jobId;//jobid
     private String tableName;//表
@@ -39,22 +39,12 @@ public class ExtractionThread extends Thread {
     private RestTemplate restTemplate = new RestTemplate();
 
 
-    private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
 
 
     @SneakyThrows
     @Override
     public void run() {
-
-        System.out.println(gesasda);
-        System.out.println(gesasda.findSourcesDbinfoById(jobId));
-
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);
-//        try {
-//            jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
         //查看源端表的类型如Oracle、MySQL、sql server、DM,实例化抓取类
         switch (Math.toIntExact(sysDbinfo.getType())) {

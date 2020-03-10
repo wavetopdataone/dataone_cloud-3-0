@@ -4,19 +4,11 @@ import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
-import com.cn.wavetop.dataone.util.DBConn;
 import com.cn.wavetop.dataone.util.DBConns;
-import javafx.beans.binding.ObjectExpression;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 
 /**
@@ -25,26 +17,36 @@ import java.util.*;
  */
 
 public class LoadingDM implements Loading {
-    public JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//源端表
+    private Connection destConn = null;
 
     public LoadingDM(Long jobId, String tableName) {
+        this.jobId = jobId;
+        this.tableName = tableName;
+        SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
+        try {
+            this.destConn = DBConns.getConn(dest);
+        } catch (Exception e) {
+        }
+        try {
+            destConn.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public LoadingDM(Long jobId, String tableName,Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
     }
 
 
     public static void main(String[] args) {
-
-        LoadingDM salgrade = new LoadingDM(47L, "SALGRADE");
-
         String value = "{\"payload\":{\"HISAL\":\"9999\",\"GRADE\":\"5\",\"LOSAL\":\"3001\"},\"message\":{\"destTable\":\"SALGRADE\",\"sourceTable\":\"SALGRADE\",\"creatTable\":\"CREATE TABLE SYSDBA.SALGRADE(GRADE NUMBER,LOSAL NUMBER,HISAL NUMBER);\",\"big_data\":[],\"stop_flag\":\"等待定义\",\"key\":[]}}";
         HashMap<Object, Object> dataMap = new HashMap<>();
         dataMap.putAll(JSONObject.parseObject(value));
-
-        salgrade.loadingDMForFull(dataMap);
-
 
     }
 
@@ -316,99 +318,182 @@ public class LoadingDM implements Loading {
 
     }
 
+    /**
+     * 解析insert
+     * @param dataMap
+     * @return
+     */
     @Override
-    public void loadingDMForFull(Map dataMap) {
+    public String getInsert(Map dataMap) {
+        System.out.println(dataMap);
+        Map message = (Map) dataMap.get("message");
+        //大字段
+        List bigdatas = (List) message.get("big_data");
 
+        System.out.println(
+                bigdatas
+        );
+
+        System.out.println(
+                bigdatas
+        ); System.out.println(
+                bigdatas
+        );
+        if (bigdatas == null || bigdatas.size() == 0) {
+            //不含blob
+            System.out.println("不含blob");
+            return noBlodToInsert(dataMap);
+        } else {
+            //含blob
+            return hasBlobToInsert(dataMap);
+        }
+    }
+
+
+    /**
+     * 执行insert
+     * @param insertSql
+     * @param dataMap
+     * @throws SQLException
+     */
+    @Override
+    public void excuteInsert(String insertSql, Map dataMap) throws Exception {
         //大字段
         List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
 
         if (bigdatas == null || bigdatas.size() == 0) {
             //不含blob
-            noBlodToInsert(dataMap);
+            excuteNoBlodByInsert(insertSql,dataMap);
         } else {
             //含blob
-            hasBlobToInsert(dataMap);
+            excuteHasBlodByInsert(insertSql,dataMap);
+        }
+    }
+
+    @Override
+    public void excuteInsert(String insertSql, Map dataMap, Connection destConn2) throws Exception {
+        //大字段
+        List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
+
+        if (bigdatas == null || bigdatas.size() == 0) {
+            //不含blob
+            excuteNoBlodByInsert(insertSql,dataMap,destConn2);
+        } else {
+            //含blob
+            excuteHasBlodByInsert(insertSql,dataMap,destConn2);
         }
     }
 
 
-    public void noBlodToInsert(Map dataMap) {
-        SysDbinfo dest = jobRelaServiceImpl.findDestDbinfoById(jobId);
+    public String noBlodToInsert(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
         Map payload = (Map) dataMap.get("payload");
-        //连接oracle和达梦数据库连接
-        Connection destConn = null;
-        try {
-            destConn = DBConns.getConn(dest);
-        } catch (Exception e) {
-            // todo
-            // 异常处理，存中台出现异常
-            e.printStackTrace();
+        //预编译存储语句
+        StringBuffer preSql = new StringBuffer("");
+        //对应的所有字段
+        StringBuffer preField = new StringBuffer("");
+        //先直接插入
+        for (int i = 0; i < payload.size() - 1; i++) {
+            preSql.append("?,");
         }
-        Statement stmt = null;
-
-        List list = new ArrayList<>();
-        PreparedStatement ps = null;
-        try {
-            //预编译存储语句
-            StringBuffer preSql = new StringBuffer("");
-            //对应的所有字段
-            StringBuffer preField = new StringBuffer("");
-            //拼接update语句where后面的条件
-            StringBuffer stringBuffer = new StringBuffer("");
-
-            //先直接插入
-            for (int i = 0; i < payload.size() - 1; i++) {
-                preSql.append("?,");
-            }
-            preSql.append("?");
-            Object value;
-            int index = 1;
-            for (Object field : payload.keySet()) {
-                value = payload.get(field);
-                list.add(value);
-                stringBuffer.append(field + "= '" + value + "' ");
-                if (payload.size() == index) {
-                    preField.append(field);
-                } else {
-                    preField.append(field + ",");
-                    ++index;
-                }
-            }
-
-            String insertSql = "insert into " + tableName + " (" + preField + ") " + " values(" + preSql
-                    + ")";
-            ps = destConn.prepareStatement(insertSql);
-            //取出value
-            for (int i = 0; i < payload.size(); i++) {
-                ps.setObject(i + 1, list.get(i));
-            }
-
-
-            System.out.println(insertSql);
-            ps.execute();
-
-            destConn.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                ps.close();
-                destConn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        preSql.append("?");
+        int index = 1;
+        for (Object field : payload.keySet()) {
+            if (payload.size() == index) {
+                preField.append(field);
+            } else {
+                preField.append(field + ",");
+                ++index;
             }
         }
-
+        payload.clear(); //释放内存
+        message.clear();//释放内存
+        return "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
+                + ")";
     }
+
 
     /**
      * 一条insert解决 ok？
      * 先拼接没有blob这种的，再拼接有的，值也是，只要用相同的便利方式确保顺序
      *
+     * 解析含blob的insert
      * @param dataMap
+     * @return
      */
-    public void hasBlobToInsert(Map dataMap) {
+    public String hasBlobToInsert(Map dataMap) {
 
+        return null;
+    }
+
+    /**
+     * 执行不含blob的insert
+     * @param insertSql
+     * @param dataMap
+     * @throws SQLException
+     */
+    public void excuteNoBlodByInsert(String insertSql, Map dataMap) throws Exception {
+        PreparedStatement ps = destConn.prepareStatement(insertSql);
+        Map payload = (Map) dataMap.get("payload");
+        int i = 1;
+        for (Object field : payload.keySet()) {
+            ps.setObject(i, payload.get(field));
+            i++;
+        }
+        ps.execute();
+        ps.close();
+    }
+
+
+
+    public void excuteNoBlodByInsert(String insertSql, Map dataMap,Connection destConn2) throws Exception {
+        PreparedStatement ps = destConn2.prepareStatement(insertSql);
+        Map payload = (Map) dataMap.get("payload");
+        int i = 1;
+        for (Object field : payload.keySet()) {
+            ps.setObject(i, payload.get(field));
+            i++;
+        }
+        ps.execute();
+        ps.close();
+    }
+
+
+    /**
+     * 执行含blob的insert
+     * todo  薛子浩实现
+     * @param insertSql
+     * @param dataMap
+     * @throws SQLException
+     */
+    public void excuteHasBlodByInsert(String insertSql, Map dataMap) throws Exception {
+
+        System.out.println(insertSql);
+        PreparedStatement ps = destConn.prepareStatement(insertSql);
+        Map payload = (Map) dataMap.get("payload");
+        int i = 1;
+        for (Object field : payload.keySet()) {
+            ps.setObject(i, payload.get(field));
+            i++;
+        }
+        ps.execute();
+        ps.close();
+        destConn.commit();
+    }
+    public void excuteHasBlodByInsert(String insertSql, Map dataMap,Connection destConn2) throws Exception {
+
+        System.out.println(insertSql);
+        PreparedStatement ps = destConn2.prepareStatement(insertSql);
+        Map payload = (Map) dataMap.get("payload");
+        int i = 1;
+        for (Object field : payload.keySet()) {
+            ps.setObject(i, payload.get(field));
+            i++;
+        }
+        ps.execute();
+        ps.close();
+        destConn.commit();
     }
 
 }

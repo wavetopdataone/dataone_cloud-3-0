@@ -1,6 +1,7 @@
 package com.cn.wavetop.dataone.etl.extraction.impl;
 
 
+import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.db.DBUtil;
 import com.cn.wavetop.dataone.db.ResultMap;
 import com.cn.wavetop.dataone.destCreateTable.SuperCreateTable;
@@ -21,6 +22,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.aspectj.weaver.ast.Var;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -51,6 +53,15 @@ public class ExtractionOracle implements Extraction {
     public void fullRang() throws Exception {
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
+        SysDbinfo sysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
+
+        JdbcTemplate jdbcTemplate = null;
+        try {
+            jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Producer producer = new Producer(null);
         Map message = getMessage(); //传输的消息
         // 建表
