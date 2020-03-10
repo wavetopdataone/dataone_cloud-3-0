@@ -9,5 +9,7 @@ import com.cn.wavetop.dataone.etl.transformation.Transformation;
 public class TransformationOracle  extends Transformation {
 
 
-
+    public TransformationOracle(Long jobId, String tableName) {
+        super(jobId, tableName);
+    }
 }

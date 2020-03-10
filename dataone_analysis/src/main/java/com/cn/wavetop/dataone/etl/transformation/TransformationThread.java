@@ -1,6 +1,8 @@
 package com.cn.wavetop.dataone.etl.transformation;
 
+import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.consumer.Consumer;
+import com.cn.wavetop.dataone.util.JSONUtil;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -18,7 +20,7 @@ public class TransformationThread extends Thread {
 
     private Long jobId;//jobid
     private String tableName;//表
-    private Transformation transformation;
+    private Transformation transformation ;
 
     public TransformationThread(Long jobId, String tableName) {
         this.jobId = jobId;
@@ -38,9 +40,9 @@ public class TransformationThread extends Thread {
 //                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                 String value = (String) record.value();
 //                System.out.println(value);
-                Transformation transformation = new Transformation();
+                Transformation transformation =new Transformation(jobId,tableName);
                 Map dataMap = transformation.Transform(value);
-                System.out.println(dataMap);
+                System.out.println(JSONUtil.toJSONString(dataMap));
             }
 
         }

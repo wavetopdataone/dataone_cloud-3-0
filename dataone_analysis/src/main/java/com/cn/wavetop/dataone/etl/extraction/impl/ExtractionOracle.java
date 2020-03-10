@@ -52,16 +52,19 @@ public class ExtractionOracle implements Extraction {
         System.out.println("Oracle 全量开始");
         Producer producer = new Producer(null);
         Map message = getMessage(); //传输的消息
-        String select_sql = null;
+        //
+        StringBuffer select_sql = new StringBuffer();
         Connection conn = DBConns.getOracleConn(sysDbinfo);
-
+//
 
 
         List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
-        select_sql = SELECT + _fileds + FROM + tableName;
 
-        ResultMap resultMap = DBUtil.query2(select_sql, conn);
+        //拼接查询语句
+        select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
+
+        ResultMap resultMap = DBUtil.query2(select_sql.toString(), conn);
 
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
 

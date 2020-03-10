@@ -7,4 +7,7 @@ import com.cn.wavetop.dataone.etl.transformation.Transformation;
  * @Date 2020/3/6、16:10
  */
 public class TransformationSqlServer extends Transformation {
+    public TransformationSqlServer(Long jobId, String tableName) {
+        super(jobId, tableName);
+    }
 }

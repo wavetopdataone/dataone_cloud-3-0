@@ -28,9 +28,20 @@ public class TestModel {
 //        String data = toJsonString2("INSERT INTO \"test\".\"file1\"(\"date\",\"time\") VALUES (TO_DATE('2019-12-04 00:00:00','YYYY-MM-DD HH24:MI:SS'),'00:00:00')", schemas, 2);
 //        System.out.println(data);
 
-        System.out.println(getTimestamp("2020-01-14", "yyyy-MM-dd"));
-        System.out.println(getStringTime(1578931200000L, "yyyy-MM-dd HH:mm:ss"));
+//        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
+//        System.out.println(getStringTime(1578931200000L, "yyyy-MM-dd HH:mm:ss"));
 //        System.out.println(getTimestamp("2019-10-09 00:00:00","yyyy"));
+
+
+//        System.out.println(getTimestamp("1970-01-01 08:00:00", "yyyy-MM-dd  HH:mm:ss"));
+        System.out.println(getTimestamp("1900-01-01", "yyyy-MM-dd"));
+        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd")+getTimestamp("1900-01-01", "yyyy-MM-dd"));
+        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
+
+
+        System.out.println(getStringTime(0L, "yyyy-MM-dd HH:mm:ss"));
+
+
 
     }
 

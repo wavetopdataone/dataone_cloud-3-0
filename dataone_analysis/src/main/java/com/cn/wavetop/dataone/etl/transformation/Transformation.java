@@ -3,6 +3,12 @@ package com.cn.wavetop.dataone.etl.transformation;
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,14 +17,20 @@ import java.util.Map;
 /**
  * 转换模块接口
  */
+
 public class Transformation {
-    public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private  static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//表
     private Map dataMap = new HashMap();
     private Map payload = new HashMap();
     private Map message = new HashMap();
 
+
+    public Transformation(Long jobId, String tableName) {
+        this.jobId = jobId;
+        this.tableName = tableName;
+    }
     public void start() {
 
     }
@@ -56,13 +68,13 @@ public class Transformation {
      */
     public Map mapping(Map payload) throws IOException {
         Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName);
-        Object value;
+
+        HashMap<Object, Object> returnPayload = new HashMap<>();
         for (Object filed : payload.keySet()) {
-            value = payload.get(filed);
-            payload.remove(filed);
-            payload.put(mappingField.get(filed), value);
+            returnPayload.put(mappingField.get(filed), payload.get(filed));
         }
-        return payload;
+        payload.clear();
+        return returnPayload;
     }
 
 }
