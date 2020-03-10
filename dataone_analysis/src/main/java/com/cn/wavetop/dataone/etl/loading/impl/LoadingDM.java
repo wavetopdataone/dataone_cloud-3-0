@@ -1,10 +1,12 @@
 package com.cn.wavetop.dataone.etl.loading.impl;
 
+import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConn;
 import com.cn.wavetop.dataone.util.DBConns;
 import javafx.beans.binding.ObjectExpression;
@@ -23,34 +25,40 @@ import java.util.*;
  */
 
 public class LoadingDM implements Loading {
-  /**
-   * @param args
-   */
-  public static void main(String[] args) {
+    public JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private Long jobId;//jobid
+    private String tableName;//源端表
 
-    //loadingDM();
-    // TODO Auto-generated method stub
-    //String dbA = "scott/oracle@192.168.1.25:1521/ORCL";
-    // String dbB = "sjgl/sjgl@76.20.19.151:1523/jssqsj";
-    /*String dbB = "sjqy/sjqy@127.0.0.1:1521/dzda";
-    Connection connA = getConn(dbA);
-    Connection connB = getConn(dbB);
-    List tables = getAllTableNames(connA, "system");
-    for (int i = 0; i < tables.size(); i++) {
-      connA = getConn(dbA);
-      connB = getConn(dbB);
-      String tableName = String.valueOf(tables.get(i));
-      //importData(tableName, connA, connB);
-    }*/
-  }
+    public LoadingDM(Long jobId, String tableName) {
+        this.jobId = jobId;
+        this.tableName = tableName;
+    }
 
 
-  /**
-   *  二进制的预编译
-   * 大字段的预编译
-   */
-  @Override
-  public void loadingDM(String jsonString){
+    public static void main(String[] args) {
+
+        LoadingDM salgrade = new LoadingDM(47L, "SALGRADE");
+
+        String value = "{\"payload\":{\"HISAL\":\"9999\",\"GRADE\":\"5\",\"LOSAL\":\"3001\"},\"message\":{\"destTable\":\"SALGRADE\",\"sourceTable\":\"SALGRADE\",\"creatTable\":\"CREATE TABLE SYSDBA.SALGRADE(GRADE NUMBER,LOSAL NUMBER,HISAL NUMBER);\",\"big_data\":[],\"stop_flag\":\"等待定义\",\"key\":[]}}";
+        HashMap<Object, Object> dataMap = new HashMap<>();
+        dataMap.putAll(JSONObject.parseObject(value));
+
+        salgrade.loadingDMForFull(dataMap);
+
+
+    }
+
+    /**
+     * 二进制的预编译
+     * 大字段的预编译
+     * <p>
+     * <p>
+     * 这样写你怎么扩展？
+     * 这样写你怎么给我算写入速率?
+     * ...........
+     */
+    @Override
+    public void loadingDM(String jsonString) {
     /*String jsonString = "{\n" +
             "  \"payload\": {\n" +
             "    \"ENAME\": \"SMITHJ\",\n" +
@@ -71,135 +79,134 @@ public class LoadingDM implements Loading {
             "    \"key\": []\n" +
             "  }\n" +
             "}";*/
-    JSONObject jsonObject = JSONObject.parseObject(jsonString);
-    SysDbinfo oracle = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(1521)).dbname("orcl").user("scott").password("oracle").build();
-    SysDbinfo dameng = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(5236)).dbname("DMSERVER").user("SYSDBA").password("SYSDBA").build();
+        JSONObject jsonObject = JSONObject.parseObject(jsonString);
+        SysDbinfo oracle = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(1521)).dbname("orcl").user("scott").password("oracle").build();
+        SysDbinfo dameng = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(5236)).dbname("DMSERVER").user("SYSDBA").password("SYSDBA").build();
 
-    Map payload = (Map) jsonObject.get("payload");
-    Map message = (Map) jsonObject.get("message");
-
-
-
-    String destTable = (String) message.get("destTable");
-    String sourceTable = (String) message.get("sourceTable");
-    //大字段
-    List bigdatas = (List) message.get("big_data");
-    //停止标志
-    //String stop_flag = (String) message.get("stop_flag");
+        Map payload = (Map) jsonObject.get("payload");
+        Map message = (Map) jsonObject.get("message");
 
 
-    //数据库操作方式
-    //String dml = (String) model.get("dml");
-
-    //数据库主键(可能有联合主键,size二)
-    List key = (List) message.get("key");
-    int primarykeySize = key.size();
-
-    //连接oracle和达梦数据库连接
-    Connection oracleConn = null;
-    Connection daMengConn = null;
-    try {
-      oracleConn = DBConns.getOracleConn(oracle);
-      daMengConn = DBConns.getDaMengConn(dameng);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    Statement stmt = null;
-    PreparedStatement pstmt = null;
-    //连接DM数据库
-    //JSONObject object = JSONObject.parseObject(tableName);
-    //Map<String, Object> map1 = JSONObject.toJavaObject(object, Map.class);
-
-    List list = new ArrayList<>();
-
-    try {
-      //stmt = oracleConn.createStatement();
-      //预编译存储语句
-      StringBuffer preSql = new StringBuffer("");
-      //对应的所有字段
-      StringBuffer preField = new StringBuffer("");
-      //解析map的schame得到list集合
-      int columnCountNew = payload.size();
-
-      //拼接update语句where后面的条件
-      StringBuffer stringBuffer = new StringBuffer("");
-
-      //先直接插入
-      for (int i = 0; i < columnCountNew - 1; i++) {
-        preSql.append("?,");
-      }
-      preSql.append("?");
-      Object value;
-      int index = 1;
-      for (Object field : payload.keySet()) {
+        String destTable = (String) message.get("destTable");
+        String sourceTable = (String) message.get("sourceTable");
+        //大字段
+        List bigdatas = (List) message.get("big_data");
+        //停止标志
+        //String stop_flag = (String) message.get("stop_flag");
 
 
-        value = payload.get(field);
-        list.add(value);
-        stringBuffer.append(field + "= '" + value + "' ");
-        if (columnCountNew==index){
+        //数据库操作方式
+        //String dml = (String) model.get("dml");
 
-          preField.append(field);
+        //数据库主键(可能有联合主键,size二)
+        List key = (List) message.get("key");
+        int primarykeySize = key.size();
 
-        }else {
-          preField.append(field+ ",");
-          ++ index;
+        //连接oracle和达梦数据库连接
+        Connection oracleConn = null;
+        Connection daMengConn = null;
+        try {
+            oracleConn = DBConns.getOracleConn(oracle);
+            daMengConn = DBConns.getDaMengConn(dameng);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-      }
+        Statement stmt = null;
+        PreparedStatement pstmt = null;
+        //连接DM数据库
+        //JSONObject object = JSONObject.parseObject(tableName);
+        //Map<String, Object> map1 = JSONObject.toJavaObject(object, Map.class);
 
-      String insertSql = "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
-              + ")";
-      PreparedStatement ps = daMengConn.prepareStatement(insertSql);
-      //取出value
-      for (int i = 0; i < columnCountNew; i++) {
-        ps.setObject(i+1,list.get(i));
-      }
-      ps.execute();
-      //System.out.println("execute = " + execute);
-      if (bigdatas != null && bigdatas.size() > 0){
-        //大字段单独去查数据库,先从源端拿出大字段.再预编译插入到目的端
-        //拼接update语句set后面的
-        StringBuffer bigBuffer = new StringBuffer("");
+        List list = new ArrayList<>();
+
+        try {
+            //stmt = oracleConn.createStatement();
+            //预编译存储语句
+            StringBuffer preSql = new StringBuffer("");
+            //对应的所有字段
+            StringBuffer preField = new StringBuffer("");
+            //解析map的schame得到list集合
+            int columnCountNew = payload.size();
+
+            //拼接update语句where后面的条件
+            StringBuffer stringBuffer = new StringBuffer("");
+
+            //先直接插入
+            for (int i = 0; i < columnCountNew - 1; i++) {
+                preSql.append("?,");
+            }
+            preSql.append("?");
+            Object value;
+            int index = 1;
+            for (Object field : payload.keySet()) {
+
+
+                value = payload.get(field);
+                list.add(value);
+                stringBuffer.append(field + "= '" + value + "' ");
+                if (columnCountNew == index) {
+
+                    preField.append(field);
+
+                } else {
+                    preField.append(field + ",");
+                    ++index;
+                }
+            }
+
+            String insertSql = "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
+                    + ")";
+            PreparedStatement ps = daMengConn.prepareStatement(insertSql);
+            //取出value
+            for (int i = 0; i < columnCountNew; i++) {
+                ps.setObject(i + 1, list.get(i));
+            }
+            ps.execute();
+            //System.out.println("execute = " + execute);
+            if (bigdatas != null && bigdatas.size() > 0) {
+                //大字段单独去查数据库,先从源端拿出大字段.再预编译插入到目的端
+                //拼接update语句set后面的
+                StringBuffer bigBuffer = new StringBuffer("");
 
         /*for (int i = 0; i < bigdatas.size() - 1; i++) {
           bigBuffer.append(bigdatas.get(i) + ",");
         }
         bigBuffer.append(bigdatas.size()-1);*/
-        String sql = "select " + bigBuffer + " from " + sourceTable;
-        //String sql = "select * from EMP";
-        ResultSet rs = stmt.executeQuery(sql);
+                String sql = "select " + bigBuffer + " from " + sourceTable;
+                //String sql = "select * from EMP";
+                ResultSet rs = stmt.executeQuery(sql);
 
-        daMengConn.setAutoCommit(false);
+                daMengConn.setAutoCommit(false);
 
 
-        while (rs.next()){
-          //取出数据
-          int length = bigdatas.size();
-          for (int i = 0; i < length - 1; i++) {
-            String object = (String) rs.getObject(i + 1);
-            bigBuffer.append(bigdatas.get(i) + " = " + "?, ");
-          }
-          bigBuffer.append(bigdatas.get(length-1) + " = " + "? ");
-        }
+                while (rs.next()) {
+                    //取出数据
+                    int length = bigdatas.size();
+                    for (int i = 0; i < length - 1; i++) {
+                        String object = (String) rs.getObject(i + 1);
+                        bigBuffer.append(bigdatas.get(i) + " = " + "?, ");
+                    }
+                    bigBuffer.append(bigdatas.get(length - 1) + " = " + "? ");
+                }
 
-        String updateBigSql = "update " + destTable + " set " + bigBuffer + " where " + stringBuffer;
+                String updateBigSql = "update " + destTable + " set " + bigBuffer + " where " + stringBuffer;
 
-        pstmt = daMengConn.prepareStatement(updateBigSql);
-        // 内部有一个指针,只能取指针指向的那条记录
-        while (rs.next()) { // 指针移动一行,有数据才返回true
-          // 取出数据
-          int length = bigdatas.size();
-          for (int i = 0; i < length - 1; i++) {
-            Object object = rs.getObject(i+1);
-            //预编译设值
-            pstmt.setObject(i+1,object);
-          }
+                pstmt = daMengConn.prepareStatement(updateBigSql);
+                // 内部有一个指针,只能取指针指向的那条记录
+                while (rs.next()) { // 指针移动一行,有数据才返回true
+                    // 取出数据
+                    int length = bigdatas.size();
+                    for (int i = 0; i < length - 1; i++) {
+                        Object object = rs.getObject(i + 1);
+                        //预编译设值
+                        pstmt.setObject(i + 1, object);
+                    }
 
-        }
+                }
 
-        daMengConn.commit();
-      }
+                daMengConn.commit();
+            }
 
 
       /*if (bigdatas.size() == 0){
@@ -295,18 +302,113 @@ public class LoadingDM implements Loading {
       }*/
 
 
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }finally {
-      try {
-        //pstmt.close();
-        oracleConn.close();
-        daMengConn.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //pstmt.close();
+                oracleConn.close();
+                daMengConn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
-  }
+    @Override
+    public void loadingDMForFull(Map dataMap) {
+
+        //大字段
+        List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
+
+        if (bigdatas == null || bigdatas.size() == 0) {
+            //不含blob
+            noBlodToInsert(dataMap);
+        } else {
+            //含blob
+            hasBlobToInsert(dataMap);
+        }
+    }
+
+
+    public void noBlodToInsert(Map dataMap) {
+        SysDbinfo dest = jobRelaServiceImpl.findDestDbinfoById(jobId);
+        Map payload = (Map) dataMap.get("payload");
+        //连接oracle和达梦数据库连接
+        Connection destConn = null;
+        try {
+            destConn = DBConns.getConn(dest);
+        } catch (Exception e) {
+            // todo
+            // 异常处理，存中台出现异常
+            e.printStackTrace();
+        }
+        Statement stmt = null;
+
+        List list = new ArrayList<>();
+        PreparedStatement ps = null;
+        try {
+            //预编译存储语句
+            StringBuffer preSql = new StringBuffer("");
+            //对应的所有字段
+            StringBuffer preField = new StringBuffer("");
+            //拼接update语句where后面的条件
+            StringBuffer stringBuffer = new StringBuffer("");
+
+            //先直接插入
+            for (int i = 0; i < payload.size() - 1; i++) {
+                preSql.append("?,");
+            }
+            preSql.append("?");
+            Object value;
+            int index = 1;
+            for (Object field : payload.keySet()) {
+                value = payload.get(field);
+                list.add(value);
+                stringBuffer.append(field + "= '" + value + "' ");
+                if (payload.size() == index) {
+                    preField.append(field);
+                } else {
+                    preField.append(field + ",");
+                    ++index;
+                }
+            }
+
+            String insertSql = "insert into " + tableName + " (" + preField + ") " + " values(" + preSql
+                    + ")";
+            ps = destConn.prepareStatement(insertSql);
+            //取出value
+            for (int i = 0; i < payload.size(); i++) {
+                ps.setObject(i + 1, list.get(i));
+            }
+
+
+            System.out.println(insertSql);
+            ps.execute();
+
+            destConn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ps.close();
+                destConn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
+     * 一条insert解决 ok？
+     * 先拼接没有blob这种的，再拼接有的，值也是，只要用相同的便利方式确保顺序
+     *
+     * @param dataMap
+     */
+    public void hasBlobToInsert(Map dataMap) {
+
+    }
 
 }

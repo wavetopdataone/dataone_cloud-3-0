@@ -374,6 +374,26 @@ public class JobRelaServiceImpl {
         return sql;
     }
 
+
+    public String excuteSql(Long jobId, String tableName,String sql) {
+        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
+        Connection conn=null;
+        try {
+            conn= DBConns.getDaMengConn(sysDbinfo);
+            DBUtil.update(sql,conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(sql);
+        }finally {
+            try {
+                DBConns.close(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return sql;
+    }
+
     /**
      * todo
      * 根据源端表名获取目的端表名

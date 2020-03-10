@@ -50,12 +50,14 @@ public class ExtractionOracle implements Extraction {
     @Override
     public void fullRang() throws Exception {
         System.out.println("Oracle 全量开始");
+        System.out.println(jobId);
         Producer producer = new Producer(null);
         Map message = getMessage(); //传输的消息
-        //
+        // 建表
+        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"));//执行creat语句
+
         StringBuffer select_sql = new StringBuffer();
         Connection conn = DBConns.getOracleConn(sysDbinfo);
-//
 
 
         List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName);
@@ -138,77 +140,5 @@ public class ExtractionOracle implements Extraction {
     }
 
 
-
-
-
-
-    /**
-     * 数据库的建表语句
-     * <p>
-     * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
-     */
-    public String createTable(Long jobId, String sourceTable) {
-        SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
-        SuperCreateTable createSql = null;
-        switch (sysDbinfo.getType().intValue()) {
-            case 1:
-                //oracle
-                createSql = new OracleCreateSql();
-                break;
-            case 2:
-                //mysql
-                createSql = new MysqlCreateSql();
-                break;
-            case 3:
-                //sqlserver
-                createSql = new SqlserverCreateSql();
-                break;
-            case 4:
-                //DM
-                createSql =new DMCreateSql();
-                break;
-            default:
-//                logger.error("不存在目标端类型");
-        }
-        String sql = createSql.createTable(jobId, sourceTable);
-        System.out.println("sql" + sql);
-        return sql;
-    }
-
-
-    /**
-     * 执行sql返回sql
-     *
-     * @param jobId
-     * @param sourceTable
-     * @return
-     */
-    public String excuteSql(Long jobId, String sourceTable) {
-        SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
-        SuperCreateTable createSql = null;
-        switch (sysDbinfo.getType().intValue()) {
-            case 1:
-                //oracle
-                createSql = new OracleCreateSql();
-                break;
-            case 2:
-                //mysql
-                createSql = new MysqlCreateSql();
-                break;
-            case 3:
-                //sqlserver
-                createSql = new SqlserverCreateSql();
-                break;
-            case 4:
-                //DM
-                createSql = new DMCreateSql();
-                break;
-            default:
-//                logger.error("不存在目标端类型");
-        }
-        String sql = createSql.excuteSql(jobId, sourceTable);
-        System.out.println("sql执行成功");
-        return sql;
-    }
 
 }

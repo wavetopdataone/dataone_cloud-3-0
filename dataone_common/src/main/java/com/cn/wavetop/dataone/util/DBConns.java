@@ -54,6 +54,26 @@ public class DBConns {
         return  DriverManager.getConnection(url, sysDbinfo.getUser(), sysDbinfo.getPassword());
     }
 
+    public static Connection getConn(SysDbinfo sysDbinfo) throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        switch (Math.toIntExact(sysDbinfo.getType())) {
+            //Oracle
+            case 1:
+                return getOracleConn(sysDbinfo);
+            //MySQL
+            case 2:
+                return getMySQLConn(sysDbinfo);
+            //sql server
+            case 3:
+                return getSqlserverConn(sysDbinfo);
+            // DM
+            case 4:
+                return getDaMengConn(sysDbinfo);
+            default:
+                return null;
+        }
+    }
+
+
 
     /**
      * 释放资源

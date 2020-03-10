@@ -1,18 +1,17 @@
 {
   "payload": {
-    "APPROVAL_DOC_ID": "",
-    "ATTACHMENT_TYPE": "",
-    "ATTACHMENT_NAME": "",
-    "APPROVAL_ATTACHMENT_ID": ""
+    "LOC": "HFnVE",
+    "DEPTNO": "406",
+    "DNAME": "P5jBk"
   },
   "message": {
-    "destTable": "4dd4REGION_APPROVE_DOC_ATT_INFO",
-    "sourceTable": "REGION_APPROVE_DOC_ATT_INFO",
-    "creatTable": "CREATE TABLE SYSDBA.4dd4REGION_APPROVE_DOC_ATT_INFO(APPROVAL_ATTACHMENT_IDss VARCHAR2(50),APPROVAL_DOC_IDss VARCHAR2(50),ATTACHMENT_NAMEss NVARCHAR2(512),ATTACHMENT_TYPEss VARCHAR2(64),ATTACHMENT_CONTENTss BLOB(4000));",
-    "big_data": [
-      "ATTACHMENT_CONTENT"
-    ],
+    "destTable": "DEPT",
+    "sourceTable": "DEPT",
+    "creatTable": "CREATE TABLE SYSDBA.DEPT(DEPTNO NUMBER(10) NOT NULL,DNAME VARCHAR2(14),LOC VARCHAR2(13),CONSTRAINT PK_DEPTNO PRIMARY KEY (DEPTNO));",
+    "big_data": [],
     "stop_flag": "等待定义",
-    "key": []
+    "key": [
+      "DEPTNO"
+    ]
   }
 }
