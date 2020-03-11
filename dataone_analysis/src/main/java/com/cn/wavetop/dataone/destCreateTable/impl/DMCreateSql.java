@@ -30,7 +30,7 @@ public class DMCreateSql implements SuperCreateTable {
     private final SysFieldruleRepository sysFieldruleRepository = (SysFieldruleRepository) SpringContextUtil.getBean("sysFieldruleRepository");
     private final SysFiledTypeRepository sysFiledTypeRepository = (SysFiledTypeRepository) SpringContextUtil.getBean("sysFiledTypeRepository");
     private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
-    ;
+
     /**
      * DM不能携带长度的类型
      */
