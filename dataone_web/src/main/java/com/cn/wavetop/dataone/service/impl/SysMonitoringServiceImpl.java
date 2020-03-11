@@ -324,6 +324,7 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         double readRate = 0;
         double disposeRate = 0;
         double synchronous = 0;
+        double sqlCount=0;
         long index = 0;
         long index1 = 0;
         HashMap<Object, Object> map = new HashMap();
@@ -331,9 +332,9 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         errorDatas = errorLogs.size();
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             for (SysMonitoring sysMonitoring : sysMonitoringList) {
-//                if (sysMonitoring.getSqlCount() == null) {
-//                    sysMonitoring.setSqlCount((long) 0);
-//                }
+                if (sysMonitoring.getSqlCount() != null) {
+                    sqlCount+= sysMonitoring.getSqlCount();
+                }
                 if (sysMonitoring.getReadData() != null) {
                     readData += sysMonitoring.getReadData();
                 }
@@ -360,7 +361,7 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
             }
 
             if (readData != 0) {
-                synchronous = writeData / readData;
+                synchronous = writeData / sqlCount;
             }
             map.put("read_datas", readData);
             map.put("write_datas", writeData);
