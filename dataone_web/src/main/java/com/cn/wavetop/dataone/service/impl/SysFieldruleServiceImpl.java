@@ -690,7 +690,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 //                    data.get(i).setDestFieldName(data.get(i).getDestFieldName());
 //                }
                 if (sysDbinfo.getType() != sysDbinfo2.getType()) {
-                        //去找到映射的字段类型
+                        //去找到映射的字段类型aaa
                         sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), data.get(i).getType().toUpperCase());
                         if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
                             //todo 如果是mysql 和sqlserver 换成小写
