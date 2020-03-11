@@ -40,6 +40,7 @@ import java.util.*;
  * 15.getDestTable：根据源端表名返回目的端表名
  * 16.findMapField：根据jobId和tableName查询源端对应的目标端表 返回map，key为源端表名 value为目标端
  * 17.findFiledNoBlob：根据jobId和tableName查询同步的字段不包含大字段的字段集合
+ *
  */
 @Service
 public class JobRelaServiceImpl {
