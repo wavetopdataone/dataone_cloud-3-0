@@ -174,7 +174,6 @@ public class JobRelaServiceImpl {
 
     /**
      * 根据jobId和表名查询映射的字段名称
-     * 要求查源端需要同步的字段（包含blod、clob。。。）
      */
     public List findFiledByJobId(Long jobId, String tableName,JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
@@ -399,7 +398,6 @@ public class JobRelaServiceImpl {
         }
         return map;
     }
-
 
     /**
      * 参数：jobid和tableName
