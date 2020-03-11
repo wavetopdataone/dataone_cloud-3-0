@@ -19,6 +19,7 @@ import java.util.List;
  * 1.findDataChangeByjobId:根据jobId查询数据源变化设置
  * 2.findJobInfoByjobId:根据jobId查询jobInfo表的配置信息
  * 3.saveMonitoring:保存到监控表的信息
+ *
  */
 @Service
 public class MiddleDBServiceImpl {
