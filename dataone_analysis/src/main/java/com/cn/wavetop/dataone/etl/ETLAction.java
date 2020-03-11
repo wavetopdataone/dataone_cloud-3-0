@@ -1,11 +1,16 @@
 package com.cn.wavetop.dataone.etl;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
+import com.cn.wavetop.dataone.config.SpringJDBCUtils;
+import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.util.DBConns;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +38,10 @@ public class ETLAction {
 //     * 内存map的key为对应的任务的表名
 //     */
 //    private Map<Object, Map<Object, ExtractionThread>> jobExtraction = new HashMap<Object, Map<Object, ExtractionThread>>();
+    private JdbcTemplate jdbcTemplate;
+    private  Connection conn;
+    private Connection destConn;
+
 
 
     @Autowired
@@ -40,6 +49,19 @@ public class ETLAction {
 
     //开始任务
     public boolean start(Long jobId) {
+        SysDbinfo sysDbinfo=JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
+        SysDbinfo sysDbinfo2=JobRelaServiceImpl.findDestDbinfoById(jobId);//端
+
+        try {
+             jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
+             conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
+             destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
         if (jobExtractionThreads.get(jobId) == null) {
             // 第一次开启，激活
             // 存放所有表的子线程
@@ -47,7 +69,7 @@ public class ETLAction {
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId);
             for (Object tableName : tableById) {
-                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName));
+                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,jdbcTemplate,destConn));
                 ExtractionThreads.get(tableName).start();
             }
             jobExtractionThreads.put(jobId, ExtractionThreads);

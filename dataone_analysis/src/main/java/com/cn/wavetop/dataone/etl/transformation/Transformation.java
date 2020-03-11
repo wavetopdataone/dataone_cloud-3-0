@@ -26,11 +26,12 @@ public class Transformation {
     private Map dataMap = new HashMap();
     private Map payload = new HashMap();
     private Map message = new HashMap();
+    private JdbcTemplate jdbcTemplate;
 
-
-    public Transformation(Long jobId, String tableName) {
+    public Transformation(Long jobId, String tableName,JdbcTemplate jdbcTemplate) {
         this.jobId = jobId;
         this.tableName = tableName;
+        this.jdbcTemplate=jdbcTemplate;
     }
     public void start() {
 
@@ -42,14 +43,14 @@ public class Transformation {
      *
      * @param value
      */
-    public Map Transform(String value,JdbcTemplate jdbcTemplate) throws IOException {
+    public Map Transform(String value) throws IOException {
         dataMap.putAll(JSONObject.parseObject(value));
         payload = (Map) dataMap.get("payload");
         message = (Map) dataMap.get("message");
 
 
         //字段映射
-        payload = mapping(payload,jdbcTemplate);
+        payload = mapping(payload);
         //页面动态调用的清洗
 
 
@@ -67,7 +68,7 @@ public class Transformation {
      * @param payload
      * @throws IOException
      */
-    public Map mapping(Map payload, JdbcTemplate jdbcTemplate) throws IOException {
+    public Map mapping(Map payload) throws IOException {
         Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName,jdbcTemplate);
 
         HashMap<Object, Object> returnPayload = new HashMap<>();

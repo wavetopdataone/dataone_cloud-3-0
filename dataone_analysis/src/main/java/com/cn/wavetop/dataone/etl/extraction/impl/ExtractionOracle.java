@@ -45,7 +45,9 @@ public class ExtractionOracle implements Extraction {
     private String tableName;
     private SysDbinfo sysDbinfo;
     private TransformationThread transformationThread;
-
+    private Connection conn;//源端连接
+    private JdbcTemplate jdbcTemplate;//源端spring的jdbc连接
+    private Connection destConn;//目标端连接
     /**
      * 全量抓取
      *
@@ -57,19 +59,10 @@ public class ExtractionOracle implements Extraction {
         System.out.println(jobId);
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
         SysDbinfo sysDbinfo1=jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
-        JdbcTemplate jdbcTemplate = null;
-        try {
-            jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Connection conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
-
-
         Producer producer = new Producer(null);
-        Map message = getMessage(conn, jdbcTemplate); //传输的消息
+        Map message = getMessage(); //传输的消息
         // todo 建表
-        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), DBConns.getConn(sysDbinfo1));//执行creat语句
+        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
 
         StringBuffer select_sql = new StringBuffer();
 
@@ -93,8 +86,8 @@ public class ExtractionOracle implements Extraction {
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
         }
 
-
-        conn.close();
+//todo
+//        conn.close();
 
     }
 
@@ -120,7 +113,8 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
-            this.transformationThread = new TransformationThread(jobId, tableName);
+            System.out.println("清洗模块，洗洗洗---------------------------------------");
+            this.transformationThread = new TransformationThread(jobId, tableName,conn,jdbcTemplate,destConn);
             this.transformationThread.start();
         }
     }
@@ -140,7 +134,7 @@ public class ExtractionOracle implements Extraction {
         this.transformationThread.suspend();
     }
 
-    private Map getMessage(Connection conn, JdbcTemplate jdbcTemplate) {
+    private Map getMessage() {
         HashMap<Object, Object> message = new HashMap<>();
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));

@@ -41,7 +41,6 @@ import java.util.*;
  * 15.getDestTable：根据源端表名返回目的端表名
  * 16.findMapField：根据jobId和tableName查询源端对应的目标端表 返回map，key为源端表名 value为目标端
  * 17.findFiledNoBlob：根据jobId和tableName查询同步的字段不包含大字段的字段集合
- *
  */
 @Service
 public class JobRelaServiceImpl {
@@ -149,7 +148,7 @@ public class JobRelaServiceImpl {
      * @param tableName
      * @return list里面套的map
      */
-    public ResultMap findSourceFiled(Long jobId, String tableName,Connection conn) {
+    public ResultMap findSourceFiled(Long jobId, String tableName, Connection conn) {
 //            sql =
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         ResultMap filedNameList = null;
@@ -177,7 +176,7 @@ public class JobRelaServiceImpl {
     /**
      * 根据jobId和表名查询映射的字段名称
      */
-    public List findFiledByJobId(Long jobId, String tableName,JdbcTemplate jdbcTemplate) {
+    public List findFiledByJobId(Long jobId, String tableName, JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List filedNameList = new ArrayList();
         List<String> filedNames = new ArrayList<>();
@@ -214,7 +213,7 @@ public class JobRelaServiceImpl {
     /**
      * 表名查询表主键
      */
-    public List findPrimaryKey(Long jobId, String tableName, JdbcTemplate jdbcTemplate ) {
+    public List findPrimaryKey(Long jobId, String tableName, JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List PrimaryKeyList = null;
         List<String> PrimaryKeys = new ArrayList<>();
@@ -257,7 +256,7 @@ public class JobRelaServiceImpl {
      * @param source_name//表名
      * @return 0是不存在, 1是存在
      */
-    public Integer VerifyDb(Long job_id, String source_name,Connection conn) {
+    public Integer VerifyDb(Long job_id, String source_name, Connection conn) {
         String sqlss = "";
         String destTable = "";
         Integer flag = 1;//0是不存在,1是存在
@@ -278,7 +277,7 @@ public class JobRelaServiceImpl {
         }
         destTable = destTableName(job_id, source_name);//目标端表名字
         //查询目标端是否出现此表
-        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, destTable,conn);
+        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, destTable, conn);
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             flag = 1;
@@ -293,9 +292,9 @@ public class JobRelaServiceImpl {
      * 根据任务id和源端表名查询映射的字段中是否含有大字段
      * 返回值是list数组，内容为大字段名称
      */
-    public List<String> BlobOrClob(Long jobId, String sourceTable,Connection conn) {
+    public List<String> BlobOrClob(Long jobId, String sourceTable, Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        ResultMap list = findSourceFiled(jobId, sourceTable,conn);
+        ResultMap list = findSourceFiled(jobId, sourceTable, conn);
         List<String> blobOrClob = new ArrayList<>();
         Map map = null;
         if (sysDbinfo.getType() == 1) {
@@ -318,7 +317,7 @@ public class JobRelaServiceImpl {
      * <p>
      * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
      */
-    public String createTable(Long jobId, String sourceTable,Connection conn,JdbcTemplate jdbcTemplate) {
+    public String createTable(Long jobId, String sourceTable, Connection conn, JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
         SuperCreateTable createSql = null;
         switch (sysDbinfo.getType().intValue()) {
@@ -341,10 +340,9 @@ public class JobRelaServiceImpl {
             default:
                 logger.error("不存在目标端类型");
         }
-        String sql = createSql.createTable(jobId, sourceTable,conn,jdbcTemplate);
+        String sql = createSql.createTable(jobId, sourceTable, conn, jdbcTemplate);
         return sql;
     }
-
 
 
     public String excuteSql(Long jobId, String tableName, String sql, Connection connection) {
@@ -384,9 +382,9 @@ public class JobRelaServiceImpl {
      * return map
      * key为源端表字段，对应的value为目的端表
      */
-    public Map findMapField(Long jobId, String sourceTable,JdbcTemplate jdbcTemplate) {
+    public Map findMapField(Long jobId, String sourceTable, JdbcTemplate jdbcTemplate) {
         //源端同步的所有字段
-        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable,jdbcTemplate);
+        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable, jdbcTemplate);
         List<SysFieldrule> sysFieldruleList = null;
         Map map = new HashMap();
         for (String sourceFiled : sourceFiledList) {
@@ -406,11 +404,11 @@ public class JobRelaServiceImpl {
      * return List
      * 要求查源端需要同步的字段（不包含blob、clob。。。）
      */
-    public List findFiledNoBlob(Long jobId, String sourceTable,Connection conn,JdbcTemplate jdbcTemplate) {
+    public List findFiledNoBlob(Long jobId, String sourceTable, Connection conn, JdbcTemplate jdbcTemplate) {
         //源端同步的所有字段
-        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable,jdbcTemplate);
+        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable, jdbcTemplate);
         //源端同步的大字段
-        List<String> BlobOrClob = BlobOrClob(jobId, sourceTable,conn);
+        List<String> BlobOrClob = BlobOrClob(jobId, sourceTable, conn);
         if (BlobOrClob != null && BlobOrClob.size() > 0) {
             Iterator<String> iterator = sourceFiled.iterator();
             while (iterator.hasNext()) {
@@ -421,5 +419,40 @@ public class JobRelaServiceImpl {
             }
         }
         return sourceFiled;
+    }
+
+
+    /**
+     * 解析create语句取出日期类型 返回值放入的都是日期类型的列名
+     */
+    public List<String> analyCreate(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String createTable = message.get("creatTable").toString();
+        String[] strings = createTable.substring(createTable.indexOf("(") + 1, createTable.lastIndexOf(")")).split(",");
+        List list = null;
+        String filedType;
+        String field; // 字段
+        for (int i = 0; i < strings.length; i++) {
+
+            if (strings[i].contains("PRIMARY KEY")) continue; //这个不是字段的调过
+            if (strings[i].split(" ").length < 2) continue; // 精度
+            if (strings[i].split(" ")[1].toUpperCase().equals("date".toUpperCase()) || strings[i].split(" ")[1].equals("TIMESTAMP".toUpperCase())) {
+                list.add(strings[i].split(" ")[0]);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 判断日期类型的值长度为多少
+     */
+    public Object dateLength(String value) {
+        StringBuffer stringBuffer = new StringBuffer("to_date('");
+        if (value.length() > 10) {
+            stringBuffer.append(value + "','yyyy-MM-dd hh24:mi:ss')");
+        } else {
+            stringBuffer.append(value + "','yyyy-MM-dd')");
+        }
+        return stringBuffer;
     }
 }

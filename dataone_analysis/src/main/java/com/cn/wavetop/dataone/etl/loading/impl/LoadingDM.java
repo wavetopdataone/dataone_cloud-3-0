@@ -5,6 +5,7 @@ import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 
 import com.alibaba.fastjson.JSONObject;
+import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
 
@@ -20,7 +21,8 @@ public class LoadingDM implements Loading {
     public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//源端表
-    private Connection destConn = null;//目的端连接
+    private Connection destConn;//目的端连接
+    private Connection conn;//源端连接
 
     public LoadingDM(Long jobId, String tableName) {
         this.jobId = jobId;
@@ -37,9 +39,11 @@ public class LoadingDM implements Loading {
         }
     }
 
-    public LoadingDM(Long jobId, String tableName,Connection destConn) {
+    public LoadingDM(Long jobId, String tableName, Connection destConn, Connection conn) {
         this.jobId = jobId;
         this.tableName = tableName;
+        this.destConn = destConn;
+        this.conn = conn;
     }
 
 
@@ -320,6 +324,7 @@ public class LoadingDM implements Loading {
 
     /**
      * 解析insert
+     *
      * @param dataMap
      * @return
      */
@@ -336,7 +341,8 @@ public class LoadingDM implements Loading {
 
         System.out.println(
                 bigdatas
-        ); System.out.println(
+        );
+        System.out.println(
                 bigdatas
         );
         if (bigdatas == null || bigdatas.size() == 0) {
@@ -352,6 +358,7 @@ public class LoadingDM implements Loading {
 
     /**
      * 执行insert
+     *
      * @param insertSql
      * @param dataMap
      * @throws SQLException
@@ -363,26 +370,26 @@ public class LoadingDM implements Loading {
 
         if (bigdatas == null || bigdatas.size() == 0) {
             //不含blob
-            excuteNoBlodByInsert(insertSql,dataMap);
+            excuteNoBlodByInsert(insertSql, dataMap);
         } else {
             //含blob
-            excuteHasBlodByInsert(insertSql,dataMap);
+            excuteHasBlodByInsert(insertSql, dataMap);
         }
     }
 
-    @Override
-    public void excuteInsert(String insertSql, Map dataMap, Connection destConn2) throws Exception {
-        //大字段
-        List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
-
-        if (bigdatas == null || bigdatas.size() == 0) {
-            //不含blob
-            excuteNoBlodByInsert(insertSql,dataMap,destConn2);
-        } else {
-            //含blob
-            excuteHasBlodByInsert(insertSql,dataMap,destConn2);
-        }
-    }
+//    @Override
+//    public void excuteInsert(String insertSql, Map dataMap) throws Exception {
+//        //大字段
+//        List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
+//
+//        if (bigdatas == null || bigdatas.size() == 0) {
+//            //不含blob
+//            excuteNoBlodByInsert(insertSql,dataMap);
+//        } else {
+//            //含blob
+//            excuteHasBlodByInsert(insertSql,dataMap,destConn2);
+//        }
+//    }
 
 
     public String noBlodToInsert(Map dataMap) {
@@ -417,23 +424,106 @@ public class LoadingDM implements Loading {
     /**
      * 一条insert解决 ok？
      * 先拼接没有blob这种的，再拼接有的，值也是，只要用相同的便利方式确保顺序
-     *
+     * <p>
      * 解析含blob的insert
+     *
      * @param dataMap
      * @return
      */
     public String hasBlobToInsert(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
+        Map payload = (Map) dataMap.get("payload");
+        StringBuffer stringBuffer = new StringBuffer("insert into " + destTable + "(");
+        StringBuffer fields = new StringBuffer("");
+        StringBuffer value = new StringBuffer("");
+        Integer index = 0;
+        for (Object key : payload.keySet()) {
+            if (index < payload.size() - 1) {
+                fields.append(key + ",");
+                value.append("?,");
+                index++;
+            } else {
+                fields.append(key);
+                value.append("?");
+            }
+        }
+        List list = (List) message.get("big_data");
+        for (int i = 0; i < list.size(); i++) {
+            fields.append("," + list.get(i));
+            value.append(",?");
+        }
 
-        return null;
+        stringBuffer.append(fields + ") values (" + value + ");");
+        return stringBuffer.toString();
     }
 
     /**
+     * 源端查询大字段类型数据的查询sql拼接
+     */
+    public String Selblob(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
+        Map payload = (Map) dataMap.get("payload");
+        StringBuffer stringBuffer = new StringBuffer("select ");
+        StringBuffer fields = new StringBuffer("");
+        StringBuffer value = new StringBuffer("");
+        Integer index = 0;
+        List list = (List) message.get("big_data");
+        for (int i = 0; i < list.size(); i++) {
+            if (i == list.size() - 1) {
+                fields.append(list.get(i));
+            } else {
+                fields.append(list.get(i) + ",");
+            }
+        }
+        List key = (List) payload.get("key");
+        if (key != null && key.size() > 0) {
+            for (int i = 0; i < key.size(); i++) {
+                if (i == key.size() - 1) {
+                    value.append(key.get(i) + "='" + message.get(key.get(i)) + "'");
+                } else {
+                    value.append(key.get(i) + "='" + message.get(key.get(i)) + "' and ");
+                }
+            }
+        } else {
+            Integer count = 0;
+            for (Object field : payload.keySet()) {
+                if (count == payload.keySet().size() - 1) {
+                    //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
+                    if(field.equals(jobRelaServiceImpl.analyCreate(dataMap))){
+                        //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
+                        value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field)));
+                    }else {
+                        value.append(field + "='" + payload.get(field) + "'");
+                    }
+                } else {
+                    //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
+                    if(field.equals(jobRelaServiceImpl.analyCreate(dataMap))){
+                        //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
+                        value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field))+" and ");
+                    }else {
+                        value.append(field + "='" + payload.get(field) + "' and ");
+                    }
+                    count++;
+                }
+            }
+        }
+        stringBuffer.append(fields + " from " + destTable + " where " + value);
+        return stringBuffer.toString();
+    }
+
+
+
+    /**
      * 执行不含blob的insert
+     *
      * @param insertSql
      * @param dataMap
      * @throws SQLException
      */
     public void excuteNoBlodByInsert(String insertSql, Map dataMap) throws Exception {
+        System.out.println("sqlyuju---" + insertSql);
         PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
@@ -441,28 +531,29 @@ public class LoadingDM implements Loading {
             ps.setObject(i, payload.get(field));
             i++;
         }
+        System.out.println("ddd" + ps + destConn);
         ps.execute();
         ps.close();
     }
 
 
-
-    public void excuteNoBlodByInsert(String insertSql, Map dataMap,Connection destConn2) throws Exception {
-        PreparedStatement ps = destConn2.prepareStatement(insertSql);
-        Map payload = (Map) dataMap.get("payload");
-        int i = 1;
-        for (Object field : payload.keySet()) {
-            ps.setObject(i, payload.get(field));
-            i++;
-        }
-        ps.execute();
-        ps.close();
-    }
+//    public void excuteNoBlodByInsert(String insertSql, Map dataMap) throws Exception {
+//        PreparedStatement ps = destConn.prepareStatement(insertSql);
+//        Map payload = (Map) dataMap.get("payload");
+//        int i = 1;
+//        for (Object field : payload.keySet()) {
+//            ps.setObject(i, payload.get(field));
+//            i++;
+//        }
+//        ps.execute();
+//        ps.close();
+//    }
 
 
     /**
      * 执行含blob的insert
      * todo  薛子浩实现
+     *
      * @param insertSql
      * @param dataMap
      * @throws SQLException
@@ -481,7 +572,8 @@ public class LoadingDM implements Loading {
         ps.close();
         destConn.commit();
     }
-    public void excuteHasBlodByInsert(String insertSql, Map dataMap,Connection destConn2) throws Exception {
+
+    public void excuteHasBlodByInsert(String insertSql, Map dataMap, Connection destConn2) throws Exception {
 
         System.out.println(insertSql);
         PreparedStatement ps = destConn2.prepareStatement(insertSql);

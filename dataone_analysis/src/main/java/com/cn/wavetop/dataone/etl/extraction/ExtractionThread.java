@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import java.sql.Connection;
+
 
 public class ExtractionThread extends Thread {
     private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
@@ -23,6 +25,9 @@ public class ExtractionThread extends Thread {
     private Long jobId;//jobid
     private String tableName;//表
     private  Extraction extraction = null;
+    private Connection conn;//源端连接
+    private JdbcTemplate jdbcTemplate;//SrpingJDBC源端连接
+    private Connection destConn;//目的端连接
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -30,12 +35,14 @@ public class ExtractionThread extends Thread {
 
     private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 
-    public ExtractionThread(Long jobId, String tableName) {
+    public ExtractionThread(Long jobId, String tableName, Connection conn,JdbcTemplate jdbcTemplate,Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
+        this.conn=conn;
+        this.jdbcTemplate=jdbcTemplate;
+        this.destConn=destConn;
     }
 
-    private JdbcTemplate jdbcTemplate;
     private RestTemplate restTemplate = new RestTemplate();
 
 
@@ -54,6 +61,9 @@ public class ExtractionThread extends Thread {
                         jobId(jobId).
                         tableName(tableName).
                         sysDbinfo(sysDbinfo).
+                        conn(conn).
+                        jdbcTemplate(jdbcTemplate).
+                        destConn(destConn).
                         build();
                 break;
             //MySQL

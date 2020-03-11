@@ -31,11 +31,13 @@ public class LoadingThread extends Thread {
     private Long jobId;//jobid
     private String tableName;//源端表
     //todo
-    private Connection conn;//目的端数据库连接
-    public LoadingThread(Long jobId, String tableName,Connection conn) {
+    private Connection conn;//源端数据库连接
+    private Connection destConn;//源端数据库连接
+    public LoadingThread(Long jobId, String tableName,Connection conn,Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn=conn;
+        this.destConn=destConn;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class LoadingThread extends Thread {
         // insert语句
         String insertSql=null;
         //todo
-        Loading loading = newInstanceLoading(conn);
+        Loading loading = newInstanceLoading();
         HashMap<Object, Object> dataMap= new HashMap<>();
         while (true) {
             dataMap.clear();
@@ -74,7 +76,7 @@ public class LoadingThread extends Thread {
         }
     }
 
-    public Loading newInstanceLoading(Connection destConn) {
+    public Loading newInstanceLoading() {
 //        Connection destConn = null;
 
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
@@ -91,7 +93,7 @@ public class LoadingThread extends Thread {
             //DM
             case 4:
 //                return   new LoadingDM(jobId, tableName);
-                return   new LoadingDM(jobId, tableName,destConn);
+                return   new LoadingDM(jobId, tableName,destConn,conn);
             // 非达蒙
             default:
                 return null;

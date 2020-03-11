@@ -31,12 +31,15 @@ public class TransformationThread extends Thread {
     private String tableName;//表
     private Transformation transformation;
     private JdbcTemplate jdbcTemplate;
-    public TransformationThread(Long jobId, String tableName) {
+    private Connection conn;//y源端连接
+    private Connection destConn;//目的端连接
+
+    public TransformationThread(Long jobId, String tableName,Connection conn,JdbcTemplate jdbcTemplate,Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
-        //todo 薛梓浩添加，暂定如此，等勇哥回来看行不
-        SysDbinfo sysDbinfo=jobRelaServiceImpl.findSourcesDbinfoById(jobId);
-         jdbcTemplate= SpringJDBCUtils.register(sysDbinfo);
+        this.conn=conn;
+        this.jdbcTemplate=jdbcTemplate;
+        this.destConn=destConn;
     }
 
     @SneakyThrows
@@ -45,13 +48,7 @@ public class TransformationThread extends Thread {
 
         int index = 1;
 
-        Connection destConn = null;
-
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
-        try {
-            destConn = DBConns.getConn(dest);
-        } catch (Exception e) {
-        }
         try {
             destConn.setAutoCommit(false);
         } catch (SQLException e) {
@@ -63,14 +60,14 @@ public class TransformationThread extends Thread {
         consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
         // insert语句
         String insertSql = null;
-        Loading loading = newInstanceLoading(destConn);
+        Loading loading = newInstanceLoading();
         while (true) {
 
             ConsumerRecords<String, String> records = consumer.poll(200);
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
-                Transformation transformation = new Transformation(jobId, tableName);
-                Map dataMap = transformation.Transform(value,jdbcTemplate);
+                Transformation transformation = new Transformation(jobId, tableName,jdbcTemplate);
+                Map dataMap = transformation.Transform(value);
                 System.out.println(dataMap);
                 if (insertSql == null) {
                     insertSql = loading.getInsert(dataMap);
@@ -78,7 +75,7 @@ public class TransformationThread extends Thread {
                 try {
 //                    loading.excuteInsert(insertSql, dataMap);
 
-                    loading.excuteInsert(insertSql, dataMap, destConn);
+                    loading.excuteInsert(insertSql, dataMap);
 
                     if (index == 1000) {
                         destConn.commit();
@@ -97,7 +94,7 @@ public class TransformationThread extends Thread {
         }
     }
  //todo
-    public Loading newInstanceLoading(Connection destConn) {
+    public Loading newInstanceLoading() {
 //        Connection destConn = null;
 
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
@@ -114,7 +111,7 @@ public class TransformationThread extends Thread {
             //DM
             case 4:
 //                return   new LoadingDM(jobId, tableName);
-                return new LoadingDM(jobId, tableName, destConn);
+                return new LoadingDM(jobId, tableName, destConn,conn);
             // 非达蒙
             default:
                 return null;

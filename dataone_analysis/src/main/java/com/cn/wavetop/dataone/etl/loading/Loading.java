@@ -24,8 +24,8 @@ public interface Loading {
   public String getInsert(Map dataMap);
 
   // 执行insert
-    void excuteInsert(String insertSql, Map dataMap) throws Exception;
+//    void excuteInsert(String insertSql, Map dataMap) throws Exception;
 
   // 执行insert 用批处理
-  void excuteInsert(String insertSql, Map dataMap, Connection destConn) throws Exception;
+  void excuteInsert(String insertSql, Map dataMap) throws Exception;
 }
