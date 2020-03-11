@@ -24,7 +24,6 @@ import java.util.*;
 
 /**
  * JobRelaServiceImpl.findSourcesDbinfoById(Long jobId):
- *
  */
 @Service
 public class JobRelaServiceImpl {
@@ -132,15 +131,13 @@ public class JobRelaServiceImpl {
      * @param tableName
      * @return list里面套的map
      */
-    public ResultMap findSourceFiled(Long jobId, String tableName) {
+    public ResultMap findSourceFiled(Long jobId, String tableName,Connection conn) {
 //            sql =
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        Connection conn = null;
         ResultMap filedNameList = null;
         List<String> filedNames = new ArrayList<>();
         try {
             if (sysDbinfo.getType() == 1) {
-                conn = DBConns.getOracleConn(sysDbinfo);
                 filedNameList = DBUtil.query2("SELECT COLUMN_NAME, DATA_TYPE,(Case When DATA_TYPE='NUMBER' Then NVL(DATA_PRECISION,0) Else NVL(DATA_LENGTH,0) End ) as DATA_LENGTH , NVL(DATA_PRECISION,0) as DATA_PRECISION , NVL(DATA_SCALE,0) as DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'", conn);
                 filedNames = findFilterFiledByJobId(jobId, tableName);//过滤的字段
                 for (int i = 0; i < filedNames.size(); i++) {
@@ -155,12 +152,6 @@ public class JobRelaServiceImpl {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                DBConns.close(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
         return filedNameList;
     }
@@ -169,9 +160,8 @@ public class JobRelaServiceImpl {
      * 根据jobId和表名查询映射的字段名称
      * 要求查源端需要同步的字段（包含blod、clob。。。）
      */
-    public List findFiledByJobId(Long jobId, String tableName) {
+    public List findFiledByJobId(Long jobId, String tableName,JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         List filedNameList = new ArrayList();
         List<String> filedNames = new ArrayList<>();
         if (sysDbinfo.getType() == 1) {
@@ -207,10 +197,9 @@ public class JobRelaServiceImpl {
     /**
      * 表名查询表主键
      */
-    public List findPrimaryKey(Long jobId, String tableName) {
+    public List findPrimaryKey(Long jobId, String tableName, JdbcTemplate jdbcTemplate ) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
-        List PrimaryKeyList = new ArrayList();
+        List PrimaryKeyList = null;
         List<String> PrimaryKeys = new ArrayList<>();
         Map map = null;
         if (sysDbinfo.getType() == 1) {
@@ -251,7 +240,7 @@ public class JobRelaServiceImpl {
      * @param source_name//表名
      * @return 0是不存在, 1是存在
      */
-    public Integer VerifyDb(Long job_id, String source_name) {
+    public Integer VerifyDb(Long job_id, String source_name,Connection conn) {
         String sqlss = "";
         String destTable = "";
         Integer flag = 1;//0是不存在,1是存在
@@ -272,7 +261,7 @@ public class JobRelaServiceImpl {
         }
         destTable = destTableName(job_id, source_name);//目标端表名字
         //查询目标端是否出现此表
-        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, destTable);
+        List<String> tablename = DBConns.existsTableName(sysDbinfo, sqlss, source_name, destTable,conn);
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             flag = 1;
@@ -287,9 +276,9 @@ public class JobRelaServiceImpl {
      * 根据任务id和源端表名查询映射的字段中是否含有大字段
      * 返回值是list数组，内容为大字段名称
      */
-    public List<String> BlobOrClob(Long jobId, String sourceTable) {
+    public List<String> BlobOrClob(Long jobId, String sourceTable,Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        ResultMap list = findSourceFiled(jobId, sourceTable);
+        ResultMap list = findSourceFiled(jobId, sourceTable,conn);
         List<String> blobOrClob = new ArrayList<>();
         Map map = null;
         if (sysDbinfo.getType() == 1) {
@@ -312,7 +301,7 @@ public class JobRelaServiceImpl {
      * <p>
      * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
      */
-    public String createTable(Long jobId, String sourceTable) {
+    public String createTable(Long jobId, String sourceTable,Connection conn,JdbcTemplate jdbcTemplate) {
         SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
         SuperCreateTable createSql = null;
         switch (sysDbinfo.getType().intValue()) {
@@ -335,62 +324,20 @@ public class JobRelaServiceImpl {
             default:
                 logger.error("不存在目标端类型");
         }
-        String sql = createSql.createTable(jobId, sourceTable);
-        return sql;
-    }
-
-    /**
-     * 执行sql返回sql
-     *
-     * @param jobId
-     * @param sourceTable
-     * @return
-     */
-    public String excuteSql(Long jobId, String sourceTable) {
-        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-        SuperCreateTable createSql = null;
-        switch (sysDbinfo.getType().intValue()) {
-            case 1:
-                //oracle
-                createSql = new OracleCreateSql();
-                break;
-            case 2:
-                //mysql
-                createSql = new MysqlCreateSql();
-                break;
-            case 3:
-                //sqlserver
-                createSql = new SqlserverCreateSql();
-                break;
-            case 4:
-                //DM
-                createSql = new DMCreateSql();
-                break;
-            default:
-                logger.error("不存在目标端类型");
-        }
-        String sql = createSql.excuteSql(jobId, sourceTable);
-        System.out.println("sql执行成功");
+        String sql = createSql.createTable(jobId, sourceTable,conn,jdbcTemplate);
         return sql;
     }
 
 
-    public String excuteSql(Long jobId, String tableName,String sql) {
-        SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
-        Connection conn=null;
+
+    public String excuteSql(Long jobId, String tableName, String sql, Connection connection) {
+
         try {
-            conn= DBConns.getDaMengConn(sysDbinfo);
-            DBUtil.update(sql,conn);
+            DBUtil.update(sql, connection);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(sql);
-        }finally {
-            try {
-                DBConns.close(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
+
         return sql;
     }
 
@@ -420,9 +367,9 @@ public class JobRelaServiceImpl {
      * return map
      * key为源端表字段，对应的value为目的端表
      */
-    public Map findMapField(Long jobId, String sourceTable) {
+    public Map findMapField(Long jobId, String sourceTable,JdbcTemplate jdbcTemplate) {
         //源端同步的所有字段
-        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable);
+        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable,jdbcTemplate);
         List<SysFieldrule> sysFieldruleList = null;
         Map map = new HashMap();
         for (String sourceFiled : sourceFiledList) {
@@ -443,12 +390,12 @@ public class JobRelaServiceImpl {
      * return List
      * 要求查源端需要同步的字段（不包含blob、clob。。。）
      */
-    public List findFiledNoBlob(Long jobId, String sourceTable) {
+    public List findFiledNoBlob(Long jobId, String sourceTable,Connection conn,JdbcTemplate jdbcTemplate) {
         //源端同步的所有字段
-        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable);
+        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable,jdbcTemplate);
         //源端同步的大字段
-        List<String> BlobOrClob =  BlobOrClob(jobId, sourceTable);
-        if(BlobOrClob!=null&&BlobOrClob.size()>0) {
+        List<String> BlobOrClob = BlobOrClob(jobId, sourceTable,conn);
+        if (BlobOrClob != null && BlobOrClob.size() > 0) {
             Iterator<String> iterator = sourceFiled.iterator();
             while (iterator.hasNext()) {
                 String num = iterator.next();

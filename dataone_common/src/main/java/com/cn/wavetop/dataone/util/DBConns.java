@@ -266,8 +266,7 @@ public class DBConns {
      * @throws InstantiationException
      * @throws ClassNotFoundException
      */
-    public static List<String> existsTableName(SysDbinfo sysDbinfo, String sql,String sourceName, String destName) {
-        Connection conn = null;
+    public static List<String> existsTableName(SysDbinfo sysDbinfo, String sql,String sourceName, String destName,Connection conn) {
         Statement stmt = null;
         PreparedStatement ps=null;
         ResultSet rs = null;
@@ -275,7 +274,6 @@ public class DBConns {
         List<String> list=new ArrayList<>();
         try {
             if (sysDbinfo.getType() == 1) {
-                conn = DBConns.getOracleConn(sysDbinfo);
                 stmt = conn.prepareStatement(sql);
                 rs = stmt.executeQuery(sql);
                 while (rs.next()){
@@ -291,7 +289,6 @@ public class DBConns {
                     }
                 }
             } else if (sysDbinfo.getType() == 2) {
-                conn = DBConns.getMySQLConn(sysDbinfo);
                 stmt = conn.prepareStatement(sql);
                 rs = stmt.executeQuery(sql);
                 while (rs.next()){
@@ -307,7 +304,6 @@ public class DBConns {
                     }
                 }
             } else if (sysDbinfo.getType() == 3) {
-                conn = DBConns.getSqlserverConn(sysDbinfo);
                 ps = conn.prepareStatement(sql);
                 rs = ps.executeQuery();
                 while (rs.next()){
@@ -321,7 +317,6 @@ public class DBConns {
                     }
                 }
             }else if (sysDbinfo.getType() == 4){
-                conn = DBConns.getDaMengConn(sysDbinfo);
                 ps = conn.prepareStatement(sql);
                 rs = ps.executeQuery();
                 while (rs.next()){
@@ -331,7 +326,7 @@ public class DBConns {
                     }
                 }
             }
-        } catch (SQLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if(ps!=null){
@@ -341,7 +336,8 @@ public class DBConns {
                     e.printStackTrace();
                 }
             }
-            DBConns.close(stmt, conn, rs);
+
+            DBConns.close(stmt, null, rs);
         }
         return list;
     }

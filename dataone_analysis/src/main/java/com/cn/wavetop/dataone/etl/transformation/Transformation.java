@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -41,14 +42,14 @@ public class Transformation {
      *
      * @param value
      */
-    public Map Transform(String value) throws IOException {
+    public Map Transform(String value,JdbcTemplate jdbcTemplate) throws IOException {
         dataMap.putAll(JSONObject.parseObject(value));
         payload = (Map) dataMap.get("payload");
         message = (Map) dataMap.get("message");
 
 
         //字段映射
-        payload = mapping(payload);
+        payload = mapping(payload,jdbcTemplate);
         //页面动态调用的清洗
 
 
@@ -66,8 +67,8 @@ public class Transformation {
      * @param payload
      * @throws IOException
      */
-    public Map mapping(Map payload) throws IOException {
-        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName);
+    public Map mapping(Map payload, JdbcTemplate jdbcTemplate) throws IOException {
+        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName,jdbcTemplate);
 
         HashMap<Object, Object> returnPayload = new HashMap<>();
         for (Object filed : payload.keySet()) {

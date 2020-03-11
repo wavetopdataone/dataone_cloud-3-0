@@ -30,10 +30,12 @@ public class LoadingThread extends Thread {
     private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//源端表
-
-    public LoadingThread(Long jobId, String tableName) {
+    //todo
+    private Connection conn;//目的端数据库连接
+    public LoadingThread(Long jobId, String tableName,Connection conn) {
         this.jobId = jobId;
         this.tableName = tableName;
+        this.conn=conn;
     }
 
     @Override
@@ -48,7 +50,8 @@ public class LoadingThread extends Thread {
 
         // insert语句
         String insertSql=null;
-        Loading loading = newInstanceLoading();
+        //todo
+        Loading loading = newInstanceLoading(conn);
         HashMap<Object, Object> dataMap= new HashMap<>();
         while (true) {
             dataMap.clear();
@@ -71,14 +74,14 @@ public class LoadingThread extends Thread {
         }
     }
 
-    public Loading newInstanceLoading() {
-        Connection destConn = null;
+    public Loading newInstanceLoading(Connection destConn) {
+//        Connection destConn = null;
 
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
-        try {
-            destConn = DBConns.getConn(dest);
-        } catch (Exception e) {
-        }
+//        try {
+//            destConn = DBConns.getConn(dest);
+//        } catch (Exception e) {
+//        }
         try {
             destConn.setAutoCommit(false);
         } catch (SQLException e) {

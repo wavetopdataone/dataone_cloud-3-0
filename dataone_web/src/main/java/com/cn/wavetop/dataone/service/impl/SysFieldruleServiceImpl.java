@@ -95,6 +95,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
     public Object VerifyDb(Long job_id, String source_name, String dest_name) {
         SysDbinfo sysDbinfo = new SysDbinfo();//源端
         SysDbinfo sysDbinfo2 = new SysDbinfo();//目标端
+        Connection conn=null;
         //查詢关联的数据库连接表jobrela
         List<SysJobrela> sysJobrelaList = sysJobrelaRepository.findById(job_id.longValue());
         //查询到数据库连接
@@ -108,29 +109,59 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         String sqlss = "";
         if (sysDbinfo2.getType() == 1) {
             //oracle
+            try {
+                conn=DBConns.getOracleConn(sysDbinfo2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             sqlss = "SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo2.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
         } else if (sysDbinfo2.getType() == 2) {
+            try {
+                conn=DBConns.getMySQLConn(sysDbinfo2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             //mysql
             sqlss = "show tables";
         } else if (sysDbinfo2.getType() == 3) {
             //sqlserver
+            try {
+                conn=DBConns.getSqlserverConn(sysDbinfo2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             sqlss = "select name from sysobjects where xtype='u'";
         } else if (sysDbinfo2.getType() == 4) {
+            try {
+                conn=DBConns.getDaMengConn(sysDbinfo2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             //dameng select distinct object_name TABLE_SCHEMA from all_objects where object_type = 'SCH'
             sqlss = "SELECT TABLE_NAME FROM USER_TABLES";
         }
         //查询目标端是否出现此表
-        List<String> tablename = DBConns.existsTableName(sysDbinfo2, sqlss, source_name, dest_name);
+        List<String> tablename = DBConns.existsTableName(sysDbinfo2, sqlss, source_name, dest_name,conn);
         String sssql = "";
         if (sysDbinfo.getType() == 1) {
             //oracle
+            try {
+                conn=DBConns.getOracleConn(sysDbinfo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             sssql = "SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
         } else if (sysDbinfo.getType() == 2) {
             //mysql
+            try {
+                conn=DBConns.getMySQLConn(sysDbinfo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             sssql = "show tables";
         }
         //查詢源端是否存在此表名
-        List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name);
+        List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name,conn);
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             return ToDataMessage.builder().status("0").message("目的端表名" + dest_name + "已经存在").build();

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @Author yongz
@@ -47,6 +48,7 @@ public class ExtractionOracle implements Extraction {
 
     /**
      * 全量抓取
+     *
      * @throws Exception
      */
     @Override
@@ -54,24 +56,25 @@ public class ExtractionOracle implements Extraction {
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
-
+        SysDbinfo sysDbinfo1=jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
         JdbcTemplate jdbcTemplate = null;
         try {
             jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Connection conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
+
 
         Producer producer = new Producer(null);
-        Map message = getMessage(); //传输的消息
-        // 建表
-        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"));//执行creat语句
+        Map message = getMessage(conn, jdbcTemplate); //传输的消息
+        // todo 建表
+        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), DBConns.getConn(sysDbinfo1));//执行creat语句
 
         StringBuffer select_sql = new StringBuffer();
-        Connection conn = DBConns.getOracleConn(sysDbinfo);
 
 
-        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName);
+        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn, jdbcTemplate);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
 
         //拼接查询语句
@@ -110,14 +113,13 @@ public class ExtractionOracle implements Extraction {
     }
 
 
-
-
     /**
      * 创建清洗层线程并开始任务
+     *
      * @param size
      */
     private void startTrans(int size) {
-        if (size>0){
+        if (size > 0) {
             this.transformationThread = new TransformationThread(jobId, tableName);
             this.transformationThread.start();
         }
@@ -138,18 +140,16 @@ public class ExtractionOracle implements Extraction {
         this.transformationThread.suspend();
     }
 
-    private Map getMessage() {
+    private Map getMessage(Connection conn, JdbcTemplate jdbcTemplate) {
         HashMap<Object, Object> message = new HashMap<>();
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
 //        String table = createTable(jobId, tableName);
-        message.put("creatTable",jobRelaServiceImpl.createTable(jobId, tableName));
-        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName));
-        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName));
+        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
+        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, jdbcTemplate));
+        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName, conn));
         message.put("stop_flag", "等待定义");
         return message;
     }
-
-
 
 }

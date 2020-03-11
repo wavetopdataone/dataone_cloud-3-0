@@ -20,7 +20,7 @@ public class LoadingDM implements Loading {
     public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//源端表
-    private Connection destConn = null;
+    private Connection destConn = null;//目的端连接
 
     public LoadingDM(Long jobId, String tableName) {
         this.jobId = jobId;
