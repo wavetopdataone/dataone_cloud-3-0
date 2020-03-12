@@ -40,7 +40,7 @@ public class DBUtil {
             log.info(sql);
             st.executeUpdate(sql);
             st.close();
-
+            st = null;
 
         }
 
@@ -286,6 +286,7 @@ public class DBUtil {
             }
             try {
                 st.close();
+                st=null;
             } catch (Exception e) {
             }
         }

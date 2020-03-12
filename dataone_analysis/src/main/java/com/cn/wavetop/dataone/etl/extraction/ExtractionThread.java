@@ -10,6 +10,7 @@ import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionMySQL;
 import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionOracle;
 import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionSqlServer;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.util.DBConns;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class ExtractionThread extends Thread {
     private Connection conn;//源端连接
     private JdbcTemplate jdbcTemplate;//SrpingJDBC源端连接
     private Connection destConn;//目的端连接
+    private Connection destConnByTran;//目的端连接给清洗层使用
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -35,12 +37,29 @@ public class ExtractionThread extends Thread {
 
     private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 
-    public ExtractionThread(Long jobId, String tableName, Connection conn,JdbcTemplate jdbcTemplate,Connection destConn) {
+    public ExtractionThread(Long jobId, String tableName, Connection conn,JdbcTemplate jdbcTemplate,Connection destConn,Connection destConnByTran) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn=conn;
         this.jdbcTemplate=jdbcTemplate;
         this.destConn=destConn;
+        this.destConnByTran=destConnByTran;
+    }
+
+
+    public ExtractionThread(Long jobId, String tableName) {
+        this.jobId = jobId;
+        this.tableName = tableName;
+        SysDbinfo sysDbinfo=jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
+        SysDbinfo sysDbinfo2=jobRelaServiceImpl.findDestDbinfoById(jobId);//端
+
+        try {
+            this.jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
+            this.conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
+            this.destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private RestTemplate restTemplate = new RestTemplate();
@@ -64,6 +83,7 @@ public class ExtractionThread extends Thread {
                         conn(conn).
                         jdbcTemplate(jdbcTemplate).
                         destConn(destConn).
+                        destConnByTran(destConnByTran).
                         build();
                 break;
             //MySQL

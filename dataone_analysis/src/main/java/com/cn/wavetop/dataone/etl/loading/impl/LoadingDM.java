@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
+import lombok.Data;
 
 import java.sql.*;
 import java.util.*;
@@ -16,14 +17,13 @@ import java.util.*;
  * @Author yongz
  * @Date 2020/3/6、17:41
  */
-
+@Data
 public class LoadingDM implements Loading {
     public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private Long jobId;//jobid
     private String tableName;//源端表
     private Connection destConn;//目的端连接
     private Connection conn;//源端连接
-
     public LoadingDM(Long jobId, String tableName) {
         this.jobId = jobId;
         this.tableName = tableName;
@@ -364,16 +364,16 @@ public class LoadingDM implements Loading {
      * @throws SQLException
      */
     @Override
-    public void excuteInsert(String insertSql, Map dataMap) throws Exception {
+    public void excuteInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
         //大字段
         List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
 
         if (bigdatas == null || bigdatas.size() == 0) {
             //不含blob
-            excuteNoBlodByInsert(insertSql, dataMap);
+            excuteNoBlodByInsert(insertSql, dataMap,ps);
         } else {
             //含blob
-            excuteHasBlodByInsert(insertSql, dataMap);
+            excuteHasBlodByInsert(insertSql, dataMap, ps);
         }
     }
 
@@ -522,32 +522,16 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteNoBlodByInsert(String insertSql, Map dataMap) throws Exception {
-        System.out.println("sqlyuju---" + insertSql);
-        PreparedStatement ps = destConn.prepareStatement(insertSql);
+    public void excuteNoBlodByInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
+//        PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
         for (Object field : payload.keySet()) {
             ps.setObject(i, payload.get(field));
             i++;
         }
-        System.out.println("ddd" + ps + destConn);
-        ps.execute();
-        ps.close();
+        ps.addBatch();
     }
-
-
-//    public void excuteNoBlodByInsert(String insertSql, Map dataMap) throws Exception {
-//        PreparedStatement ps = destConn.prepareStatement(insertSql);
-//        Map payload = (Map) dataMap.get("payload");
-//        int i = 1;
-//        for (Object field : payload.keySet()) {
-//            ps.setObject(i, payload.get(field));
-//            i++;
-//        }
-//        ps.execute();
-//        ps.close();
-//    }
 
 
     /**
@@ -558,10 +542,10 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteHasBlodByInsert(String insertSql, Map dataMap) throws Exception {
+    public void excuteHasBlodByInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
 
         System.out.println(insertSql);
-        PreparedStatement ps = destConn.prepareStatement(insertSql);
+//        PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
         for (Object field : payload.keySet()) {
@@ -569,7 +553,7 @@ public class LoadingDM implements Loading {
             i++;
         }
         ps.execute();
-        ps.close();
+//        ps.close();
         destConn.commit();
     }
 

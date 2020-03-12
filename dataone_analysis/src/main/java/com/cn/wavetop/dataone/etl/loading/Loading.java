@@ -4,6 +4,7 @@ import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -16,7 +17,6 @@ import java.util.Map;
 public interface Loading {
    JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
 
-
   //导入达梦接口
   public void loadingDM(String jsonString);
 
@@ -27,5 +27,5 @@ public interface Loading {
 //    void excuteInsert(String insertSql, Map dataMap) throws Exception;
 
   // 执行insert 用批处理
-  void excuteInsert(String insertSql, Map dataMap) throws Exception;
+  void excuteInsert(String insertSql, Map dataMap, PreparedStatement ps) throws Exception;
 }

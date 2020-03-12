@@ -18,24 +18,32 @@ import java.util.HashMap;
 @SpringBootApplication
 public class DataoneAnalysisApplication {
 
-    public static void main(String[] args) {
-      ConfigurableApplicationContext context=SpringApplication.run(DataoneAnalysisApplication.class, args);
+    public static void main(String[] args)  {
+        ConfigurableApplicationContext context = SpringApplication.run(DataoneAnalysisApplication.class, args);
         new SpringContextUtil().setApplicationContext(context);  //获取bean
 
-
-//        LoadingDM salgrade = new LoadingDM(47L, "SALGRADE");
-//
-//        String value="{\"payload\":{\"HISAL\":\"9999\",\"GRADE\":\"5\",\"LOSAL\":\"3001\"},\"message\":{\"destTable\":\"SALGRADE\",\"sourceTable\":\"SALGRADE\",\"creatTable\":\"CREATE TABLE SYSDBA.SALGRADE(GRADE NUMBER,LOSAL NUMBER,HISAL NUMBER);\",\"big_data\":[],\"stop_flag\":\"等待定义\",\"key\":[]}}";
-//        HashMap<Object, Object> dataMap = new HashMap<>();
-//        dataMap.putAll(JSONObject.parseObject(value));
-//
-//        salgrade.loadingDMForFull(dataMap);
-
-//        StartThread startThread=new StartThread(15);
-//        startThread.run();
-//        StartThread startThread2=new StartThread(17);
-//        startThread2.run();
-  
+//        while (true) {
+//            ThreadGroup group = Thread.currentThread().getThreadGroup();
+//            ThreadGroup topGroup = group;
+//// 遍历线程组树，获取根线程组
+//            while (group != null) {
+//                topGroup = group;
+//                group = group.getParent();
+//            }
+//// 激活的线程数加倍
+//            int estimatedSize = topGroup.activeCount() * 2;
+//            Thread[] slackList = new Thread[estimatedSize];
+//// 获取根线程组的所有线程
+//            int actualSize = topGroup.enumerate(slackList);
+//// copy into a list that is the exact size
+//            Thread[] list = new Thread[actualSize];
+//            System.arraycopy(slackList, 0, list, 0, actualSize);
+//            System.out.println("Thread list size == " + list.length);
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
-
 }

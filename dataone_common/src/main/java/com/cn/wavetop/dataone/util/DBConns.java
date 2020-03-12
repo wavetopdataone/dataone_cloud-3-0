@@ -29,7 +29,7 @@ public class DBConns {
     public static Connection getOracleConn(SysDbinfo sysDbinfo) throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         String url = "jdbc:oracle:thin:@"+sysDbinfo.getHost()+":"+sysDbinfo.getPort()+":"+sysDbinfo.getDbname();
         Class.forName("oracle.jdbc.driver.OracleDriver");
-        DriverManager.setLoginTimeout(10);
+        DriverManager.setLoginTimeout(20);
         return  DriverManager.getConnection(url, sysDbinfo.getUser(), sysDbinfo.getPassword());
 
     }

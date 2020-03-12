@@ -41,6 +41,7 @@ public class ETLAction {
     private JdbcTemplate jdbcTemplate;
     private  Connection conn;
     private Connection destConn;
+    private Connection destConnByTran;
 
 
 
@@ -56,6 +57,7 @@ public class ETLAction {
              jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
              conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
              destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
+             destConnByTran = DBConns.getConn(sysDbinfo2); // 给清洗层使用
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,11 +71,13 @@ public class ETLAction {
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId);
             for (Object tableName : tableById) {
-                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,jdbcTemplate,destConn));
+                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,jdbcTemplate,destConn,destConnByTran));
+//                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName));
                 ExtractionThreads.get(tableName).start();
             }
             jobExtractionThreads.put(jobId, ExtractionThreads);
         } else {
+            // todo 优化数据库连接
             // 重启，resume
             ExtractionThreads = jobExtractionThreads.get(jobId);
             for (Object o : ExtractionThreads.keySet()) {
@@ -86,6 +90,7 @@ public class ETLAction {
 
     //暂停任务
     public boolean pause(Long jobId) {
+        // todo 优化数据库连接（释放）
         ExtractionThreads = jobExtractionThreads.get(jobId);
         if (ExtractionThreads == null){
             return false;

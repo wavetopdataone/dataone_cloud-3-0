@@ -25,7 +25,10 @@ import org.aspectj.weaver.ast.Var;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,8 @@ public class ExtractionOracle implements Extraction {
     private Connection conn;//源端连接
     private JdbcTemplate jdbcTemplate;//源端spring的jdbc连接
     private Connection destConn;//目标端连接
+    private Connection destConnByTran;//目标端连接
+
     /**
      * 全量抓取
      *
@@ -57,12 +62,11 @@ public class ExtractionOracle implements Extraction {
     public void fullRang() throws Exception {
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
-        SysDbinfo sysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
-        SysDbinfo sysDbinfo1=jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
         Producer producer = new Producer(null);
-        Map message = getMessage(); //传输的消息
+        Map message;
+        message = getMessage(); //传输的消息
         // todo 建表
-        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
+//        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
 
         StringBuffer select_sql = new StringBuffer();
 
@@ -73,22 +77,41 @@ public class ExtractionOracle implements Extraction {
         //拼接查询语句
         select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
 
-        ResultMap resultMap = DBUtil.query2(select_sql.toString(), conn);
 
+        System.out.println(select_sql.toString());
+
+        ResultMap resultMap;
+
+        resultMap = DBUtil.query2(select_sql.toString(), conn);
+        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
+//        synchronized (this) {
+////            creatTable((String) message.get("creatTable"), destConn);
+////            jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
+//        }
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
-
+        System.out.println(tableName + "____" + resultMap.size());
         for (int i = 0; i < resultMap.size(); i++) {
 
             DataMap data = DataMap.builder()
                     .payload(resultMap.get(i))
-                    .message(message).build();
-
+                    .message(message)
+                    .build();
+//            System.out.println(data);
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
         }
 
 //todo
 //        conn.close();
 
+    }
+
+    private void creatTable(String creatTable, Connection destConn) throws SQLException {
+        Statement st = null;
+        st = destConn.createStatement();
+        st.executeUpdate(creatTable);
+        destConn.commit();
+        st.close();
+        st = null;
     }
 
 
@@ -113,8 +136,7 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
-            System.out.println("清洗模块，洗洗洗---------------------------------------");
-            this.transformationThread = new TransformationThread(jobId, tableName,conn,jdbcTemplate,destConn);
+            this.transformationThread = new TransformationThread(jobId, tableName, conn, jdbcTemplate, destConnByTran);
             this.transformationThread.start();
         }
     }
@@ -139,9 +161,10 @@ public class ExtractionOracle implements Extraction {
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
 //        String table = createTable(jobId, tableName);
-        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
-        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, jdbcTemplate));
-        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName, conn));
+//        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
+//        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, jdbcTemplate));
+//        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName, conn));
+        message.put("big_data", new ArrayList<>());
         message.put("stop_flag", "等待定义");
         return message;
     }

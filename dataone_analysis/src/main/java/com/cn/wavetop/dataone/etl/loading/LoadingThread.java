@@ -15,6 +15,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ public class LoadingThread extends Thread {
 
         // insert语句
         String insertSql=null;
+        PreparedStatement ps=null;
         //todo
         Loading loading = newInstanceLoading();
         HashMap<Object, Object> dataMap= new HashMap<>();
@@ -64,9 +66,14 @@ public class LoadingThread extends Thread {
                 dataMap.putAll(JSONObject.parseObject(value));
                 if (insertSql==null){
                     insertSql= loading.getInsert(dataMap);
+                    try {
+                        ps=destConn.prepareStatement(insertSql);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
                 try {
-                    loading.excuteInsert(insertSql, dataMap);
+                    loading.excuteInsert(insertSql, dataMap ,ps);
                 } catch (Exception e) {
                     // todo 错误队列   王成实现
                     e.printStackTrace();
