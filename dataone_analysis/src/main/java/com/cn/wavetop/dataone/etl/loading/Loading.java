@@ -4,6 +4,7 @@ import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 

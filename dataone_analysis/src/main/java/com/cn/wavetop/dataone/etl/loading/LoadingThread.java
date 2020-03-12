@@ -66,7 +66,7 @@ public class LoadingThread extends Thread {
                     insertSql= loading.getInsert(dataMap);
                 }
                 try {
-                    loading.excuteInsert(insertSql, dataMap);
+//                    loading.excuteInsert(insertSql, dataMap,ps);
                 } catch (Exception e) {
                     // todo 错误队列   王成实现
                     e.printStackTrace();

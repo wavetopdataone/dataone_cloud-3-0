@@ -455,4 +455,20 @@ public class JobRelaServiceImpl {
         }
         return stringBuffer;
     }
+
+    /**
+     * 判断同步的列是否包含日期字段
+     * @param value
+     * @param fields
+     * @return
+     */
+    public  boolean equalsDate(String value, List<String> fields) {
+        for (int i = 0; i < fields.size(); i++) {
+            if (value.equals(fields.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

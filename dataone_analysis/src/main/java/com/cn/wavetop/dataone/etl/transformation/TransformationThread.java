@@ -48,7 +48,13 @@ public class TransformationThread extends Thread {
 
         int index = 1;
 
+        Connection destConn = null;
+
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
+        try {
+            destConn = DBConns.getConn(dest);
+        } catch (Exception e) {
+        }
         try {
             destConn.setAutoCommit(false);
         } catch (SQLException e) {
@@ -60,7 +66,7 @@ public class TransformationThread extends Thread {
         consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
         // insert语句
         String insertSql = null;
-        Loading loading = newInstanceLoading();
+        Loading loading = newInstanceLoading(destConn);
         while (true) {
 
             ConsumerRecords<String, String> records = consumer.poll(200);
@@ -94,7 +100,7 @@ public class TransformationThread extends Thread {
         }
     }
  //todo
-    public Loading newInstanceLoading() {
+    public Loading newInstanceLoading(Connection destConn) {
 //        Connection destConn = null;
 
         SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
@@ -111,7 +117,7 @@ public class TransformationThread extends Thread {
             //DM
             case 4:
 //                return   new LoadingDM(jobId, tableName);
-                return new LoadingDM(jobId, tableName, destConn,conn);
+                return new LoadingDM(jobId, tableName);
             // 非达蒙
             default:
                 return null;
