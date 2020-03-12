@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 @AllArgsConstructor
 @Builder
 public class ExtractionOracle implements Extraction {
-
+    private static Boolean blok = true;
     private Long jobId;
     private String tableName;
     private SysDbinfo sysDbinfo;
@@ -84,10 +84,14 @@ public class ExtractionOracle implements Extraction {
 
         resultMap = DBUtil.query2(select_sql.toString(), conn);
         message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
-//        synchronized (this) {
-////            creatTable((String) message.get("creatTable"), destConn);
-////            jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
-//        }
+        synchronized (blok) {
+            try {
+                creatTable((String) message.get("creatTable"), destConn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+//            jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
+        }
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
         System.out.println(tableName + "____" + resultMap.size());
         for (int i = 0; i < resultMap.size(); i++) {

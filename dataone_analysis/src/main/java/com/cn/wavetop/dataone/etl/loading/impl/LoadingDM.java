@@ -3,6 +3,7 @@ package com.cn.wavetop.dataone.etl.loading.impl;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
+import org.voovan.tools.TSQL;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.models.DataMap;
@@ -12,6 +13,7 @@ import lombok.Data;
 
 import java.sql.*;
 import java.util.*;
+
 
 /**
  * @Author yongz
@@ -24,6 +26,8 @@ public class LoadingDM implements Loading {
     private String tableName;//源端表
     private Connection destConn;//目的端连接
     private Connection conn;//源端连接
+
+
     public LoadingDM(Long jobId, String tableName) {
         this.jobId = jobId;
         this.tableName = tableName;
@@ -523,7 +527,8 @@ public class LoadingDM implements Loading {
      * @throws SQLException
      */
     public void excuteNoBlodByInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
-//        PreparedStatement ps = destConn.prepareStatement(insertSql);
+//        PreparedStatement ps2 = destConn.prepareStatement(insertSql);
+//        PreparedStatement  ps2 = TSQL.createPreparedStatement(destConn,insertSql, null);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
         for (Object field : payload.keySet()) {
@@ -531,6 +536,10 @@ public class LoadingDM implements Loading {
             i++;
         }
         ps.addBatch();
+//        ps2.executeUpdate();
+//        destConn.commit();
+//        ps2.close();
+//        ps2=null;
     }
 
 

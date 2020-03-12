@@ -43,18 +43,32 @@ public class TransformationThread extends Thread {
         this.tableName = tableName;
         this.conn = conn;
         this.jdbcTemplate = jdbcTemplate;
-        this.destConn = destConn;
+//        this.destConn = destConn;
+        try {
+            this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SneakyThrows
     @Override
     public void run() {
-        Thread.sleep(5000);
+        Thread.sleep(50000);
         int index = 1;
+        while (destConn == null) {
+            try {
+                this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+            Thread.sleep(60000);
+        }
         // SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
         try {
             destConn.setAutoCommit(false);
+//            destConn.setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -91,22 +105,20 @@ public class TransformationThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap, ps);
 
                     if (index == 100) {
-                        Connection destConn2 = ((LoadingDM) loading).getDestConn();
 
-                        synchronized (this) {
+                        synchronized (blok) {
                             int[] ints = ps.executeBatch();
                             System.out.println(ints);
                             System.out.println("ps.executeBatch()");
-                            destConn2.commit();
-
+                            destConn.commit();
                             ps.clearBatch();
                             ps.close();
                             ps = null; //gc
                         }
-                        index = 1;
+                        index = 0;
                     }
                     index++;
-                    System.out.println(index);
+                    System.out.println(tableName + "--------" + index);
 
 
                 } catch (Exception e) {
