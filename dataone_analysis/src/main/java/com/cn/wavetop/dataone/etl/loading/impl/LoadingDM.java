@@ -251,16 +251,6 @@ public class LoadingDM implements Loading {
         //大字段
         List bigdatas = (List) message.get("big_data");
 
-        System.out.println(
-                bigdatas
-        );
-
-        System.out.println(
-                bigdatas
-        );
-        System.out.println(
-                bigdatas
-        );
         if (bigdatas == null || bigdatas.size() == 0) {
             //不含blob
             System.out.println("不含blob");
@@ -318,8 +308,8 @@ public class LoadingDM implements Loading {
                 ++index;
             }
         }
-        payload.clear(); //释放内存
-        message.clear();//释放内存
+//        payload.clear(); //释放内存
+//        message.clear();//释放内存
         return "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
                 + ")";
     }
@@ -433,16 +423,16 @@ public class LoadingDM implements Loading {
 //        PreparedStatement ps2 = destConn.prepareStatement(insertSql);
 //        PreparedStatement  ps2 = TSQL.createPreparedStatement(destConn,insertSql, null);
         Map payload = (Map) dataMap.get("payload");
+
         int i = 1;
         for (Object field : payload.keySet()) {
             ps.setObject(i, payload.get(field));
             i++;
         }
         ps.addBatch();
-//        ps2.executeUpdate();
-//        destConn.commit();
-//        ps2.close();
-//        ps2=null;
+        payload.clear(); // gc
+        payload=null; //gc
+
     }
 
 

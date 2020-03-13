@@ -29,7 +29,7 @@ public class ExtractionThread extends Thread {
     private  Extraction extraction = null;
     private Connection conn;//源端连接
     private Connection destConn;//目的端连接
-    private Connection destConnByTran;//目的端连接给清洗层使用
+//    private Connection destConnByTran;//目的端连接给清洗层使用
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -37,12 +37,12 @@ public class ExtractionThread extends Thread {
 
     private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 
-    public ExtractionThread(Long jobId, String tableName, Connection conn,Connection destConn,Connection destConnByTran) {
+    public ExtractionThread(Long jobId, String tableName, Connection conn,Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn=conn;
         this.destConn=destConn;
-        this.destConnByTran=destConnByTran;
+//        this.destConnByTran=destConnByTran;
     }
 
 
@@ -80,7 +80,7 @@ public class ExtractionThread extends Thread {
                         sysDbinfo(sysDbinfo).
                         conn(conn).
                         destConn(destConn).
-                        destConnByTran(destConnByTran).
+//                        destConnByTran(destConnByTran).
                         build();
                 break;
             //MySQL
