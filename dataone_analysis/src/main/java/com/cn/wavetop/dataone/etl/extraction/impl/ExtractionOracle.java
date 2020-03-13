@@ -50,7 +50,7 @@ public class ExtractionOracle implements Extraction {
     private TransformationThread transformationThread;
     private Connection conn;//源端连接
     private Connection destConn;//目标端连接
-    private Connection destConnByTran;//目标端连接
+//    private Connection destConnByTran;//目标端连接
 
     /**
      * 全量抓取
@@ -139,7 +139,7 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
-            this.transformationThread = new TransformationThread(jobId, tableName, conn, destConnByTran);
+            this.transformationThread = new TransformationThread(jobId, tableName, conn, destConn);
             this.transformationThread.start();
         }
     }

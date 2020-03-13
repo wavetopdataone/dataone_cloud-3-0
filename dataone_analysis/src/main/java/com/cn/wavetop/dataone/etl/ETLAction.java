@@ -51,11 +51,9 @@ public class ETLAction {
     public boolean start(Long jobId) {
         SysDbinfo sysDbinfo=JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
         SysDbinfo sysDbinfo2=JobRelaServiceImpl.findDestDbinfoById(jobId);//端
-
         try {
              conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
              destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
-             destConnByTran = DBConns.getConn(sysDbinfo2); // 给清洗层使用
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,8 +68,7 @@ public class ETLAction {
             List tableById = JobRelaServiceImpl.findTableById(jobId,conn);
             System.out.println("同步表："+tableById);
             for (Object tableName : tableById) {
-                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn,destConnByTran));
-//                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName));
+                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn));
                 ExtractionThreads.get(tableName).start();
             }
             jobExtractionThreads.put(jobId, ExtractionThreads);
