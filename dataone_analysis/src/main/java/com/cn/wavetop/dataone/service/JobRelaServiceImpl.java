@@ -101,13 +101,11 @@ public class JobRelaServiceImpl {
         return filterTable;
     }
 
-    public static void main(String[] args) {
 
-    }
     /**
      * 根据jobId查询映射的表名称
      */
-    public List findTableById(Long jobId,Connection conn)  {
+    public List findTableById(Long jobId, Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List tableNameList = new ArrayList();
         List<String> tableNames = new ArrayList<>();
@@ -115,9 +113,9 @@ public class JobRelaServiceImpl {
         if (sysDbinfo.getType() == 1) {
             //根据jobID查询任务有多少张表sum代替//标的名字是什么
             //过滤的直接去掉，字段就按照原表的先解析
-            String sql="SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
+            String sql = "SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
             try {
-                tableNameList = DBUtil.query2(sql,conn).getList();
+                tableNameList = DBUtil.query2(sql, conn).getList();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -194,9 +192,9 @@ public class JobRelaServiceImpl {
         List filedNameList = new ArrayList();
         List<String> filedNames = new ArrayList<>();
         if (sysDbinfo.getType() == 1) {
-            String sql="SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
+            String sql = "SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
             try {
-                filedNameList = DBUtil.query2(sql,conn).getList();
+                filedNameList = DBUtil.query2(sql, conn).getList();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -231,15 +229,15 @@ public class JobRelaServiceImpl {
     /**
      * 表名查询表主键
      */
-    public List findPrimaryKey(Long jobId, String tableName,Connection conn) {
+    public List findPrimaryKey(Long jobId, String tableName, Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List PrimaryKeyList = null;
         List<String> PrimaryKeys = new ArrayList<>();
         Map map = null;
         if (sysDbinfo.getType() == 1) {
-            String sql="select COLUMN_NAME from user_cons_columns where table_name='" + tableName + "' and constraint_name in (select constraint_name from user_constraints where table_name='" + tableName + "' and constraint_type='P')";
+            String sql = "select COLUMN_NAME from user_cons_columns where table_name='" + tableName + "' and constraint_name in (select constraint_name from user_constraints where table_name='" + tableName + "' and constraint_type='P')";
             try {
-                PrimaryKeyList = DBUtil.query2(sql,conn).getList();
+                PrimaryKeyList = DBUtil.query2(sql, conn).getList();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -405,9 +403,9 @@ public class JobRelaServiceImpl {
      * return map
      * key为源端表字段，对应的value为目的端表
      */
-    public Map findMapField(Long jobId, String sourceTable,Connection conn) {
+    public Map findMapField(Long jobId, String sourceTable, Connection conn) {
         //源端同步的所有字段
-        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable,conn);
+        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable, conn);
         List<SysFieldrule> sysFieldruleList = null;
         Map map = new HashMap();
         for (String sourceFiled : sourceFiledList) {
@@ -429,7 +427,7 @@ public class JobRelaServiceImpl {
      */
     public List findFiledNoBlob(Long jobId, String sourceTable, Connection conn) {
         //源端同步的所有字段
-        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable,conn);
+        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable, conn);
         //源端同步的大字段
         List<String> BlobOrClob = BlobOrClob(jobId, sourceTable, conn);
         if (BlobOrClob != null && BlobOrClob.size() > 0) {
@@ -481,11 +479,12 @@ public class JobRelaServiceImpl {
 
     /**
      * 判断同步的列是否包含日期字段
+     *
      * @param value
      * @param fields
      * @return
      */
-    public  boolean equalsDate(String value, List<String> fields) {
+    public boolean equalsDate(String value, List<String> fields) {
         for (int i = 0; i < fields.size(); i++) {
             if (value.equals(fields.get(i))) {
                 return true;
@@ -499,7 +498,7 @@ public class JobRelaServiceImpl {
      * 插入错误信息
      */
     @Transactional
-    public void insertError(Long jobId,String sourceTable, String destTable, String time,String errortype,String message,Long offset) {
+    public void insertError(Long jobId, String sourceTable, String destTable, String time, String errortype, String message, Long offset) {
         ErrorLog errorLog = new ErrorLog();
         errorLog.setJobId(jobId);
         errorLog.setSourceName(sourceTable);
@@ -514,24 +513,24 @@ public class JobRelaServiceImpl {
         errorLog.setOptTime(parse);
         errorLog.setOptType(errortype);
         errorLog.setContent(message);
-        Optional<SysJobrela> sysJobrela= sysJobrelaRespository.findById(jobId);
+        Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
         String jobName = sysJobrela.get().getJobName();
         //每一万次判断一次总数
         if (offset % 10000 == 0) {
-        long count = errorLogRespository.count();
-        if (count >= 100000) {
-            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
-            String jobStatus = sysJobrela.get().getJobStatus();
-            //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态,21是暂停状态
-            if (!"2".equals(jobStatus) && !"21".equals(jobStatus) && !"4".equals(jobStatus)) {
-                sysJobrela.get().setJobStatus("21");//改为暂停
-                sysJobrelaRespository.save(sysJobrela.get());
+            long count = errorLogRespository.count();
+            if (count >= 100000) {
+                Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
+                String jobStatus = sysJobrela.get().getJobStatus();
+                //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态,21是暂停状态
+                if (!"2".equals(jobStatus) && !"21".equals(jobStatus) && !"4".equals(jobStatus)) {
+                    sysJobrela.get().setJobStatus("21");//改为暂停
+                    sysJobrelaRespository.save(sysJobrela.get());
+                    userLogRepository.save(build2);
+                }
+            } else if (count >= 90000 && count < 100000) {
+                Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
                 userLogRepository.save(build2);
             }
-        } else if (count >= 90000 && count < 100000) {
-            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
-            userLogRepository.save(build2);
-        }
         }
         errorLogRespository.save(errorLog);
     }

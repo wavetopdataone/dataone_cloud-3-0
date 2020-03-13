@@ -78,7 +78,7 @@ public class LoadingThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap ,ps);
                 } catch (Exception e) {
                     // todo 错误队列   王成实现
-                    Long offset = 0L;
+                    Long offset = 1L;
                     String message = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
