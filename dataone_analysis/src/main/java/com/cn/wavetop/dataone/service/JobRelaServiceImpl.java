@@ -16,7 +16,6 @@ import com.cn.wavetop.dataone.util.DBConns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -98,16 +97,20 @@ public class JobRelaServiceImpl {
     /**
      * 根据jobId查询映射的表名称
      */
-    public List findTableById(Long jobId) {
+    public List findTableById(Long jobId,Connection conn)  {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
-        JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
         List tableNameList = new ArrayList();
         List<String> tableNames = new ArrayList<>();
         //oracle
         if (sysDbinfo.getType() == 1) {
             //根据jobID查询任务有多少张表sum代替//标的名字是什么
             //过滤的直接去掉，字段就按照原表的先解析
-            tableNameList = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'");
+            String sql="SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
+            try {
+                tableNameList = DBUtil.query2(sql,conn).getList();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             logger.info("所有的表有：" + tableNameList);
             Map map = null;
             for (int i = 0; i < tableNameList.size(); i++) {
@@ -176,12 +179,17 @@ public class JobRelaServiceImpl {
     /**
      * 根据jobId和表名查询映射的字段名称
      */
-    public List findFiledByJobId(Long jobId, String tableName, JdbcTemplate jdbcTemplate) {
+    public List findFiledByJobId(Long jobId, String tableName, Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List filedNameList = new ArrayList();
         List<String> filedNames = new ArrayList<>();
         if (sysDbinfo.getType() == 1) {
-            filedNameList = jdbcTemplate.queryForList("SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'");
+            String sql="SELECT COLUMN_NAME FROM DBA_TAB_COLUMNS WHERE TABLE_NAME='" + tableName + "' AND OWNER='" + sysDbinfo.getSchema() + "'";
+            try {
+                filedNameList = DBUtil.query2(sql,conn).getList();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Map map = null;
             for (int i = 0; i < filedNameList.size(); i++) {
                 map = (Map) filedNameList.get(i);
@@ -213,13 +221,18 @@ public class JobRelaServiceImpl {
     /**
      * 表名查询表主键
      */
-    public List findPrimaryKey(Long jobId, String tableName, JdbcTemplate jdbcTemplate) {
+    public List findPrimaryKey(Long jobId, String tableName,Connection conn) {
         SysDbinfo sysDbinfo = findSourcesDbinfoById(jobId);
         List PrimaryKeyList = null;
         List<String> PrimaryKeys = new ArrayList<>();
         Map map = null;
         if (sysDbinfo.getType() == 1) {
-            PrimaryKeyList = jdbcTemplate.queryForList("select COLUMN_NAME from user_cons_columns where table_name='" + tableName + "' and constraint_name in (select constraint_name from user_constraints where table_name='" + tableName + "' and constraint_type='P')");
+            String sql="select COLUMN_NAME from user_cons_columns where table_name='" + tableName + "' and constraint_name in (select constraint_name from user_constraints where table_name='" + tableName + "' and constraint_type='P')";
+            try {
+                PrimaryKeyList = DBUtil.query2(sql,conn).getList();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             logger.info("该表的主键有：" + PrimaryKeyList);
             for (int i = 0; i < PrimaryKeyList.size(); i++) {
                 map = (Map) PrimaryKeyList.get(i);
@@ -317,7 +330,7 @@ public class JobRelaServiceImpl {
      * <p>
      * COLUMN_NAME, DATA_TYPE,DATA_LENGTH,DATA_PRECISION,DATA_SCALE, NULLABLE, COLUMN_ID ,DATA_TYPE_OWNER
      */
-    public String createTable(Long jobId, String sourceTable, Connection conn, JdbcTemplate jdbcTemplate) {
+    public String createTable(Long jobId, String sourceTable, Connection conn) {
         SysDbinfo sysDbinfo = findDestDbinfoById(jobId);//目标端数据库
         SuperCreateTable createSql = null;
         switch (sysDbinfo.getType().intValue()) {
@@ -340,7 +353,7 @@ public class JobRelaServiceImpl {
             default:
                 logger.error("不存在目标端类型");
         }
-        String sql = createSql.createTable(jobId, sourceTable, conn, jdbcTemplate);
+        String sql = createSql.createTable(jobId, sourceTable, conn);
         return sql;
     }
 
@@ -382,9 +395,9 @@ public class JobRelaServiceImpl {
      * return map
      * key为源端表字段，对应的value为目的端表
      */
-    public Map findMapField(Long jobId, String sourceTable, JdbcTemplate jdbcTemplate) {
+    public Map findMapField(Long jobId, String sourceTable,Connection conn) {
         //源端同步的所有字段
-        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable, jdbcTemplate);
+        List<String> sourceFiledList = findFiledByJobId(jobId, sourceTable,conn);
         List<SysFieldrule> sysFieldruleList = null;
         Map map = new HashMap();
         for (String sourceFiled : sourceFiledList) {
@@ -404,9 +417,9 @@ public class JobRelaServiceImpl {
      * return List
      * 要求查源端需要同步的字段（不包含blob、clob。。。）
      */
-    public List findFiledNoBlob(Long jobId, String sourceTable, Connection conn, JdbcTemplate jdbcTemplate) {
+    public List findFiledNoBlob(Long jobId, String sourceTable, Connection conn) {
         //源端同步的所有字段
-        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable, jdbcTemplate);
+        List<String> sourceFiled = findFiledByJobId(jobId, sourceTable,conn);
         //源端同步的大字段
         List<String> BlobOrClob = BlobOrClob(jobId, sourceTable, conn);
         if (BlobOrClob != null && BlobOrClob.size() > 0) {

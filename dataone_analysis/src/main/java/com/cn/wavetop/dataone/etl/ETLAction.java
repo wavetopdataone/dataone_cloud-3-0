@@ -38,7 +38,6 @@ public class ETLAction {
 //     * 内存map的key为对应的任务的表名
 //     */
 //    private Map<Object, Map<Object, ExtractionThread>> jobExtraction = new HashMap<Object, Map<Object, ExtractionThread>>();
-    private JdbcTemplate jdbcTemplate;
     private  Connection conn;
     private Connection destConn;
     private Connection destConnByTran;
@@ -54,7 +53,6 @@ public class ETLAction {
         SysDbinfo sysDbinfo2=JobRelaServiceImpl.findDestDbinfoById(jobId);//端
 
         try {
-             jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
              conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
              destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
              destConnByTran = DBConns.getConn(sysDbinfo2); // 给清洗层使用
@@ -69,9 +67,10 @@ public class ETLAction {
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
-            List tableById = JobRelaServiceImpl.findTableById(jobId);
+            List tableById = JobRelaServiceImpl.findTableById(jobId,conn);
+            System.out.println("同步表："+tableById);
             for (Object tableName : tableById) {
-                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,jdbcTemplate,destConn,destConnByTran));
+                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn,destConnByTran));
 //                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName));
                 ExtractionThreads.get(tableName).start();
             }

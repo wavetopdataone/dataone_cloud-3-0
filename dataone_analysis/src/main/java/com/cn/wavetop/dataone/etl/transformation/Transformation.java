@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,12 +27,12 @@ public class Transformation {
     private Map dataMap = new HashMap();
     private Map payload = new HashMap();
     private Map message = new HashMap();
-    private JdbcTemplate jdbcTemplate;
+    private Connection conn;
 
-    public Transformation(Long jobId, String tableName,JdbcTemplate jdbcTemplate) {
+    public Transformation(Long jobId, String tableName, Connection conn) {
         this.jobId = jobId;
         this.tableName = tableName;
-        this.jdbcTemplate=jdbcTemplate;
+        this.conn=conn;
     }
     public void start() {
 
@@ -69,7 +70,7 @@ public class Transformation {
      * @throws IOException
      */
     public Map mapping(Map payload) throws IOException {
-        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName,jdbcTemplate);
+        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName,conn);
 
         HashMap<Object, Object> returnPayload = new HashMap<>();
         for (Object filed : payload.keySet()) {

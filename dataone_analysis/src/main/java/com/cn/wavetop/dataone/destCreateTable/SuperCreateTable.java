@@ -7,5 +7,5 @@ import java.sql.Connection;
 public interface SuperCreateTable {
 
     //目标端建表语句
-    public String createTable(Long jobId, String tableName, Connection connection, JdbcTemplate jdbcTemplate);
+    public String createTable(Long jobId, String tableName, Connection connection);
 }

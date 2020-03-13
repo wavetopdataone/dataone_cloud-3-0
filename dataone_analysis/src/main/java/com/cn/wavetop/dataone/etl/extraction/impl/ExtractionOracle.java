@@ -49,7 +49,6 @@ public class ExtractionOracle implements Extraction {
     private SysDbinfo sysDbinfo;
     private TransformationThread transformationThread;
     private Connection conn;//源端连接
-    private JdbcTemplate jdbcTemplate;//源端spring的jdbc连接
     private Connection destConn;//目标端连接
     private Connection destConnByTran;//目标端连接
 
@@ -71,7 +70,7 @@ public class ExtractionOracle implements Extraction {
         StringBuffer select_sql = new StringBuffer();
 
 
-        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn, jdbcTemplate);
+        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
 
         //拼接查询语句
@@ -83,7 +82,7 @@ public class ExtractionOracle implements Extraction {
         ResultMap resultMap;
 
         resultMap = DBUtil.query2(select_sql.toString(), conn);
-        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
+        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
         synchronized (blok) {
             try {
                 creatTable((String) message.get("creatTable"), destConn);
@@ -140,7 +139,7 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
-            this.transformationThread = new TransformationThread(jobId, tableName, conn, jdbcTemplate, destConnByTran);
+            this.transformationThread = new TransformationThread(jobId, tableName, conn, destConnByTran);
             this.transformationThread.start();
         }
     }

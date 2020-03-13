@@ -10,7 +10,7 @@ public class MysqlCreateSql implements SuperCreateTable {
 
 
     @Override
-    public String createTable(Long jobId, String tableName, Connection connection, JdbcTemplate jdbcTemplate) {
+    public String createTable(Long jobId, String tableName, Connection connection) {
         return null;
     }
 }
