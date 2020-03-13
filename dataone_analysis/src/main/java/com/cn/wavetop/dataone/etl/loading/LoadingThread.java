@@ -94,7 +94,7 @@ public class LoadingThread extends Thread {
     public Loading newInstanceLoading() {
 //        Connection destConn = null;
 
-        SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
+       // SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
 //        try {
 //            destConn = DBConns.getConn(dest);
 //        } catch (Exception e) {
