@@ -220,97 +220,7 @@ public class LoadingDM implements Loading {
             }
 
 
-      /*if (bigdatas.size() == 0){
-        //执行预编译的语句
-        for (int i = 0; i < columnCountNew - 1; i++) {
-          preSql.append("?,");
-        }
-        preSql.append("?");
-        for (int i = 0; i < columnCountNew - 1; i++) {
-          for (Object value : payload.keySet()) {
 
-          }
-          preField.append()
-        }
-
-        String insertSql = "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
-                + ")";
-
-
-        System.out.println(insertSql);
-        //预编译设置值
-        pstmt = daMengConn.prepareStatement(insertSql);
-        int index = 1;
-        //for (String fieldvalue : fieldvalues) {
-//
-        //  pstmt.setObject(index++,fieldvalue);
-        //}
-        Object value;
-        for (Object field : payload.keySet()) {
-          value = payload.get(field);
-//          payload.remove(field);
-          pstmt.setObject(index++,value);
-        }
-        pstmt.executeUpdate();
-      }//如果有大字段则执行,则执行全字段匹配插入,大字段再单独插入
-      else {
-        //大字段单独去查数据库,先从源端拿出大字段.再预编译插入到目的端
-        //拼接insert语句value后面的
-        StringBuffer bigBuffer = new StringBuffer();
-        //拼接insert语句前面的条件
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < bigdatas.size() - 1; i++) {
-          bigBuffer.append(bigdatas.get(i) + ",");
-        }
-        bigBuffer.append(bigdatas.size()-1);
-        String sql = "select " + bigBuffer + " from " + sourceTable;
-        //String sql = "select * from EMP";
-        ResultSet rs = stmt.executeQuery(sql);
-
-        //执行预编译的语句
-        for (int i = 0; i < bigBuffer.length() - 1; i++) {
-          stringBuffer.append("?,");
-        }
-        stringBuffer.append("?");
-        String insertBigSql = "insert into " + destTable + " (" + bigBuffer + ") " + " values(" + stringBuffer
-                + ")";
-
-        pstmt = oracleConn.prepareStatement(insertBigSql);
-        // 内部有一个指针,只能取指针指向的那条记录
-        while (rs.next()) { // 指针移动一行,有数据才返回true
-          // 取出数据
-          int length = bigdatas.size();
-          for (int i = 0; i < length - 1; i++) {
-            Object object = rs.getObject(i+1);
-            //预编译设值
-            pstmt.setObject(i+1,object);
-          }
-          pstmt.executeUpdate();
-        }
-
-        //对除大字段的其他字段就行预编译处理
-        for (int i = 0; i < fieldkeys.size() - 1; i++) {
-          preTable.append(fieldkeys.get(i) + ",");
-        }
-        preTable.append(fieldkeys.get(fieldkeys.size() - 1));
-
-        //执行预编译的语句
-        for (int i = 0; i < columnCountNew - 1; i++) {
-          preSql.append("?,");
-        }
-        preSql.append("?");
-        String insertComSql = "insert into " + destTable + " (" + preTable + ") " + " values(" + preSql
-                + ")";
-        pstmt = daMengConn.prepareStatement(insertComSql);
-
-        int index = 1;
-        Object value;
-        for (Object field : payload.keySet()) {
-          value = payload.get(field);
-          payload.remove(field);
-          pstmt.setObject(index++,value);
-        }
-      }*/
 
 
         } catch (SQLException e) {
@@ -382,19 +292,6 @@ public class LoadingDM implements Loading {
         }
     }
 
-//    @Override
-//    public void excuteInsert(String insertSql, Map dataMap) throws Exception {
-//        //大字段
-//        List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
-//
-//        if (bigdatas == null || bigdatas.size() == 0) {
-//            //不含blob
-//            excuteNoBlodByInsert(insertSql,dataMap);
-//        } else {
-//            //含blob
-//            excuteHasBlodByInsert(insertSql,dataMap,destConn2);
-//        }
-//    }
 
 
     public String noBlodToInsert(Map dataMap) {
