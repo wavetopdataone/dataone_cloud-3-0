@@ -3,7 +3,6 @@ package com.cn.wavetop.dataone.etl.loading.impl;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
-import org.voovan.tools.TSQL;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.models.DataMap;
@@ -11,6 +10,8 @@ import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
 import lombok.Data;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.*;
 
@@ -377,7 +378,7 @@ public class LoadingDM implements Loading {
             excuteNoBlodByInsert(insertSql, dataMap,ps);
         } else {
             //含blob
-            excuteHasBlodByInsert(insertSql, dataMap, ps);
+//            excuteHasBlodByInsert(insertSql, dataMap, ps);
         }
     }
 
@@ -461,7 +462,9 @@ public class LoadingDM implements Loading {
         stringBuffer.append(fields + ") values (" + value + ");");
         return stringBuffer.toString();
     }
-
+    /**
+     * 源端查询大字段类型数据的查询sql拼接
+     */
     /**
      * 源端查询大字段类型数据的查询sql拼接
      */
@@ -492,10 +495,12 @@ public class LoadingDM implements Loading {
             }
         } else {
             Integer count = 0;
+            //拿到日期的列集合
+            List<String> analyCreate=  jobRelaServiceImpl.analyCreate(dataMap);
             for (Object field : payload.keySet()) {
                 if (count == payload.keySet().size() - 1) {
                     //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
-                    if(field.equals(jobRelaServiceImpl.analyCreate(dataMap))){
+                    if(jobRelaServiceImpl.equalsDate((String)field,analyCreate)){
                         //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
                         value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field)));
                     }else {
@@ -503,7 +508,7 @@ public class LoadingDM implements Loading {
                     }
                 } else {
                     //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
-                    if(field.equals(jobRelaServiceImpl.analyCreate(dataMap))){
+                    if(jobRelaServiceImpl.equalsDate((String)field,analyCreate)){
                         //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
                         value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field))+" and ");
                     }else {
@@ -516,6 +521,7 @@ public class LoadingDM implements Loading {
         stringBuffer.append(fields + " from " + destTable + " where " + value);
         return stringBuffer.toString();
     }
+
 
 
 
@@ -551,20 +557,44 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteHasBlodByInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
+    public void excuteHasBlodByInsert( int index,String insertSql,String selSql, Map dataMap, PreparedStatement ps) throws Exception {
+        ResultSet resultSet=null;
+        InputStream input = null;
+        ByteArrayOutputStream baos=null;
+        oracle.sql.BLOB  blob=null;
+        Map message = (Map) dataMap.get("message");
+        List<String> bigData=(List)message.get("big_data");
+        ps= destConn.prepareStatement(selSql);
+                 resultSet=ps.executeQuery(selSql);
+                if (resultSet.next()) {
+                    for (int i = 0; i < bigData.size(); i++) {
+                        blob = (oracle.sql.BLOB) resultSet.getBlob(bigData.get(i));
+                        input = blob.getBinaryStream();
+                        baos = new ByteArrayOutputStream();
+                        byte[] b = new byte[1024];
+                        int l = 0;
+                        while ((l = input.read(b)) != -1) {
+                            baos.write(b, 0, l);
+                        }
+                        input.close();
+                        baos.flush();
+                        baos.close();
+//                        ps.setObject(i, ps.get(field));
 
+                    }
+                }
         System.out.println(insertSql);
-//        PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
         for (Object field : payload.keySet()) {
-            ps.setObject(i, payload.get(field));
             i++;
         }
+
         ps.execute();
-//        ps.close();
+        ps.close();
         destConn.commit();
     }
+
 
     public void excuteHasBlodByInsert(String insertSql, Map dataMap, Connection destConn2) throws Exception {
 
