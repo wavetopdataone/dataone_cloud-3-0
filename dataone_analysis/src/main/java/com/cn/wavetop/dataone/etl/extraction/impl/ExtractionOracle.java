@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 @AllArgsConstructor
 @Builder
 public class ExtractionOracle implements Extraction {
+    private  static  final  long size = 500;
     private static Boolean blok = true;
     private Long jobId;
     private String tableName;
@@ -54,20 +55,18 @@ public class ExtractionOracle implements Extraction {
 
     /**
      * 全量抓取
-     *
+     * 之前没有优化的全查
      * @throws Exception
      */
-    @Override
-    public void fullRang() throws Exception {
+
+    public void fullRangALL() throws Exception {
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
         Producer producer = new Producer(null);
         Map message;
         message = getMessage(); //传输的消息
-        // todo 建表
-//        jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
 
-        StringBuffer select_sql = new StringBuffer();
+        StringBuffer select_sql = new StringBuffer(); // 之前的全查
 
 
         List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
@@ -77,10 +76,8 @@ public class ExtractionOracle implements Extraction {
         select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
 
 
-        System.out.println(select_sql.toString());
 
         ResultMap resultMap;
-
         resultMap = DBUtil.query2(select_sql.toString(), conn);
         message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
         synchronized (blok) {
@@ -108,6 +105,53 @@ public class ExtractionOracle implements Extraction {
 
     }
 
+    /**
+     * 全量抓取
+     * 优化后的分页查
+     * @throws Exception
+     */
+    @Override
+    public void fullRang() throws Exception {
+
+        long index =1; // 记录分页开始点
+
+        System.out.println("Oracle 全量开始");
+        System.out.println(jobId);
+        Producer producer = new Producer(null);
+        Map message;
+        message = getMessage(); //传输的消息
+        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
+        synchronized (blok) {
+            try {
+                creatTable((String) message.get("creatTable"), destConn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
+        String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
+
+        // 分页查询
+        String pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
+        System.out.println(pageSelectSql);
+        ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
+        System.out.println(tableName+"------cha-------"+resultMap.size());
+        startTrans(resultMap.size());   //判断创建清洗线程并开启线程
+        while (resultMap.size()>0) {
+            for (int i = 0; i < resultMap.size(); i++) {
+                DataMap data = DataMap.builder()
+                        .payload(resultMap.get(i))
+                        .message(message)
+                        .build();
+//            System.out.println(data);
+                producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
+            }
+            index =index+size;
+            pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
+            resultMap = DBUtil.query2(pageSelectSql, conn);
+        }
+    }
     private void creatTable(String creatTable, Connection destConn) throws SQLException {
         Statement st = null;
         st = destConn.createStatement();
@@ -139,6 +183,9 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
+            if (transformationThread != null){
+                return;
+            }
             this.transformationThread = new TransformationThread(jobId, tableName, conn, destConn);
             this.transformationThread.start();
         }
@@ -163,13 +210,35 @@ public class ExtractionOracle implements Extraction {
         HashMap<Object, Object> message = new HashMap<>();
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
-//        String table = createTable(jobId, tableName);
-//        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn, jdbcTemplate));
-//        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, jdbcTemplate));
-//        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName, conn));
-        message.put("big_data", new ArrayList<>());
+        message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, conn));
+        message.put("big_data", jobRelaServiceImpl.BlobOrClob(jobId, tableName, conn));
         message.put("stop_flag", "等待定义");
         return message;
     }
 
+
+    public static void main(String[] args) throws InterruptedException {
+//        int index =1;
+//        while (true){
+//            System.out.println(getPageSelectSql(index,1000,"ID,ENAME","AA"));
+//           index = index +1000;
+//            Thread.sleep(100);
+//        }
+    }
+
+    /**
+     *
+     * @param minSize
+     * @param size
+     * @param _fileds
+     * @param tableName
+     * @return
+     */
+    public   String getPageSelectSql(long index,long size, String _fileds, String tableName){
+        StringBuffer stringBuffer=new StringBuffer(SELECT+_fileds+FROM+"(");
+        StringBuffer stringBuffer1=new StringBuffer(SELECT+_fileds+",ROWNUM rn"+FROM+"(");
+        StringBuffer stringBuffer2=new StringBuffer(SELECT+_fileds+FROM+tableName+" )"+WHERE+"ROWNUM < "+(size+index)+")"+WHERE+"rn >="+index);
+        stringBuffer.append(stringBuffer1.toString()+stringBuffer2.toString());
+        return stringBuffer.toString();
+    }
 }

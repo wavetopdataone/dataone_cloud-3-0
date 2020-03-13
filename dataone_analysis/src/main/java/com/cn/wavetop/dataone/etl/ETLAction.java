@@ -58,8 +58,6 @@ public class ETLAction {
             e.printStackTrace();
         }
 
-
-
         if (jobExtractionThreads.get(jobId) == null) {
             // 第一次开启，激活
             // 存放所有表的子线程

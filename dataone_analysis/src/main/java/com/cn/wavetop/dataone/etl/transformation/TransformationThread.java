@@ -79,16 +79,17 @@ public class TransformationThread extends Thread {
         Loading loading = newInstanceLoading();
         while (true) {
 
-            ConsumerRecords<String, String> records = consumer.poll(100000);
+            ConsumerRecords<String, String> records = consumer.poll(1000);
+            // 开始时间戳
+            long start = System.currentTimeMillis();
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
-                Transformation transformation = new Transformation(jobId, tableName,conn);
+                Transformation transformation = new Transformation(jobId, tableName, conn);
                 Map dataMap = transformation.Transform(value);
                 System.out.println(dataMap);
+
                 if (insertSql == null) {
                     insertSql = loading.getInsert(dataMap);
-
-
                 }
                 try {
                     if (ps == null) {
@@ -98,22 +99,23 @@ public class TransformationThread extends Thread {
                     e.printStackTrace();
                 }
                 try {
-                    // 开始时间戳
+
                     loading.excuteInsert(insertSql, dataMap, ps);
 
                     if (index == 100) {
-// 时间戳
+                        // 时间戳
+                        long end = System.currentTimeMillis();
                         synchronized (blok) {
                             int[] ints = ps.executeBatch();
                             System.out.println(ints);
-                            System.out.println("ps.executeBatch()");
                             destConn.commit();
+                            System.out.println("当前表" + tableName + "的处理速率为：" + (100.0 / (end - start)) * 1000+"_____当前插入量："+100);
                             ps.clearBatch();
                             ps.close();
                             ps = null; //gc
                         }
-                        index = 0;
-                        // 当前
+                        index = 0;// 当前
+                        start = System.currentTimeMillis();
                     }
                     index++;
                     System.out.println(tableName + "--------" + index);
@@ -125,6 +127,23 @@ public class TransformationThread extends Thread {
 
                     e.printStackTrace();
                 }
+            }
+
+
+            // 最后一批数据处理
+            if (ps != null) {
+                long end = System.currentTimeMillis();
+                // 时间戳
+                System.out.println("当前表" + tableName + "的处理速率为：" + Double.valueOf(index) / (end - start) * 1000+"_____当前插入量："+index);
+
+                int[] ints = ps.executeBatch();
+                destConn.commit();
+                ps.clearBatch();
+                ps.close();
+                ps = null; //gc
+                index = 1;// 当前
+
+                start = System.currentTimeMillis();
             }
 
         }
