@@ -54,7 +54,6 @@ public class TransformationThread extends Thread {
     @SneakyThrows
     @Override
     public void run() {
-        Thread.sleep(50000);
         int index = 1;
         while (destConn == null) {
             try {
@@ -101,11 +100,11 @@ public class TransformationThread extends Thread {
                     e.printStackTrace();
                 }
                 try {
-
+                    // 开始时间戳
                     loading.excuteInsert(insertSql, dataMap, ps);
 
                     if (index == 100) {
-
+// 时间戳
                         synchronized (blok) {
                             int[] ints = ps.executeBatch();
                             System.out.println(ints);
@@ -116,6 +115,7 @@ public class TransformationThread extends Thread {
                             ps = null; //gc
                         }
                         index = 0;
+                        // 当前
                     }
                     index++;
                     System.out.println(tableName + "--------" + index);

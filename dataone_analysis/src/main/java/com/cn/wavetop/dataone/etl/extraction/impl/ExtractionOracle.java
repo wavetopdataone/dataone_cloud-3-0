@@ -103,7 +103,7 @@ public class ExtractionOracle implements Extraction {
 //            System.out.println(data);
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
         }
-
+        destConn.close();
 //todo
 //        conn.close();
 

@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 
 public class ExtractionThread extends Thread {
@@ -152,6 +153,11 @@ public class ExtractionThread extends Thread {
 
     public void stopTrans() {
         this.extraction.stopTrans();
+//        try {
+//            conn.close();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void pasueTrans() {
