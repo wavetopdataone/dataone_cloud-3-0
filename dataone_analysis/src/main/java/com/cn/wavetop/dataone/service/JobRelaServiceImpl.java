@@ -498,7 +498,7 @@ public class JobRelaServiceImpl {
      * 插入错误信息
      */
     @Transactional
-    public void insertError(Long jobId, String sourceTable, String destTable, String time, String errortype, String message, Long offset) {
+    public void insertError(Long jobId, String sourceTable, String destTable, String time, String errortype, String message) {
         ErrorLog errorLog = new ErrorLog();
         errorLog.setJobId(jobId);
         errorLog.setSourceName(sourceTable);
@@ -515,6 +515,7 @@ public class JobRelaServiceImpl {
         errorLog.setContent(message);
         Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
         String jobName = sysJobrela.get().getJobName();
+        Long offset = 1L;
         //每一万次判断一次总数
         if (offset % 10000 == 0) {
             long count = errorLogRespository.count();
@@ -533,5 +534,6 @@ public class JobRelaServiceImpl {
             }
         }
         errorLogRespository.save(errorLog);
+        offset++;
     }
 }
