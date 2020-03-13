@@ -1,13 +1,13 @@
 {
   "payload": {
-    "ENAME": "mcLp8",
-    "ID": "477"
+    "ENAME": "te972",
+    "ID": "1460"
   },
   "message": {
-    "destTable": "AABXCE",
-    "sourceTable": "AABXCE",
-    "creatTable": "CREATE TABLE SYSDBA.AABXCE(ID NUMBER(10) NOT NULL,ENAME VARCHAR2(10),CONSTRAINT PK_AABXCE_ID PRIMARY KEY (ID));",
-    "big_data": "",
+    "destTable": "DD",
+    "sourceTable": "DD",
+    "big_data": [],
+    "creatTable": "CREATE TABLE SYSDBA.DD(ID NUMBER(10) NOT NULL,ENAME VARCHAR2(10),CONSTRAINT PK_DD_ID PRIMARY KEY (ID));",
     "stop_flag": "等待定义",
     "key": [
       "ID"

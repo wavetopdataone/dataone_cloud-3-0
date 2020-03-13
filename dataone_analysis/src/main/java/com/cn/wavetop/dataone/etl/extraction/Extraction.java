@@ -48,4 +48,6 @@ public interface Extraction {
      * 暂停清洗
      */
     public void pasueTrans();
+
+
 }

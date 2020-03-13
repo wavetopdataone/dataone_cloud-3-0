@@ -72,7 +72,6 @@ public class ExtractionOracle implements Extraction {
 
         List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
-
         //拼接查询语句
         select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
 
@@ -171,5 +170,8 @@ public class ExtractionOracle implements Extraction {
         message.put("stop_flag", "等待定义");
         return message;
     }
+
+
+
 
 }

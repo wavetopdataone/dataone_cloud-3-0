@@ -84,11 +84,9 @@ public class TransformationThread extends Thread {
                 String value = (String) record.value();
                 Transformation transformation = new Transformation(jobId, tableName,conn);
                 Map dataMap = transformation.Transform(value);
-                System.out.println(dataMap);
+//                System.out.println("HAHAHAH"+dataMap);
                 if (insertSql == null) {
                     insertSql = loading.getInsert(dataMap);
-
-
                 }
                 try {
                     if (ps == null) {

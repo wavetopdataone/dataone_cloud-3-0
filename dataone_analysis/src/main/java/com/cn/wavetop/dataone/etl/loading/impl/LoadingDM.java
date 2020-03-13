@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import lombok.Data;
 
 import java.io.ByteArrayOutputStream;
@@ -284,6 +285,7 @@ public class LoadingDM implements Loading {
         List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
 
         if (bigdatas == null || bigdatas.size() == 0) {
+
             //不含blob
             excuteNoBlodByInsert(insertSql, dataMap,ps);
         } else {
@@ -362,9 +364,7 @@ public class LoadingDM implements Loading {
     /**
      * 源端查询大字段类型数据的查询sql拼接
      */
-    /**
-     * 源端查询大字段类型数据的查询sql拼接
-     */
+
     public String Selblob(Map dataMap) {
         Map message = (Map) dataMap.get("message");
         String destTable = (String) message.get("destTable");
