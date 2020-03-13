@@ -28,7 +28,6 @@ public class ExtractionThread extends Thread {
     private String tableName;//表
     private  Extraction extraction = null;
     private Connection conn;//源端连接
-    private JdbcTemplate jdbcTemplate;//SrpingJDBC源端连接
     private Connection destConn;//目的端连接
     private Connection destConnByTran;//目的端连接给清洗层使用
 
@@ -38,11 +37,10 @@ public class ExtractionThread extends Thread {
 
     private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 
-    public ExtractionThread(Long jobId, String tableName, Connection conn,JdbcTemplate jdbcTemplate,Connection destConn,Connection destConnByTran) {
+    public ExtractionThread(Long jobId, String tableName, Connection conn,Connection destConn,Connection destConnByTran) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn=conn;
-        this.jdbcTemplate=jdbcTemplate;
         this.destConn=destConn;
         this.destConnByTran=destConnByTran;
     }
@@ -55,7 +53,6 @@ public class ExtractionThread extends Thread {
         SysDbinfo sysDbinfo2=jobRelaServiceImpl.findDestDbinfoById(jobId);//端
 
         try {
-            this.jdbcTemplate = SpringJDBCUtils.register(sysDbinfo);
             this.conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
             this.destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
         } catch (Exception e) {
@@ -82,7 +79,6 @@ public class ExtractionThread extends Thread {
                         tableName(tableName).
                         sysDbinfo(sysDbinfo).
                         conn(conn).
-                        jdbcTemplate(jdbcTemplate).
                         destConn(destConn).
                         destConnByTran(destConnByTran).
                         build();

@@ -1,7 +1,8 @@
 package com.cn.wavetop.dataone.etl.transformation.impl;
 
 import com.cn.wavetop.dataone.etl.transformation.Transformation;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.sql.Connection;
 
 /**
  * @Author yongz
@@ -10,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class TransformationOracle  extends Transformation {
 
 
-    public TransformationOracle(Long jobId, String tableName, JdbcTemplate jdbcTemplate) {
-        super(jobId, tableName,jdbcTemplate);
+    public TransformationOracle(Long jobId, String tableName, Connection conn) {
+        super(jobId, tableName,conn);
     }
 }

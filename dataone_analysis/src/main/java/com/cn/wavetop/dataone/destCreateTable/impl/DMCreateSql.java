@@ -97,7 +97,7 @@ public class DMCreateSql implements SuperCreateTable {
         return false;
     }
     @Override
-    public String createTable(Long jobId, String tableName, Connection conn, JdbcTemplate jdbcTemplate) {
+    public String createTable(Long jobId, String tableName, Connection conn) {
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
         SysDbinfo sourceSysDbinfo = jobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端数据库
         ResultMap list = jobRelaServiceImpl.findSourceFiled(jobId, tableName, conn);//源端的字段信息
@@ -164,7 +164,7 @@ public class DMCreateSql implements SuperCreateTable {
         if (primary != null && primary.size() > 0) {
             stringBuffer.append(",CONSTRAINT PK_" + primary.get(0).getDestName().toUpperCase()+"_"+primary.get(0).getDestFieldName().toUpperCase() + " PRIMARY KEY ('" + primary.get(0).getDestFieldName() + "')");
         } else {
-            primaryKey = jobRelaServiceImpl.findPrimaryKey(jobId, tableName,jdbcTemplate );
+            primaryKey = jobRelaServiceImpl.findPrimaryKey(jobId, tableName,conn);
             destTable=jobRelaServiceImpl.destTableName(jobId,tableName);//目标端表名称
             //主键别名生成规则PK_表名_主键的字段名
             if (primaryKey != null && primaryKey.size() > 0) {

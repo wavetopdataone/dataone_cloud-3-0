@@ -33,16 +33,14 @@ public class TransformationThread extends Thread {
     private Long jobId;//jobid
     private String tableName;//表
     private Transformation transformation;
-    private JdbcTemplate jdbcTemplate;
     private Connection conn;//y源端连接
     private Connection destConn;//目的端连接
 
 
-    public TransformationThread(Long jobId, String tableName, Connection conn, JdbcTemplate jdbcTemplate, Connection destConn) {
+    public TransformationThread(Long jobId, String tableName, Connection conn, Connection destConn) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn = conn;
-        this.jdbcTemplate = jdbcTemplate;
 //        this.destConn = destConn;
         try {
             this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
@@ -84,7 +82,7 @@ public class TransformationThread extends Thread {
             ConsumerRecords<String, String> records = consumer.poll(100000);
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
-                Transformation transformation = new Transformation(jobId, tableName, jdbcTemplate);
+                Transformation transformation = new Transformation(jobId, tableName,conn);
                 Map dataMap = transformation.Transform(value);
                 System.out.println(dataMap);
                 if (insertSql == null) {
