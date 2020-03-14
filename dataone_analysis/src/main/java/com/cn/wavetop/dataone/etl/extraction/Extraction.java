@@ -4,6 +4,7 @@ package com.cn.wavetop.dataone.etl.extraction;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.service.YongzService;
 
 /**
  * @Author yongz
@@ -13,6 +14,7 @@ import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
  */
 public interface Extraction {
     public JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    public YongzService yongzService = (YongzService) SpringContextUtil.getBean("yongzService");
     public final String SELECT="select ";
     public final String FROM=" from ";
     public final String WHERE=" where ";

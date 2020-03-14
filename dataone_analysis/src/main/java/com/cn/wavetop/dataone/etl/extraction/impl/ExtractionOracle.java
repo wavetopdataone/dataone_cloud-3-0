@@ -86,7 +86,6 @@ public class ExtractionOracle implements Extraction {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-//            jobRelaServiceImpl.excuteSql(jobId, tableName, (String) message.get("creatTable"), destConn);//执行creat语句
         }
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
         System.out.println(tableName + "____" + resultMap.size());
@@ -131,14 +130,29 @@ public class ExtractionOracle implements Extraction {
 
         List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
+        StringBuffer sqlCount = new StringBuffer(); // 之前的全查
+        sqlCount.append(SELECT).append(" count(*) ").append(FROM).append(tableName);
+
+        Long sqlCount1 = DBUtil.queryCount(sqlCount.toString(), conn);
+        message.put("sqlCount",sqlCount1);
+        yongzService.insertSqlCount(message);//更新监控表
+        if (sqlCount1 == null || sqlCount1==0L){
+            // todo 优化该部分 没有数据
+            return;
+        }
 
         // 分页查询
         String pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
         System.out.println(pageSelectSql);
+
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
         System.out.println(tableName+"------cha-------"+resultMap.size());
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
+        long start;    //开始读取的时间
+        long end;    //结束读取的时间
+        double readRate;    //读取速率
         while (resultMap.size()>0) {
+             start = System.currentTimeMillis();    //开始读取的时间
             for (int i = 0; i < resultMap.size(); i++) {
                 DataMap data = DataMap.builder()
                         .payload(resultMap.get(i))
@@ -147,6 +161,10 @@ public class ExtractionOracle implements Extraction {
 //            System.out.println(data);
                 producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
             }
+            end = System.currentTimeMillis();    //结束读取的时间
+
+            readRate =  Double.valueOf( resultMap.size()) /(end-start) * 1000;
+            yongzService.updateRead(message,readRate,resultMap.size());//更新读取速率
             index =index+size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
             resultMap = DBUtil.query2(pageSelectSql, conn);
@@ -208,6 +226,7 @@ public class ExtractionOracle implements Extraction {
 
     private Map getMessage() {
         HashMap<Object, Object> message = new HashMap<>();
+        message.put("job_id", jobId);
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
         message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, conn));
@@ -228,7 +247,7 @@ public class ExtractionOracle implements Extraction {
 
     /**
      *
-     * @param minSize
+     * @param index
      * @param size
      * @param _fileds
      * @param tableName
