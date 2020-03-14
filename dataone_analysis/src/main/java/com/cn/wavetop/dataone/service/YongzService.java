@@ -89,8 +89,30 @@ public class YongzService {
      * 更新监控表
      */
     @Transactional
-    public void updateWrite(Map message, double writeRate, long writeData) {
-
+    public void updateWrite(Map message, Long writeRate, Long writeData) {
+        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
+        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
+            //为了页面图展示用的历史读取量
+            Long dayWriteData=writeData;
+            if(sysMonitoringList.get(0).getWriteData()!=null) {
+                dayWriteData = writeData + sysMonitoringList.get(0).getDayWriteData();
+            }
+            //如果写入速率比之前的小就不更新历史读取速率
+            Double dayWriteRate = Double.valueOf(writeRate);
+            if(sysMonitoringList.get(0).getDayWriteRate()!=null) {
+                if (writeRate < sysMonitoringList.get(0).getDayWriteRate()) {
+                    dayWriteRate = sysMonitoringList.get(0).getDayWriteRate();
+                }
+            }
+            //读取量累加
+            if(sysMonitoringList.get(0).getWriteData()!=null) {
+                writeData += sysMonitoringList.get(0).getWriteData();
+            }
+            sysMonitoringRepository.updateWriteData(sysMonitoringList.get(0).getId(), writeData, new Date(), writeRate, message.get("destTable").toString(), dayWriteData, dayWriteRate);
+        } else {
+            logger.error("该表不存在");
+        }
+        sysMonitoringList.clear();
     }
 
 }

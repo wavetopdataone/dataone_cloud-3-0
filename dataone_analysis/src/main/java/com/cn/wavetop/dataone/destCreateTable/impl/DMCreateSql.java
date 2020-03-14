@@ -37,6 +37,7 @@ public class DMCreateSql implements SuperCreateTable {
      */
     public static String[] Types = {
             "DATE", "TIMESTAMP"
+
     };
     /**
      * DM需要携带精度的类型
