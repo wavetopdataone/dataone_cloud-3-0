@@ -47,6 +47,13 @@ public class DateUtils {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date);
     }
+    public static String formatTime4(Date date) {
+        if (date == null) {
+            return "";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return formatter.format(date);
+    }
 
     public static String formatTime3(Date date) {
         if (date == null) {

@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 @AllArgsConstructor
 @Builder
 public class ExtractionOracle implements Extraction {
-    private  static  final  long size = 500;
+    private static final long size = 500;
     private static Boolean blok = true;
     private Long jobId;
     private String tableName;
@@ -56,6 +56,7 @@ public class ExtractionOracle implements Extraction {
     /**
      * 全量抓取
      * 之前没有优化的全查
+     *
      * @throws Exception
      */
 
@@ -74,7 +75,6 @@ public class ExtractionOracle implements Extraction {
 
         //拼接查询语句
         select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
-
 
 
         ResultMap resultMap;
@@ -107,12 +107,13 @@ public class ExtractionOracle implements Extraction {
     /**
      * 全量抓取
      * 优化后的分页查
+     *
      * @throws Exception
      */
     @Override
     public void fullRang() throws Exception {
 
-        long index =1; // 记录分页开始点
+        long index = 1; // 记录分页开始点
 
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
@@ -134,9 +135,9 @@ public class ExtractionOracle implements Extraction {
         sqlCount.append(SELECT).append(" count(*) ").append(FROM).append(tableName);
 
         Long sqlCount1 = DBUtil.queryCount(sqlCount.toString(), conn);
-        message.put("sqlCount",sqlCount1);
+        message.put("sqlCount", sqlCount1);
         yongzService.insertSqlCount(message);//更新监控表
-        if (sqlCount1 == null || sqlCount1==0L){
+        if (sqlCount1 == null || sqlCount1 == 0L) {
             // todo 优化该部分 没有数据
             return;
         }
@@ -146,13 +147,13 @@ public class ExtractionOracle implements Extraction {
         System.out.println(pageSelectSql);
 
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
-        System.out.println(tableName+"------cha-------"+resultMap.size());
+        System.out.println(tableName + "------cha-------" + resultMap.size());
         startTrans(resultMap.size());   //判断创建清洗线程并开启线程
         long start;    //开始读取的时间
         long end;    //结束读取的时间
         double readRate;    //读取速率
-        while (resultMap.size()>0) {
-             start = System.currentTimeMillis();    //开始读取的时间
+        while (resultMap.size() > 0) {
+            start = System.currentTimeMillis();    //开始读取的时间
             for (int i = 0; i < resultMap.size(); i++) {
                 DataMap data = DataMap.builder()
                         .payload(resultMap.get(i))
@@ -163,13 +164,16 @@ public class ExtractionOracle implements Extraction {
             }
             end = System.currentTimeMillis();    //结束读取的时间
 
-            readRate =  Double.valueOf( resultMap.size()) /(end-start) * 1000;
-            yongzService.updateRead(message,readRate,resultMap.size());//更新读取速率
-            index =index+size;
+            readRate = Double.valueOf(resultMap.size()) / (end - start) * 1000;
+            yongzService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
+            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
+
+            index = index + size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
             resultMap = DBUtil.query2(pageSelectSql, conn);
         }
     }
+
     private void creatTable(String creatTable, Connection destConn) throws SQLException {
         Statement st = null;
         st = destConn.createStatement();
@@ -201,7 +205,7 @@ public class ExtractionOracle implements Extraction {
      */
     private void startTrans(int size) {
         if (size > 0) {
-            if (transformationThread != null){
+            if (transformationThread != null) {
                 return;
             }
             this.transformationThread = new TransformationThread(jobId, tableName, conn, destConn);
@@ -226,7 +230,7 @@ public class ExtractionOracle implements Extraction {
 
     private Map getMessage() {
         HashMap<Object, Object> message = new HashMap<>();
-        message.put("job_id", jobId);
+        message.put("jobId", jobId);
         message.put("sourceTable", tableName);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, tableName));
         message.put("key", jobRelaServiceImpl.findPrimaryKey(jobId, tableName, conn));
@@ -246,18 +250,17 @@ public class ExtractionOracle implements Extraction {
     }
 
     /**
-     *
      * @param index
      * @param size
      * @param _fileds
      * @param tableName
      * @return
      */
-    public   String getPageSelectSql(long index,long size, String _fileds, String tableName){
-        StringBuffer stringBuffer=new StringBuffer(SELECT+_fileds+FROM+"(");
-        StringBuffer stringBuffer1=new StringBuffer(SELECT+_fileds+",ROWNUM rn"+FROM+"(");
-        StringBuffer stringBuffer2=new StringBuffer(SELECT+_fileds+FROM+tableName+" )"+WHERE+"ROWNUM < "+(size+index)+")"+WHERE+"rn >="+index);
-        stringBuffer.append(stringBuffer1.toString()+stringBuffer2.toString());
+    public String getPageSelectSql(long index, long size, String _fileds, String tableName) {
+        StringBuffer stringBuffer = new StringBuffer(SELECT + _fileds + FROM + "(");
+        StringBuffer stringBuffer1 = new StringBuffer(SELECT + _fileds + ",ROWNUM rn" + FROM + "(");
+        StringBuffer stringBuffer2 = new StringBuffer(SELECT + _fileds + FROM + tableName + " )" + WHERE + "ROWNUM < " + (size + index) + ")" + WHERE + "rn >=" + index);
+        stringBuffer.append(stringBuffer1.toString() + stringBuffer2.toString());
         return stringBuffer.toString();
     }
 }

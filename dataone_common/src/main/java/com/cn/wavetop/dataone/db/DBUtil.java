@@ -201,7 +201,7 @@ public class DBUtil {
 
         ResultMap rm = null;
         try {
-            rm = query2(sql, con, 0);
+            rm = query2(sql, con, 4);
         } catch (Exception e) {
             log.error("exception:", e);
 
@@ -282,6 +282,12 @@ public class DBUtil {
                             map.put(meta.getColumnLabel(i + 1)
                                             .toUpperCase(),
                                     DateUtils.formatTime2(rs
+                                            .getTimestamp(i + 1)));
+                        }
+                        else if (dateformat == 4) {
+                            map.put(meta.getColumnLabel(i + 1)
+                                            .toUpperCase(),
+                                    DateUtils.formatTime4(rs
                                             .getTimestamp(i + 1)));
                         }
 

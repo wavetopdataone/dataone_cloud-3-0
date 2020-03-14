@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
@@ -36,6 +37,7 @@ public class DMCreateSql implements SuperCreateTable {
      */
     public static String[] Types = {
             "DATE", "TIMESTAMP"
+
     };
     /**
      * DM需要携带精度的类型
@@ -46,7 +48,7 @@ public class DMCreateSql implements SuperCreateTable {
     /**
      * DM日期类型的判断
      */
-    public static String[] dateType={
+    public static String[] dateType = {
             "DATE", "TIMESTAMP"
     };
 
@@ -81,6 +83,7 @@ public class DMCreateSql implements SuperCreateTable {
         }
         return false;
     }
+
     /**
      * 判断是否包含能携带精度的类型
      * 包含返回true，否则false
@@ -96,6 +99,7 @@ public class DMCreateSql implements SuperCreateTable {
         }
         return false;
     }
+
     @Override
     public String createTable(Long jobId, String tableName, Connection conn) {
         SysDbinfo sysDbinfo = jobRelaServiceImpl.findDestDbinfoById(jobId);//目标端数据库
@@ -103,7 +107,7 @@ public class DMCreateSql implements SuperCreateTable {
         ResultMap list = jobRelaServiceImpl.findSourceFiled(jobId, tableName, conn);//源端的字段信息
         List<SysFieldrule> sysFieldruleList = new ArrayList<>();//目标端的字段信息
         List<SysFiledType> sysFiledTypeList = new ArrayList<>();//目标端的字段类型
-        String destTable=null;//目标段表名
+        String destTable = null;//目标段表名
         List primaryKey = null;//源端表的主键
         StringBuffer stringBuffer = new StringBuffer("CREATE TABLE");
         stringBuffer.append(" " + sysDbinfo.getSchema() + "." + jobRelaServiceImpl.destTableName(jobId, tableName) + "(");
@@ -129,17 +133,24 @@ public class DMCreateSql implements SuperCreateTable {
                     stringBuffer.append(" NOT NULL");
                 }
             } else {
-                //目标端的字段类型
-                sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sourceSysDbinfo.getType()), String.valueOf(sysDbinfo.getType()), (String) list.get(i).get("DATA_TYPE"));
                 //如果长度为0或者类型为DATA等类型 不能拼接长度
-                if ("0".equals(list.get(i).get("DATA_LENGTH").toString()) || equalsType(sysFiledTypeList.get(0).getDestFiledType())) {
-                    stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + sysFiledTypeList.get(0).getDestFiledType());
+                String sourceFiledType = list.get(i).get("DATA_TYPE").toString();
+
+                if (sourceFiledType.contains("(")) {
+                    sourceFiledType = sourceFiledType.substring(0, sourceFiledType.indexOf("("));
+                }
+                //目标端的字段类型
+                sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sourceSysDbinfo.getType()), String.valueOf(sysDbinfo.getType()), sourceFiledType);
+
+                String destFiledType = sysFiledTypeList.get(0).getDestFiledType();
+                if ("0".equals(list.get(i).get("DATA_LENGTH").toString()) || equalsType(destFiledType)) {
+                    stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + destFiledType);
                 } else {
                     //如果精度不为空，类型也为number等类型 拼接精度
-                    if (!"0".equals(list.get(i).get("DATA_SCALE").toString()) && equalsAccuracyTypes(sysFiledTypeList.get(0).getDestFiledType())) {
-                        stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + sysFiledTypeList.get(0).getDestFiledType() + "(" + list.get(i).get("DATA_LENGTH") + "," + list.get(i).get("DATA_SCALE") + ")");
+                    if (!"0".equals(list.get(i).get("DATA_SCALE").toString()) && equalsAccuracyTypes(destFiledType)) {
+                        stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + destFiledType + "(" + list.get(i).get("DATA_LENGTH") + "," + list.get(i).get("DATA_SCALE") + ")");
                     } else {
-                        stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + sysFiledTypeList.get(0).getDestFiledType() + "(" + list.get(i).get("DATA_LENGTH") + ")");
+                        stringBuffer.append(list.get(i).get("COLUMN_NAME") + " " + destFiledType + "(" + list.get(i).get("DATA_LENGTH") + ")");
                     }
                 }
                 if (!"Y".equals(list.get(i).get("NULLABLE"))) {
@@ -162,13 +173,13 @@ public class DMCreateSql implements SuperCreateTable {
         //目标端的主键
         List<SysFieldrule> primary = sysFieldruleRepository.findPremaryKey(jobId, tableName);
         if (primary != null && primary.size() > 0) {
-            stringBuffer.append(",CONSTRAINT PK_" + primary.get(0).getDestName().toUpperCase()+"_"+primary.get(0).getDestFieldName().toUpperCase() + " PRIMARY KEY ('" + primary.get(0).getDestFieldName() + "')");
+            stringBuffer.append(",CONSTRAINT PK_" + primary.get(0).getDestName().toUpperCase() + "_" + primary.get(0).getDestFieldName().toUpperCase() + " PRIMARY KEY ('" + primary.get(0).getDestFieldName() + "')");
         } else {
-            primaryKey = jobRelaServiceImpl.findPrimaryKey(jobId, tableName,conn);
-            destTable=jobRelaServiceImpl.destTableName(jobId,tableName);//目标端表名称
+            primaryKey = jobRelaServiceImpl.findPrimaryKey(jobId, tableName, conn);
+            destTable = jobRelaServiceImpl.destTableName(jobId, tableName);//目标端表名称
             //主键别名生成规则PK_表名_主键的字段名
             if (primaryKey != null && primaryKey.size() > 0) {
-                stringBuffer.append(",CONSTRAINT PK_"+destTable+"_"+ primaryKey.get(0).toString().toUpperCase() + " PRIMARY KEY (");
+                stringBuffer.append(",CONSTRAINT PK_" + destTable + "_" + primaryKey.get(0).toString().toUpperCase() + " PRIMARY KEY (");
                 for (int i = 0; i < primaryKey.size(); i++) {
                     stringBuffer.append(primaryKey.get(i));
                     if (i < primaryKey.size() - 1) {
