@@ -40,11 +40,24 @@ public class YongzService {
     }
 
     /**
+     * 读取速率、读取量
+     *
      * 实时插入实时监控表
      * 更新监控表
      */
     @Transactional
     public void updateRead(Map message, double readRate, long readData) {
+
+    }
+
+    /**
+     * 写入速率、写入量
+     *
+     * 实时插入实时监控表
+     * 更新监控表
+     */
+    @Transactional
+    public void updateWrite(Map message, double writeRate, long writeData) {
 
     }
 
