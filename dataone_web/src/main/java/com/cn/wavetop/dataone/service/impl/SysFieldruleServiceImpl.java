@@ -691,7 +691,11 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 //                }
                 if (sysDbinfo.getType() != sysDbinfo2.getType()) {
                         //去找到映射的字段类型aaa
-                        sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), data.get(i).getType().toUpperCase());
+                    String sourceFileType=  data.get(i).getType();
+                    if(sourceFileType.contains("(")){
+                        sourceFileType=sourceFileType.substring(0,sourceFileType.indexOf("("));
+                    }
+                        sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), sourceFileType.toUpperCase());
                         if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
                             //todo 如果是mysql 和sqlserver 换成小写
                             if(sysDbinfo2.getType()==2||sysDbinfo2.getType()==3){
