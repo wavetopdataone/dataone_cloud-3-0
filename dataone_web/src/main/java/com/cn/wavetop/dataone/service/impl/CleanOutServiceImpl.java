@@ -40,7 +40,7 @@ public class CleanOutServiceImpl implements CleanOutService {
         Map map = null;
         try {
             if (sysDbinfo.getType() == 1) {
-                String sql = "SELECT * FROM (SELECT a.*, ROWNUM rn FROM (SELECT * FROM " + tableName + ") a)WHERE rn= " + number;
+                String sql = "SELECT * FROM (SELECT a.*, ROWNUM rn FROM (SELECT * FROM " + tableName + ") a )WHERE rn= " + number;
                 resultMap = DBUtil.query2(sql, conn);
             } else if (sysDbinfo.getType() == 2) {
                 String sql="select * from "+tableName+" order by rand() LIMIT 1";
