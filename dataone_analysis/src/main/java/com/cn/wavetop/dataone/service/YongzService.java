@@ -26,7 +26,7 @@ public class YongzService {
     public void insertSqlCount(Map message) {
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(),(Long) message.get("sqlCount"),0L,message.get("destTable").toString());
+            sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(),(Long) message.get("sqlCount"),0L,message.get("destTable").toString(),new Date());
         } else {
             SysMonitoring sysMonitoring = SysMonitoring.builder().
                     jobId((Long) message.get("jobId")).

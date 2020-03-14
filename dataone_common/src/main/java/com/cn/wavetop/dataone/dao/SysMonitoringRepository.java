@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.List;
 
@@ -67,8 +68,8 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
 
     @Transactional
     @Modifying
-    @Query("update SysMonitoring sm set sm.readData = :readData,sm.writeData = :readData,sm.sqlCount = :sqlCount,sm.destTable = :destTable where sm.id = :id")
-    void updateSqlCount(long id, Long sqlCount, Long readData, String destTable);
+    @Query("update SysMonitoring sm set sm.readData = :readData,sm.writeData = :readData,sm.sqlCount = :sqlCount,sm.destTable = :destTable ,sm.optTime = :optTime where sm.id = :id")
+    void updateSqlCount(long id, Long sqlCount, Long readData, String destTable, Date optTime);
 
 
 }
