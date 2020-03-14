@@ -1,20 +1,15 @@
 package com.cn.wavetop.dataone.etl.transformation;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.consumer.Consumer;
-import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
-import com.cn.wavetop.dataone.util.JSONUtil;
-import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -157,13 +152,7 @@ public class TransformationThread extends Thread {
 
     //todo
     public Loading newInstanceLoading() {
-//        Connection destConn = null;
 
-//        SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
-//        try {
-//            destConn = DBConns.getConn(dest);
-//        } catch (Exception e) {
-//        }
         try {
             destConn.setAutoCommit(false);
         } catch (SQLException e) {

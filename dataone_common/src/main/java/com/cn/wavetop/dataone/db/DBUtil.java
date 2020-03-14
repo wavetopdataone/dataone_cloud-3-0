@@ -34,15 +34,15 @@ public class DBUtil {
 //            DBConn.getInstance().closeConnection(con);
 //        }
 
-        public static void update(String sql, Connection con) throws Exception {
-            Statement st = null;
-            st = con.createStatement();
-            log.info(sql);
-            st.executeUpdate(sql);
-            st.close();
-            st = null;
+    public static void update(String sql, Connection con) throws Exception {
+        Statement st = null;
+        st = con.createStatement();
+        log.info(sql);
+        st.executeUpdate(sql);
+        st.close();
+        st = null;
 
-        }
+    }
 
     public static String[][] query(String sql, Connection con) throws Exception {
         return query(sql, con, 0);
@@ -85,11 +85,9 @@ public class DBUtil {
 //        }
 
     /**
-     *
      * @param sql
      * @param con
-     * @param dateformat
-     *            0����yyyy-MM-dd 1����yyyy-MM-dd hh:mm 2����yyyy-MM-dd hh:mm:ss
+     * @param dateformat 0����yyyy-MM-dd 1����yyyy-MM-dd hh:mm 2����yyyy-MM-dd hh:mm:ss
      * @return
      * @throws Exception
      */
@@ -212,6 +210,32 @@ public class DBUtil {
         return rm;
     }
 
+    public static Long queryCount(String sql, Connection con) throws Exception {
+        ResultSet rs = null;
+        Statement stmt = null;
+        Long sqlCount = 0L;
+        try {
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                sqlCount = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+        } finally {
+            try {
+                rs.close();
+                stmt.close();
+            } catch (SQLException e) {
+
+                e.printStackTrace();
+            }
+
+        }
+        return sqlCount;
+    }
+
+
     public static ResultMap query2(String sql, Connection con, int dateformat)
             throws Exception {
         log.info(sql);
@@ -252,13 +276,13 @@ public class DBUtil {
                                     DateUtils.format(rs.getTimestamp(i + 1)));
                         else if (dateformat == 1)
                             map.put(meta.getColumnLabel(i + 1)
-                                            .toUpperCase(), DateUtils
-                                            .formatTime(rs.getTimestamp(i + 1)));
+                                    .toUpperCase(), DateUtils
+                                    .formatTime(rs.getTimestamp(i + 1)));
                         else if (dateformat == 2) {
                             map.put(meta.getColumnLabel(i + 1)
-                                                    .toUpperCase(),
-                                            DateUtils.formatTime2(rs
-                                                    .getTimestamp(i + 1)));
+                                            .toUpperCase(),
+                                    DateUtils.formatTime2(rs
+                                            .getTimestamp(i + 1)));
                         }
 
                     } else {
@@ -286,7 +310,7 @@ public class DBUtil {
             }
             try {
                 st.close();
-                st=null;
+                st = null;
             } catch (Exception e) {
             }
         }
@@ -318,7 +342,7 @@ public class DBUtil {
         String[][] arr = null;
         MyResultSet myresults = new MyResultSet();
         try {
-            int rows = Integer.parseInt(DBUtil.query(getCountSql(sql),con)[0][0]);
+            int rows = Integer.parseInt(DBUtil.query(getCountSql(sql), con)[0][0]);
             // st =
             // con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
             st = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -429,12 +453,12 @@ public class DBUtil {
 //            }
 //        }
 
-    public static String getCountSql(String sql){
+    public static String getCountSql(String sql) {
         String sql2 = sql.toLowerCase();
-        int begin = 0,end = 0;
+        int begin = 0, end = 0;
         String head = "";
         begin = sql2.indexOf("select ") + 7;
-        head = sql.substring(0,begin) + " count(*) ";
+        head = sql.substring(0, begin) + " count(*) ";
 
         begin = sql2.indexOf(" from ");
         head = head + sql.substring(begin);
