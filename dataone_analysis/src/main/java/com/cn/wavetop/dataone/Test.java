@@ -13,22 +13,14 @@ import java.util.Map;
  */
 public class Test {
     public static void main(String[] args) throws IOException {
-        HashMap<Object, Object> map = new HashMap<>();
-        map.put(1, 9);
-        map.put(2, 8);
-        map.put(3, 7);
-        map.put(4, "7");
-        map.put("dasghda", "7dsadasd");
-        map.put("中国", "7dsadasd");
+        String sql = "TIMESTAMP(5)";
 
-        for (Object o : map.keySet()) {
-            System.out.print(o+"_---"+map.get(o)+"\t");
+        if (sql.contains("(")) {
+            sql= sql.substring(0, sql.indexOf("("));
         }
-        System.out.println(
+        System.out.println(sql);
 
-        );
-        for (Object o : map.keySet()) {
-            System.out.print(o+"_---"+map.get(o)+"\t");
-        }
+
+
     }
 }

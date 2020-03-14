@@ -65,6 +65,8 @@ public class SysMonitoring {
     private Long dayWriteData;
     @Column(name = "day_read_rate", columnDefinition = "DOUBLE default 0.00")
     private Double dayReadRate;
-    @Column(name = "day_write_date", columnDefinition = "DOUBLE default 0.00")
-    private Double dayWriteDate;
+    @Column(name = "day_write_rate", columnDefinition = "DOUBLE default 0.00")
+    private Double dayWriteRate;
+    @Column(name = "day_sql_count", columnDefinition = "DOUBLE default 0.00")
+    private Double daySqlCount;
 }

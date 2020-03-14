@@ -28,6 +28,12 @@ public class YongzService {
      */
     @Transactional
     public void insertSqlCount(Map message) {
+        System.out.println(message+"______message");
+        System.out.println(sysMonitoringRepository+"_______sysMonitoringRepository");
+
+
+        System.out.println(message.get("sourceTable").toString());
+        System.out.println((Long) message.get("jobId"));
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), 0L, message.get("destTable").toString(), new Date());
@@ -50,22 +56,30 @@ public class YongzService {
      * 更新监控表
      */
     @Transactional
-    public void updateRead(Map message, double readRate, long readData) {
+    public void updateRead(Map message, Long readRate, Long readData) {
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            //读取量累加
-            readData += sysMonitoringList.get(0).getReadData();
             //为了页面图展示用的历史读取量
-            Long dayReadData = readData + sysMonitoringList.get(0).getDayReadData();
+            Long dayReadData=readData;
+            if (sysMonitoringList.get(0).getDayReadData()!=null) {
+                dayReadData = readData + sysMonitoringList.get(0).getDayReadData();
+            }
             //如果读取速率比之前的小就不更新历史读取速率
-            Double dayReadRate = readRate;
-            if (readRate < sysMonitoringList.get(0).getDayReadRate()) {
-                dayReadRate = sysMonitoringList.get(0).getDayReadRate();
+            Double dayReadRate = Double.valueOf(readRate) ;
+            if (sysMonitoringList.get(0).getDayReadRate() != null) {
+                if (readRate < sysMonitoringList.get(0).getDayReadRate()) {
+                    dayReadRate = sysMonitoringList.get(0).getDayReadRate();
+                }
+            }
+            //读取量累加
+            if (sysMonitoringList.get(0).getReadData()!= null){
+                readData += sysMonitoringList.get(0).getReadData();
             }
             sysMonitoringRepository.updateReadData(sysMonitoringList.get(0).getId(), readData, new Date(), readRate, message.get("destTable").toString(), dayReadData, dayReadRate);
         } else {
             logger.error("该表不存在");
         }
+        sysMonitoringList.clear();
     }
 
     /**
