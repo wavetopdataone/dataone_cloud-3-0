@@ -131,12 +131,12 @@ public class TransformationThread extends Thread {
 
                 } catch (Exception e) {
 //                    // todo 错误队列   王成实现
-//                    String message = e.toString();
+//                    String errormessage = e.toString();
 //                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
 //                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //                    String time = simpleDateFormat.format(new Date());
 //                    String errortype = "Error";
-//                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,message);
+//                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
 //                    e.printStackTrace();
                 }
 //                if (dataMap != null) dataMap.clear(); //释放资源
@@ -151,9 +151,19 @@ public class TransformationThread extends Thread {
                 System.out.println("当前表" + tableName + "的处理速率为：" + writeRate+"_____当前插入量："+index);
 
                 yongzService.updateWrite(message, writeRate, Long.valueOf(index));
-                int[] ints = ps.executeBatch();
-                // todo 错误队列在此判断
-                destConn.commit();
+                try {
+                    int[] ints = ps.executeBatch();
+                    // todo 错误队列在此判断
+                    destConn.commit();
+                } catch (SQLException e) {
+                    String errormessage = e.toString();
+                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String time = simpleDateFormat.format(new Date());
+                    String errortype = "Error";
+                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                    e.printStackTrace();
+                }
                 ps.clearBatch();
                 ps.close();
                 ps = null; //gc
