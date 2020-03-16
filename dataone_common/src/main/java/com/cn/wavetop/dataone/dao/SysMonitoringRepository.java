@@ -17,6 +17,8 @@ import java.util.List;
 public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Long>, JpaSpecificationExecutor<SysMonitoring> {
 
     List<SysMonitoring> findByJobId(long job_id);
+    List<SysMonitoring> findByJobIdOrderByOptTimeDesc(long job_id);
+
     List<SysMonitoring> findByJobId(long job_id, Pageable pageable);
     List<SysMonitoring> findById(long id);
     List<SysMonitoring> findBySourceTableContainingAndJobId(String source_table, long job_id);
@@ -65,6 +67,11 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
     @Modifying
     @Query("update SysMonitoring sm set sm.readData = :readData,sm.writeData = :readData,sm.optTime = :optTime,sm.disposeRate = :readRate,sm.readRate = :readRate,sm.destTable = :destTable where sm.id = :id")
     void updateReadMonitoring2ForDm(long id, Long readData, Date optTime, Long readRate, String destTable);
+
+    @Transactional
+    @Modifying
+    @Query("update SysMonitoring sm set  sm.dayReadData=:dayReadData,sm.dayReadRate=:dayReadRate, sm.dayWriteData=:dayWriteData,sm.dayWriteRate=:dayWriteRate where sm.id = :id")
+    void updateDayReadData(long id, Long dayReadData,Double dayReadRate,Long dayWriteData,Double dayWriteRate);
 
 
     /**

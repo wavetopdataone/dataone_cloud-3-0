@@ -356,9 +356,9 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
             if ((sysMonitoringList.size() - index) != 0) {
                 readRate = readRate / (sysMonitoringList.size() - index);
             }
-            if ((sysMonitoringList.size() - index1) != 0) {
-                disposeRate = disposeRate / (sysMonitoringList.size() - index1);
-            }
+//            if ((sysMonitoringList.size() - index1) != 0) {
+//                disposeRate = disposeRate / (sysMonitoringList.size() - index1);
+//            }
 
             if (readData != 0) {
                 synchronous = writeData / sqlCount;
@@ -423,12 +423,12 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
                     //如果目的表没有，去tablerule中找（找到的一定是修改过的）目标表，插到监控表里
                     // 如果tablerule中没有则代表源表和目的表是一致的;
                     if (sysMonitoringList1 != null && sysMonitoringList1.size() > 0) {
-                        if (sysTablerules != null && sysTablerules.size() > 0) {
-                            sysMonitoringList1.get(0).setDestTable(sysTablerules.get(0).getDestTable());
-
-                        } else {
-                            sysMonitoringList1.get(0).setDestTable(sysMonitoringList1.get(0).getSourceTable());
-                        }
+//                        if (sysTablerules != null && sysTablerules.size() > 0) {
+//                            sysMonitoringList1.get(0).setDestTable(sysTablerules.get(0).getDestTable());
+//
+//                        } else {
+//                            sysMonitoringList1.get(0).setDestTable(sysMonitoringList1.get(0).getSourceTable());
+//                        }
                         //从错误队列里面取得每张表的错误总数
                         List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoringList1.get(0).getDestTable());
                         sysMonitoringList1.get(0).setErrorData(Long.valueOf(errorLogList.size()));
@@ -524,6 +524,11 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         List<String> list3 = new ArrayList<>();
         List<String> list4 = new ArrayList<>();
         String ab = dfs.format(date);
+//        //todo  監控表日期往前移動
+//         List<SysMonitoring> sysMonitoringList=sysMonitoringRepository.findByJobIdOrderByOptTimeDesc(jobId);
+//          if(sysMonitoringList!=null&&sysMonitoringList.size()>0){
+//              date=sysMonitoringList.get(0).getOptTime();
+//          }
         String cd = dfs.format(date);
         String sum = "-" + num;
         if(!"undefined".equals(num)) {
@@ -553,12 +558,33 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
                     list3.add("0");
                 }
             }else{
-                map2 = (HashMap<Object, Double>) showMonitoring(jobId);
-                String nowdate = df.format(new Date());
-//            String strss = nowdate.substring(5, 7) + "." + nowdate.substring(8, 10);
+                Date date1=new Date();
+                String nowdate = df.format(date1);
+                String dateFormat=dfs.format(date1);
+                Double readRate=0.0;
+                Double disposeRate=0.0;
+                Integer index=0;
+                List<SysMonitoring> sysMonitorings = sysMonitoringRepository.findByIdAndDate(jobId, DateUtil.StringToDate(dateFormat));
+                if(sysMonitorings!=null&&sysMonitorings.size()>0){
+                    for (SysMonitoring sysMonitoring : sysMonitorings) {
+                        if (sysMonitoring.getDayReadRate() != null&&sysMonitoring.getDayReadRate()!=0) {
+                            readRate += sysMonitoring.getDayReadRate();
+                            index++;
+                        }
+                        if (sysMonitoring.getDayWriteRate() != null) {
+                            disposeRate += sysMonitoring.getDayWriteRate();
+                        }
+                    }
+                    if(index!=0){
+                        readRate=readRate/index;
+                    }
+                    list2.add(String.valueOf(readRate));
+                    list3.add(String.valueOf(disposeRate));
+                }else{
+                    list2.add(String.valueOf(0));
+                    list3.add(String.valueOf(0));
+                }
                 list1.add(nowdate);
-                list2.add(String.valueOf(map2.get("read_rate")));
-                list3.add(String.valueOf(map2.get("dispose_rate")));
             }
             //每次循环都在日历的天数+1
             calendar.add(Calendar.DATE, +1);

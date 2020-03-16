@@ -104,7 +104,7 @@ public class YongzService {
                     dayWriteRate = sysMonitoringList.get(0).getDayWriteRate();
                 }
             }
-            //读取量累加
+            //寫入量量累加
             if(sysMonitoringList.get(0).getWriteData()!=null) {
                 writeData += sysMonitoringList.get(0).getWriteData();
             }
