@@ -155,7 +155,7 @@ public class TransformationThread extends Thread {
                     int[] ints = ps.executeBatch();
                     // todo 错误队列在此判断
                     destConn.commit();
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
