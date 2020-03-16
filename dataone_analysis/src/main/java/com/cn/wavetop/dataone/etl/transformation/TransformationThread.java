@@ -12,6 +12,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -34,13 +35,14 @@ public class TransformationThread extends Thread {
     private Transformation transformation;
     private Connection conn;//y源端连接
     private Connection destConn;//目的端连接
+    private int sync_range;
 
 
-    public TransformationThread(Long jobId, String tableName, Connection conn, Connection destConn) {
+    public TransformationThread(Long jobId, String tableName, Connection conn, int sync_range) {
         this.jobId = jobId;
         this.tableName = tableName;
         this.conn = conn;
-//        this.destConn = destConn;
+        this.sync_range = sync_range;
         try {
             this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
         } catch (Exception e) {
@@ -51,8 +53,36 @@ public class TransformationThread extends Thread {
     @SneakyThrows
     @Override
     public void run() {
+        switch (sync_range) {
+            //全量
+            case 1:
+                fullRangTran();
+                break;
+            //增量
+            case 2:
+                incrementRangTran();
+                break;
+            //增量+全量
+            case 3:
+
+                break;
+        }
+
+    }
+
+    /**
+     * 增量清洗
+     */
+    private void incrementRangTran() {
+
+    }
+
+    /**
+     * 全量的清洗
+     */
+    private void fullRangTran() {
         int index = 1;
-        Map dataMap;
+        Map dataMap = null;
         Map message = null;
         while (destConn == null) {
             try {
@@ -61,7 +91,11 @@ public class TransformationThread extends Thread {
                 e.printStackTrace();
             }
 
-            Thread.sleep(60000);
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         // SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
         try {
@@ -86,7 +120,12 @@ public class TransformationThread extends Thread {
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
                 Transformation transformation = new Transformation(jobId, tableName, conn);
-                dataMap = transformation.Transform(value);
+                try {
+                    dataMap = transformation.Transform(value);
+                } catch (IOException e) {
+                    // todo 转换
+                    e.printStackTrace();
+                }
                 // todo 页面清洗
                 System.out.println(dataMap);
 
@@ -101,45 +140,47 @@ public class TransformationThread extends Thread {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+
+
                 try {
-
                     loading.excuteInsert(insertSql, dataMap, ps);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    if (index == 100) {
-                        // 时间戳
-                        long end = System.currentTimeMillis();
-                        synchronized (blok) {
-                            int[] ints = ps.executeBatch();
+                if (index == 100) {
+                    // 时间戳
+                    long end = System.currentTimeMillis();
+                    synchronized (blok) {
+                        // 插入写入速率
+                        Long writeRate = (long) ((100.0 / (end - start)) * 3000);
+                        yongzService.updateWrite(message, writeRate, 100L);
+                        System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
+                        int[] ints;
+                        try {
+                            ints = ps.executeBatch();
                             System.out.println(ints);
                             destConn.commit();
-                            Long writeRate = (long) ((100.0 / (end - start)) * 1000);
-                            // 插入写入速率
-                            yongzService.updateWrite(message, writeRate, 100L);
-                             System.out.println("当前表" + tableName + "的处理速率为：" + writeRate+"_____当前插入量："+100);
                             ps.clearBatch();
                             ps.close();
                             ps = null; //gc
-
-
+                        } catch (Exception e) {
+                            String errormessage = e.toString();
+                            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String time = simpleDateFormat.format(new Date());
+                            String errortype = "Error";
+                            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                            e.printStackTrace();
                         }
-                        index = 0;// 当前
-                        start = System.currentTimeMillis();
                     }
-                    index++;
-                    System.out.println(tableName + "--------" + index);
-
-
-                } catch (Exception e) {
-//                    // todo 错误队列   王成实现
-//                    String errormessage = e.toString();
-//                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                    String time = simpleDateFormat.format(new Date());
-//                    String errortype = "Error";
-//                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
-//                    e.printStackTrace();
+                    index = 0;// 当前
+                    start = System.currentTimeMillis();
                 }
-//                if (dataMap != null) dataMap.clear(); //释放资源
+                index++;
+                System.out.println(tableName + "--------" + index);
+
+
             }
 
 
@@ -147,14 +188,17 @@ public class TransformationThread extends Thread {
             if (ps != null) {
                 long end = System.currentTimeMillis();
                 // 时间戳
-                  Long writeRate = (long) ((Double.valueOf(index) / (end - start) * 1000));
-                System.out.println("当前表" + tableName + "的处理速率为：" + writeRate+"_____当前插入量："+index);
+                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 3000);
+                System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
 
                 yongzService.updateWrite(message, writeRate, Long.valueOf(index));
                 try {
                     int[] ints = ps.executeBatch();
-                    // todo 错误队列在此判断
                     destConn.commit();
+                    ps.clearBatch();
+                    ps.close();
+                    ps = null; //gc
+                    index = 1;// 当前
                 } catch (Exception e) {
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
@@ -164,11 +208,6 @@ public class TransformationThread extends Thread {
                     jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
                     e.printStackTrace();
                 }
-                ps.clearBatch();
-                ps.close();
-                ps = null; //gc
-                index = 1;// 当前
-
                 start = System.currentTimeMillis();
             }
         }
