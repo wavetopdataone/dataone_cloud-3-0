@@ -28,12 +28,8 @@ public class YongzService {
      */
     @Transactional
     public void insertSqlCount(Map message) {
-        System.out.println(message+"______message");
         System.out.println(sysMonitoringRepository+"_______sysMonitoringRepository");
 
-
-        System.out.println(message.get("sourceTable").toString());
-        System.out.println((Long) message.get("jobId"));
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), 0L, message.get("destTable").toString(), new Date());
@@ -90,11 +86,11 @@ public class YongzService {
      */
     @Transactional
     public void updateWrite(Map message, Long writeRate, Long writeData) {
-        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
+        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), Long.parseLong(message.get("jobId").toString()) );
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             //为了页面图展示用的历史读取量
             Long dayWriteData=writeData;
-            if(sysMonitoringList.get(0).getWriteData()!=null) {
+            if(sysMonitoringList.get(0).getDayWriteData()!=null) {
                 dayWriteData = writeData + sysMonitoringList.get(0).getDayWriteData();
             }
             //如果写入速率比之前的小就不更新历史读取速率

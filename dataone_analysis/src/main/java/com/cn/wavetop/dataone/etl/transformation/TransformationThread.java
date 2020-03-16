@@ -5,6 +5,7 @@ import com.cn.wavetop.dataone.consumer.Consumer;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.service.YongzService;
 import com.cn.wavetop.dataone.util.DBConns;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 public class TransformationThread extends Thread {
     private static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private static final YongzService yongzService = (YongzService) SpringContextUtil.getBean("yongzService");
     private static Boolean blok = true;
     private Long jobId;//jobid
     private String tableName;//表
@@ -50,6 +52,8 @@ public class TransformationThread extends Thread {
     @Override
     public void run() {
         int index = 1;
+        Map dataMap;
+        Map message = null;
         while (destConn == null) {
             try {
                 this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
@@ -82,11 +86,13 @@ public class TransformationThread extends Thread {
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
                 Transformation transformation = new Transformation(jobId, tableName, conn);
-                Map dataMap = transformation.Transform(value);
+                dataMap = transformation.Transform(value);
+                // todo 页面清洗
                 System.out.println(dataMap);
 
                 if (insertSql == null) {
                     insertSql = loading.getInsert(dataMap);
+                    message = (Map) dataMap.get("message");
                 }
                 try {
                     if (ps == null) {
@@ -106,10 +112,15 @@ public class TransformationThread extends Thread {
                             int[] ints = ps.executeBatch();
                             System.out.println(ints);
                             destConn.commit();
-                            System.out.println("当前表" + tableName + "的处理速率为：" + (100.0 / (end - start)) * 1000+"_____当前插入量："+100);
+                            Long writeRate = (long) ((100.0 / (end - start)) * 1000);
+                            // 插入写入速率
+                            yongzService.updateWrite(message, writeRate, 100L);
+                             System.out.println("当前表" + tableName + "的处理速率为：" + writeRate+"_____当前插入量："+100);
                             ps.clearBatch();
                             ps.close();
                             ps = null; //gc
+
+
                         }
                         index = 0;// 当前
                         start = System.currentTimeMillis();
@@ -128,6 +139,7 @@ public class TransformationThread extends Thread {
 //                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,message);
 //                    e.printStackTrace();
                 }
+//                if (dataMap != null) dataMap.clear(); //释放资源
             }
 
 
@@ -135,9 +147,12 @@ public class TransformationThread extends Thread {
             if (ps != null) {
                 long end = System.currentTimeMillis();
                 // 时间戳
-                System.out.println("当前表" + tableName + "的处理速率为：" + Double.valueOf(index) / (end - start) * 1000+"_____当前插入量："+index);
+                  Long writeRate = (long) ((Double.valueOf(index) / (end - start) * 1000));
+                System.out.println("当前表" + tableName + "的处理速率为：" + writeRate+"_____当前插入量："+index);
 
+                yongzService.updateWrite(message, writeRate, Long.valueOf(index));
                 int[] ints = ps.executeBatch();
+                // todo 错误队列在此判断
                 destConn.commit();
                 ps.clearBatch();
                 ps.close();
@@ -146,7 +161,6 @@ public class TransformationThread extends Thread {
 
                 start = System.currentTimeMillis();
             }
-
         }
     }
 
