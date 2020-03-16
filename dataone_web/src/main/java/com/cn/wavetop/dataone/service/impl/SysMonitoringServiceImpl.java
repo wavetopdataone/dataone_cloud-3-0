@@ -154,7 +154,7 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         }
     }
 
-    //根据状态和表名查询table
+    //根据状态和表名查询table //全查 條件差都是這個接口，所以狀態也提到這個接口了
     public Object findTableAndStatus(String source_table,Integer jobStatus,Long job_id,Integer current,Integer size){
         Pageable pageable = new PageRequest(current - 1, size, Sort.Direction.ASC, "id");
 
@@ -164,6 +164,55 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         SysMonitoring sysMonitoring2 = null;
         SysMonitoring sysMonitoring3 = null;
         List<ErrorLog> errorLogs = null;
+        List<SysMonitoring> sysMonitoringListss = sysMonitoringRepository.findByJobId(job_id);
+        SysJobrela sysJobrela = sysJobrelaRespository.findById(job_id.longValue());
+        if (sysMonitoringListss != null && sysMonitoringListss.size() > 0) {
+            for (SysMonitoring sysMonitoring : sysMonitoringListss) {
+                //从错误队列里面取得每张表的错误总数
+                List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoring.getDestTable());
+                sysMonitoring.setErrorData(Long.valueOf(errorLogList.size()));
+                //每张表的同步状态
+                if (sysMonitoring.getJobStatus() == null) {
+                    sysMonitoring.setJobStatus(0);
+                }
+                //todo 判断有问题，如果一张表完了
+                if (sysMonitoring.getJobStatus() != 4) {
+
+                    if(sysMonitoring.getReadData()==null||sysMonitoring.getReadData().equals("null")){
+                        sysMonitoring.setReadData(0L);
+                    }
+                    if(sysMonitoring.getErrorData()==null||sysMonitoring.getErrorData().equals("null")){
+                        sysMonitoring.setErrorData(0L);
+                    }
+                    if(sysMonitoring.getWriteData()==null||sysMonitoring.getWriteData().equals("null")){
+                        sysMonitoring.setWriteData(0L);
+                    }
+                    if(sysMonitoring.getJobStatus()==null||sysMonitoring.getJobStatus().equals("null")){
+                        sysMonitoring.setJobStatus(0);
+                    }
+
+                    if (sysMonitoring.getErrorData() +sysMonitoring.getWriteData() < sysMonitoring.getReadData() && ("1".equals(sysJobrela.getJobStatus()) || "11".equals(sysJobrela.getJobStatus()))) {
+                        sysMonitoring.setJobStatus(1);//运行中
+                    }else if (sysMonitoring.getSqlCount()!=0&&sysMonitoring.getReadData()==0) {
+                        sysMonitoring.setJobStatus(5);//未开始
+                    } else if (sysMonitoring.getErrorData() + sysMonitoring.getWriteData() == sysMonitoring.getReadData()) {
+                        sysMonitoring.setJobStatus(3);//已完成
+                    } else if ("2".equals(sysJobrela.getJobStatus()) || "21".equals(sysJobrela.getJobStatus())) {
+                        sysMonitoring.setJobStatus(2);//暂停中
+                    }else if ("3".equals(sysJobrela.getJobStatus()) || "31".equals(sysJobrela.getJobStatus())) {
+                        sysMonitoring.setJobStatus(6);//已终止
+                    }
+                }
+                sysMonitoringRepository.save(sysMonitoring);
+
+            }
+        }
+
+
+
+
+
+
         Specification<SysMonitoring> querySpecifi = new Specification<SysMonitoring>() {
             @Override
             public Predicate toPredicate(Root<SysMonitoring> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
