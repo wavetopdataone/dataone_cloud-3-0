@@ -111,4 +111,10 @@ public class YongzService {
         sysMonitoringList.clear();
     }
 
+    /**
+     * 根据jobId和tableName更新監控表的狀態
+     */
+    public void updateJobStatus(Long jobId,String tableName,int jobStatus){
+        sysMonitoringRepository.updateStatus(jobId,tableName,jobStatus);
+    }
 }
