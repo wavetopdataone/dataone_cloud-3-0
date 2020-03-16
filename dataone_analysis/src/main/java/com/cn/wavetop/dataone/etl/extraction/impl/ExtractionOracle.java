@@ -55,7 +55,7 @@ public class ExtractionOracle implements Extraction {
 
     /**
      * 全量抓取
-     * 之前没有优化的全查
+     * 未优化的全查
      *
      * @throws Exception
      */
@@ -87,7 +87,7 @@ public class ExtractionOracle implements Extraction {
                 e.printStackTrace();
             }
         }
-        startTrans(resultMap.size());   //判断创建清洗线程并开启线程
+        startTrans(resultMap.size(),1);   //判断创建清洗线程并开启线程
         System.out.println(tableName + "____" + resultMap.size());
         for (int i = 0; i < resultMap.size(); i++) {
 
@@ -148,7 +148,7 @@ public class ExtractionOracle implements Extraction {
 
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
         System.out.println(tableName + "------cha-------" + resultMap.size());
-        startTrans(resultMap.size());   //判断创建清洗线程并开启线程
+        startTrans(resultMap.size(),1);   //判断创建清洗线程并开启线程
         long start;    //开始读取的时间
         long end;    //结束读取的时间
         double readRate;    //读取速率
@@ -203,12 +203,12 @@ public class ExtractionOracle implements Extraction {
      *
      * @param size
      */
-    private void startTrans(int size) {
+    private void startTrans(int size,int sync_range) {
         if (size > 0) {
             if (transformationThread != null) {
                 return;
             }
-            this.transformationThread = new TransformationThread(jobId, tableName, conn, destConn);
+            this.transformationThread = new TransformationThread(jobId, tableName, conn, sync_range);
             this.transformationThread.start();
         }
     }
