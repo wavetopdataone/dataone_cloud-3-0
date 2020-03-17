@@ -21,10 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * 1.findSourcesDbinfoById:根据jobId查询源端数据源信息
@@ -535,5 +535,39 @@ public class JobRelaServiceImpl {
         }
         errorLogRespository.save(errorLog);
         offset++;
+    }
+
+
+    private static List<String> doLogAddress(Long jobId)  {
+//        SysDbinfo sysDbinfo=findSourcesDbinfoById(jobId);
+        //数据库连接
+        SysDbinfo sysDbinfo=SysDbinfo.builder().dbname("ORCL").host("192.168.1.25").user("system").password("oracle").port(1521L).type(1l).schema("SCOTT").build();
+        String sql=" select group#, member from v$logfile order by group#";
+        Connection conn = null;
+        ResultMap resultMap=null;
+        List<String> logList=new ArrayList<>();
+        try {
+            conn = DBConns.getConn(sysDbinfo);
+             resultMap=DBUtil.query2(sql,conn);
+        for(int i=0;i<resultMap.size();i++){
+            logList.add(resultMap.get(i,"member").replaceAll("\\\\","\\\\\\\\"));
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                DBConns.close(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+         return logList;
+    }
+
+    public static void main(String[]args){
+        List<String> list=doLogAddress(16L);
+        for(String a:list){
+            System.out.println(a);
+        }
     }
 }
