@@ -3,7 +3,7 @@ package com.cn.wavetop.dataone.oracleLogminer;
 public class Constants {
 
     /** 上次数据同步最后SCN号 */
-    public static String LAST_SCN = "0";
+    public static String LAST_SCN = "0sss";
 
     /** 源数据库配置 */
     public static String DATABASE_DRIVER="oracle.jdbc.driver.OracleDriver";
