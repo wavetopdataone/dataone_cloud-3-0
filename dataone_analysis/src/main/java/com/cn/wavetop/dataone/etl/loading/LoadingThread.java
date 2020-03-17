@@ -67,7 +67,7 @@ public class LoadingThread extends Thread {
                 String value = (String) record.value();
                 dataMap.putAll(JSONObject.parseObject(value));
                 if (insertSql==null){
-                    insertSql= loading.getInsert(dataMap);
+                    insertSql= loading.getFullSQL(dataMap);
                     try {
                         ps=destConn.prepareStatement(insertSql);
                     } catch (SQLException e) {
