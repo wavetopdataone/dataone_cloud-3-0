@@ -156,4 +156,31 @@ public class YongzService {
                 .build();
         userLogRepository.save(userlog);
     }
+
+
+    /**
+     * 根据写入量和sqlcount总量的比较判断全量是否结束
+     * @param jobId
+     * @return
+     */
+    public Boolean fullOver(Long jobId){
+        Long writeData=0l;
+        Long sqlCount=0l;
+      List<SysMonitoring> monitoringList=sysMonitoringRepository.findByJobId(jobId);
+      if(monitoringList!=null&&monitoringList.size()>0){
+          for(SysMonitoring sysMonitoring:monitoringList){
+              if(sysMonitoring.getWriteData()!=null){
+                  writeData+=sysMonitoring.getWriteData();
+              }
+              if(sysMonitoring.getSqlCount()!=null){
+                  sqlCount+=sysMonitoring.getSqlCount();
+              }
+          }
+      }
+      if(writeData>=sqlCount&&sqlCount!=0){
+          return true;
+      }else{
+          return false;
+      }
+    }
 }
