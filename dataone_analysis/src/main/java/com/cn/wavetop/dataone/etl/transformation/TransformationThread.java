@@ -151,6 +151,12 @@ public class TransformationThread extends Thread {
                         ps = destConn.prepareStatement(insertSql);
                     }
                 } catch (SQLException e) {
+                    String errormessage = e.toString();
+                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String time = simpleDateFormat.format(new Date());
+                    String errortype = "Error";
+                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
                     e.printStackTrace();
                 }
 
@@ -178,6 +184,12 @@ public class TransformationThread extends Thread {
                             ps.close();
                             ps = null; //gc
                         } catch (SQLException e) {
+                            String errormessage = e.toString();
+                            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String time = simpleDateFormat.format(new Date());
+                            String errortype = "Error";
+                            jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
                             e.printStackTrace();
                         }
                     }
