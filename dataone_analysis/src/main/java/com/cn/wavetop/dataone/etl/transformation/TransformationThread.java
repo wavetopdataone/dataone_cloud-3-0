@@ -72,15 +72,18 @@ public class TransformationThread extends Thread {
         getDestConn();
         KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, "&Increment*");
         consumer.subscribe(Arrays.asList("Increment-Source-" + jobId));
-        ConsumerRecords<String, String> records = consumer.poll(2000);
-        for (final ConsumerRecord record : records) {
-            String value = (String) record.value();
-            Transformation transformation = new Transformation(jobId, null, conn);
-            try {
-                dataMap = transformation.TransformIn(value);
-                System.out.println(dataMap);
-            } catch (IOException e) {
-                e.printStackTrace();
+        while (true) {
+            ConsumerRecords<String, String> records = consumer.poll(2000);
+            for (final ConsumerRecord record : records) {
+                String value = (String) record.value();
+                Transformation transformation = new Transformation(jobId, null, conn);
+                try {
+                    dataMap = transformation.TransformIn(value);
+                    loading.excuteIncrementSQL(dataMap);
+                    System.out.println(dataMap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -154,7 +157,7 @@ public class TransformationThread extends Thread {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String time = simpleDateFormat.format(new Date());
                     String errortype = "Error";
-                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
+                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
                     e.printStackTrace();
                 }
 
@@ -187,7 +190,7 @@ public class TransformationThread extends Thread {
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             String time = simpleDateFormat.format(new Date());
                             String errortype = "Error";
-                            jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
+                            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
                             e.printStackTrace();
                         }
                     }
