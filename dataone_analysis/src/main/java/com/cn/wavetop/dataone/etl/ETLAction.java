@@ -22,7 +22,7 @@ import java.util.Map;
  * 开启监控线程的做法
  */
 @Component
-public class ETLAction extends Thread {
+public class ETLAction  {
     private static Map<Object, JobMonitoringThread> jobMonitoringMap = new HashMap<Object, JobMonitoringThread>();
 
 
