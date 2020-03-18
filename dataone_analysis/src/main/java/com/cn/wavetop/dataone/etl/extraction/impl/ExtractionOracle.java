@@ -188,6 +188,8 @@ public class ExtractionOracle implements Extraction {
      */
     @Override
     public void incrementRang() {
+
+
         System.out.println("Oracle 增量开始");
         StringBuffer br = new StringBuffer();
         long scn =0;// todo 查看scn

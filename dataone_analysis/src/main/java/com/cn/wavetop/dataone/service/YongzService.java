@@ -1,7 +1,7 @@
 package com.cn.wavetop.dataone.service;
 
-import com.cn.wavetop.dataone.dao.SysMonitoringRepository;
-import com.cn.wavetop.dataone.entity.SysMonitoring;
+import com.cn.wavetop.dataone.dao.*;
+import com.cn.wavetop.dataone.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,14 @@ public class YongzService {
 
     @Autowired
     private SysMonitoringRepository sysMonitoringRepository;
+    @Autowired
+    private SysJobinfoRespository sysJobinfoRespository;
+    @Autowired
+    private DataChangeSettingsRespository dataChangeSettingsRespository;
+    @Autowired
+    private UserLogRepository userLogRepository;
+    @Autowired
+    private SysJobrelaRespository sysJobrelaRespository;
 
     /**
      * 参数为job_id和源端表名和目的端表名和sqlcount
@@ -100,7 +108,7 @@ public class YongzService {
                     dayWriteRate = sysMonitoringList.get(0).getDayWriteRate();
                 }
             }
-            //读取量累加
+            //寫入量量累加
             if(sysMonitoringList.get(0).getWriteData()!=null) {
                 writeData += sysMonitoringList.get(0).getWriteData();
             }
@@ -111,4 +119,68 @@ public class YongzService {
         sysMonitoringList.clear();
     }
 
+    /**
+     * 根据jobId和tableName更新監控表的狀態
+     */
+    public void updateJobStatus(Long jobId,String tableName,int jobStatus){
+        sysMonitoringRepository.updateStatus(jobId,tableName,jobStatus);
+    }
+
+
+    /**
+     * 根据jobId查询jobInfo表的配置信息
+     * getLogMinerScn()是oracle增量的自定义起点
+     */
+    public SysJobinfo findJobInfoByjobId(Long jobId) {
+        return sysJobinfoRespository.findByJobId(jobId);
+    }
+
+
+    /**
+     * 根据jobId查询数据源变化设置
+     */
+    public List<DataChangeSettings> findDataChangeByjobId(Long jobId) {
+        return dataChangeSettingsRespository.findByJobId(jobId);
+    }
+
+    /**
+     * 数据源变化更新中台的消息列表
+     */
+    public void saveUserLog(Long jobId, String operate) {
+        SysJobrela sysJobrela = sysJobrelaRespository.findById(jobId.longValue());
+        Userlog userlog = Userlog.builder().
+                jobId(jobId).
+                jobName(sysJobrela.getJobName()).
+                operate(operate).
+                time(new Date())
+                .build();
+        userLogRepository.save(userlog);
+    }
+
+
+    /**
+     * 根据写入量和sqlcount总量的比较判断全量是否结束
+     * @param jobId
+     * @return
+     */
+    public Boolean fullOver(Long jobId){
+        Long writeData=0l;
+        Long sqlCount=0l;
+      List<SysMonitoring> monitoringList=sysMonitoringRepository.findByJobId(jobId);
+      if(monitoringList!=null&&monitoringList.size()>0){
+          for(SysMonitoring sysMonitoring:monitoringList){
+              if(sysMonitoring.getWriteData()!=null){
+                  writeData+=sysMonitoring.getWriteData();
+              }
+              if(sysMonitoring.getSqlCount()!=null){
+                  sqlCount+=sysMonitoring.getSqlCount();
+              }
+          }
+      }
+      if(writeData>=sqlCount&&sqlCount!=0){
+          return true;
+      }else{
+          return false;
+      }
+    }
 }

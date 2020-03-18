@@ -312,6 +312,7 @@ public class DBUtil {
         } finally {
             try {
                 rs.close();
+                rs=null;
             } catch (Exception e) {
             }
             try {
