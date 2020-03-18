@@ -59,6 +59,7 @@ public class Transformation {
         Map before = (Map) payload.get("before");
         String TABLE_NAME = payload.get("TABLE_NAME").toString();
         message.put("sourceTable", TABLE_NAME);
+        message.put("jobId", jobId);
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, TABLE_NAME));
 
         //字段映射

@@ -322,7 +322,8 @@ public class LoadingDM implements Loading {
                 pstm.setObject(i, dataMap.get(field));
                 i++;
             }
-            pstm.addBatch();
+            pstm.executeUpdate();
+            destConn.commit();
         } catch (Exception e) {
             String message = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
@@ -395,6 +396,7 @@ public class LoadingDM implements Loading {
                 i++;
             }
             pstm.execute();
+            destConn.commit();
         } catch (Exception e) {
             String message = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
@@ -454,6 +456,7 @@ public class LoadingDM implements Loading {
                 i++;
             }
             pstm.execute();
+            destConn.commit();
         } catch (Exception e) {
             String message = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
