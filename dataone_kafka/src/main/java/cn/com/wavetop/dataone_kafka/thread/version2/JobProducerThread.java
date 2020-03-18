@@ -88,6 +88,8 @@ public class JobProducerThread extends Thread {
         timestamp = new Date().getTime();
 //        ArrayList<String> fileNames;
         // sync_range::1是全量，2是增量，3是增量+全量，4是存量
+
+
         int sync_range = restTemplate.getForObject("http://DATAONE-WEB/toback/find_range/" + jodId, Integer.class);
 
         // int sync_range = (int) toBackClient.findRangeByJobId(jodId);

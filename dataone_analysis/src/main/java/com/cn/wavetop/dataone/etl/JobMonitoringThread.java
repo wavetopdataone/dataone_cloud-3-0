@@ -17,7 +17,7 @@ import java.util.Map;
  * @Author yongz
  * @Date 2020/3/6、11:34
  */
-public class JobMonitoringThread extends  Thread {
+public class JobMonitoringThread extends Thread {
     private Long jobId;
 
     private static Map<Object, ExtractionThread> ExtractionThreads;
@@ -27,7 +27,7 @@ public class JobMonitoringThread extends  Thread {
      * 外层Key为任务{jobid}
      * 内存map的key为对应的任务的表名
      */
-   // private static Map<Object, Map<Object, ExtractionThread>> jobExtractionThreads = new HashMap<Object, Map<Object, ExtractionThread>>();
+    // private static Map<Object, Map<Object, ExtractionThread>> jobExtractionThreads = new HashMap<Object, Map<Object, ExtractionThread>>();
 
 
     //    /**
@@ -43,6 +43,7 @@ public class JobMonitoringThread extends  Thread {
     public JobMonitoringThread(Long jobId) {
         this.jobId = jobId;
     }
+
     private static final JobRelaServiceImpl JobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
 
 
@@ -130,8 +131,21 @@ public class JobMonitoringThread extends  Thread {
     }
 
 
+    /**
+     * 任务监控线程
+     */
     @Override
     public void run() {
-        System.out.println("我要开始监控任务了！");
+        while (true) {
+            System.out.println("我要开始监控任务了！");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+
+
 }
