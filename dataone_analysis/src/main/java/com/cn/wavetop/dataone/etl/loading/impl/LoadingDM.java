@@ -382,7 +382,7 @@ public class LoadingDM implements Loading {
             if (null == (sourceEntry.getValue())) {
                 nullCondition.append(sourceEntry.getKey() + " IS NULL " + " and ");
             } else {
-                whereCondition.append(sourceEntry.getKey() + " = " + sourceEntry.getValue() + " and ");
+                whereCondition.append(sourceEntry.getKey() + " = " + "?" + " and ");
             }
         }
         //截掉最后一个/,和and
@@ -391,10 +391,14 @@ public class LoadingDM implements Loading {
         String sql = substring + " where " + and;
         PreparedStatement pstm = null;
         try {
-            pstm = destConn.prepareStatement(preSql.toString());
+            pstm = destConn.prepareStatement(sql);
             int i = 1;
             for (Map.Entry<String, Object> entry : destMap.entrySet()) {
                 pstm.setObject(i, entry.getValue());
+                i++;
+            }
+            for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
+                pstm.setObject(i,sourceEntry.getValue());
                 i++;
             }
             pstm.execute();
@@ -434,9 +438,9 @@ public class LoadingDM implements Loading {
         String dest_name = (String) payload.get("TABLE_NAME");
         Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
-        Statement st = null;
+        PreparedStatement pstm =  null;
         try {
-            st = destConn.createStatement();
+
             //预编译存储语句
             StringBuffer preSql = new StringBuffer("delete from " + dest_name + " where ");
             for (String key : sourceMap.keySet()) {
@@ -448,7 +452,15 @@ public class LoadingDM implements Loading {
                 }
             }
             preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
-            st.execute(preSql.toString());
+
+            pstm = destConn.prepareStatement(preSql.toString());
+
+            int i = 1;
+            for (Object field : sourceMap.keySet()) {
+                pstm.setObject(i, sourceMap.get(field));
+                i++;
+            }
+            pstm.execute();
         } catch (Exception e) {
             String message = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
@@ -459,7 +471,7 @@ public class LoadingDM implements Loading {
             e.printStackTrace();
         } finally {
             try {
-                st.close();
+                pstm.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
