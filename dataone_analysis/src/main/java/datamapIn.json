@@ -1,0 +1,101 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "int64",
+        "optional": false,
+        "field": "SCN"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "SEG_OWNER"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "TABLE_NAME"
+      },
+      {
+        "type": "int64",
+        "optional": false,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "version": 1,
+        "field": "TIMESTAMP"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "SQL_REDO"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "OPERATION"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "double",
+            "optional": true,
+            "field": "ID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ENAME"
+          }
+        ],
+        "optional": true,
+        "name": "value",
+        "field": "data"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "double",
+            "optional": true,
+            "field": "ID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ENAME"
+          }
+        ],
+        "optional": true,
+        "name": "value",
+        "field": "before"
+      }
+    ],
+    "optional": false,
+    "name": "test.test1.test.row"
+  },
+  "payload": {
+    "SCN": 19765409,
+    "SEG_OWNER": "TEST1",
+    "TABLE_NAME": "TEST",
+    "TIMESTAMP": 1584418424000,
+    "SQL_REDO": "insert into \"TEST1\".\"TEST\"(\"ID\",\"NAME\",\"ENAME\") values (3,\u00272\u0027,NULL)",
+    "OPERATION": "INSERT",
+    "data": {
+      "ID": 3.0,
+      "NAME": "2",
+      "ENAME": null
+    },
+    "before": null
+  }
+}
