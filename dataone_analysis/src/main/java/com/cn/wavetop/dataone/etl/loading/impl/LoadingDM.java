@@ -56,7 +56,6 @@ public class LoadingDM implements Loading {
     }
 
 
-
     /**
      * 二进制的预编译
      * 大字段的预编译
@@ -365,10 +364,12 @@ public class LoadingDM implements Loading {
         //预编译存储语句
         StringBuffer preSql = new StringBuffer("update " + dest_name + " set ");
         //这里的key可能不同
+        String key = "";
         for (Map.Entry<String, Object> destEntry : destMap.entrySet()) {
             String destvalue = String.valueOf(destEntry.getValue());
             String sourcevalue = String.valueOf(sourceMap.get(destEntry.getKey()));
             if (!destvalue.equals(sourcevalue)) {
+                key = destEntry.getKey();
                 preSql.append(destEntry.getKey() + " = " + "?" + " ,");
             }
         }
@@ -387,12 +388,9 @@ public class LoadingDM implements Loading {
         try {
             pstm = destConn.prepareStatement(sql);
             int i = 1;
-            for (Map.Entry<String, Object> entry : destMap.entrySet()) {
-                pstm.setObject(i, entry.getValue());
-                i++;
-            }
+            pstm.setObject(i++, destMap.get(key));
             for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
-                pstm.setObject(i,sourceEntry.getValue());
+                pstm.setObject(i, sourceEntry.getValue());
                 i++;
             }
             pstm.execute();
@@ -433,7 +431,7 @@ public class LoadingDM implements Loading {
         String dest_name = (String) payload.get("TABLE_NAME");
         Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
-        PreparedStatement pstm =  null;
+        PreparedStatement pstm = null;
         try {
 
             //预编译存储语句
