@@ -7,7 +7,7 @@ import com.cn.wavetop.dataone.db.ResultMap;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.Extraction;
 import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
-import com.cn.wavetop.dataone.kafkahttputils.HttpClientKafkaUtil;
+import com.cn.wavetop.dataone.kafkautil.HttpClientKafkaUtil;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.producer.Producer;
 import com.cn.wavetop.dataone.util.JSONUtil;

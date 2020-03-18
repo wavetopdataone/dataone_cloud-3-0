@@ -56,13 +56,6 @@ public class LoadingDM implements Loading {
     }
 
 
-    public static void main(String[] args) {
-        String value = "{\"payload\":{\"HISAL\":\"9999\",\"GRADE\":\"5\",\"LOSAL\":\"3001\"},\"message\":{\"destTable\":\"SALGRADE\",\"sourceTable\":\"SALGRADE\",\"creatTable\":\"CREATE TABLE SYSDBA.SALGRADE(GRADE NUMBER,LOSAL NUMBER,HISAL NUMBER);\",\"big_data\":[],\"stop_flag\":\"等待定义\",\"key\":[]}}";
-        String value1 = "{\"payload\":{\"HISAL\":\"9999\",\"GRADE\":\"5\",\"LOSAL\":\"3001\"},\"message\":{\"destTable\":\"SALGRADE\",\"sourceTable\":\"SALGRADE\",\"creatTable\":\"CREATE TABLE SYSDBA.SALGRADE(GRADE NUMBER,LOSAL NUMBER,HISAL NUMBER);\",\"big_data\":[],\"stop_flag\":\"等待定义\",\"key\":[]}}";
-        HashMap<Object, Object> dataMap = new HashMap<>();
-        dataMap.putAll(JSONObject.parseObject(value));
-
-    }
 
     /**
      * 二进制的预编译
@@ -272,7 +265,7 @@ public class LoadingDM implements Loading {
     @Override
     public int excuteIncrementSQL(Map dataMap) {
         Map payload = (Map) dataMap.get("payload");
-        String dmlsql = payload.get("SQL_REDO").toString();
+//        String dmlsql = payload.get("SQL_REDO").toString();
         String operation = payload.get("OPERATION").toString();
         if (operation.equalsIgnoreCase("insert")) {
             return excuteIncrementInsert(payload);
