@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.sql.*;
@@ -67,6 +68,8 @@ public class JobRelaServiceImpl {
     private ErrorLogRespository errorLogRespository;
     @Autowired
     private UserLogRepository userLogRepository;
+    // 注入restTemplate
+    private RestTemplate restTemplate = (RestTemplate) SpringContextUtil.getBean("restTemplate");
 
     /**
      * 根据jobId查询源端数据源信息
@@ -522,9 +525,10 @@ public class JobRelaServiceImpl {
             if (count >= 100000) {
                 Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
                 String jobStatus = sysJobrela.get().getJobStatus();
-                //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态,21是暂停状态
-                if (!"2".equals(jobStatus) && !"21".equals(jobStatus) && !"4".equals(jobStatus)) {
-                    sysJobrela.get().setJobStatus("21");//改为暂停
+                Boolean forObject = restTemplate.getForObject("http://dataone-analysis/job/stop/"+ jobId, Boolean.class);
+                //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态
+                if (forObject && !"2".equals(jobStatus) && !"4".equals(jobStatus)) {
+                    sysJobrela.get().setJobStatus("2");//改为暂停
                     sysJobrelaRespository.save(sysJobrela.get());
                     userLogRepository.save(build2);
                 }
