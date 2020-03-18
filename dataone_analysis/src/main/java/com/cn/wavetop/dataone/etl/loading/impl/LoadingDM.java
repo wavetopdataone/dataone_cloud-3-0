@@ -444,14 +444,16 @@ public class LoadingDM implements Loading {
                     preSql.append(" " + key + " = " + " ? " + " and ");
                 }
             }
-            preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
+            String and = preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
 
-            pstm = destConn.prepareStatement(preSql.toString());
+            pstm = destConn.prepareStatement(and);
 
             int i = 1;
             for (Object field : sourceMap.keySet()) {
-                pstm.setObject(i, sourceMap.get(field));
-                i++;
+                if (sourceMap.get(field) != null){
+                    pstm.setObject(i, sourceMap.get(field));
+                    i++;
+                }
             }
             pstm.execute();
             destConn.commit();
