@@ -1,16 +1,20 @@
 {
-  "payload": {
-    "ENAME": "te972",
-    "ID": "1460"
-  },
-  "message": {
-    "destTable": "DD",
-    "sourceTable": "DD",
-    "big_data": [],
-    "creatTable": "CREATE TABLE SYSDBA.DD(ID NUMBER(10) NOT NULL,ENAME VARCHAR2(10),CONSTRAINT PK_DD_ID PRIMARY KEY (ID));",
-    "stop_flag": "等待定义",
-    "key": [
-      "ID"
-    ]
+  "name": "Increment-Source-82",
+  "config": {
+    "connector.class": "com.ecer.kafka.connect.oracle.OracleSourceConnector",
+    "reset.offset": "true",
+    "db.hostname": "192.168.1.25",
+    "tasks.max": "1",
+    "db.user.password": "oracle",
+    "table.whitelist": "scott.TEST,scott.TEST1,scott.TEST2,scott.TEST5",
+    "db.user": "scott",
+    "start.scn": 0,
+    "db.port": 1521,
+    "db.fetch.size": "1",
+    "multitenant": "false",
+    "topic": "Increment-Source-82",
+    "parse.dml.data": "true",
+    "db.name": "orcl",
+    "db.name.alias": "test"
   }
 }
