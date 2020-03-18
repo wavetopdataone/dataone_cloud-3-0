@@ -656,7 +656,7 @@ public class LoadingDM implements Loading {
             }
         } else {
             Integer count = 0;
-            //拿到日期的列集合
+
             for (Object field : payload.keySet()) {
                 if (count == payload.keySet().size() - 1) {
                     value.append(field + "=  ?" );
@@ -709,8 +709,22 @@ public class LoadingDM implements Loading {
         ByteArrayOutputStream baos = null;
         oracle.sql.BLOB blob = null;
         Map message = (Map) dataMap.get("message");
+        Map payload = (Map) dataMap.get("payload");
+
         List<String> bigData = (List) message.get("big_data");
         ps = destConn.prepareStatement(selSql);
+        List key = (List) payload.get("key");
+        if (key != null && key.size() > 0) {
+            for (int i = 0; i < key.size(); i++) {
+                ps.setObject(i+1,key.get(i));
+            }
+        } else {
+            int i = 1;
+            for (Object field : payload.keySet()) {
+                ps.setObject(i, payload.get(field));
+                i++;
+            }
+        }
         resultSet = ps.executeQuery(selSql);
         if (resultSet.next()) {
             for (int i = 0; i < bigData.size(); i++) {
@@ -725,17 +739,9 @@ public class LoadingDM implements Loading {
                 input.close();
                 baos.flush();
                 baos.close();
-//                        ps.setObject(i, ps.get(field));
-
             }
         }
-        System.out.println(insertSql);
-        Map payload = (Map) dataMap.get("payload");
-        int i = 1;
-        for (Object field : payload.keySet()) {
-            i++;
-        }
-
+        System.out.println(baos);
         ps.execute();
         ps.close();
         destConn.commit();
