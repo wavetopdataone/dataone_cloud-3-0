@@ -138,7 +138,7 @@ public class TransformationThread extends Thread {
                     // todo 转换
                     e.printStackTrace();
                 }
-                System.out.println(dataMap);
+//                System.out.println(dataMap);
 
                 if (insertSql == null) {
                     insertSql = loading.getFullSQL(dataMap);
