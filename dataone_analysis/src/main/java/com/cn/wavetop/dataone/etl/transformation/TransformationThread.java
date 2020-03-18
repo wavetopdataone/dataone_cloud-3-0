@@ -67,9 +67,9 @@ public class TransformationThread extends Thread {
     private void incrementRangTran() {
         System.out.println("开始增量抓取插入");
         Map dataMap = null;
+        Loading loading = newInstanceLoading();
         // 获取连接
         getDestConn();
-        Loading loading = newInstanceLoading();
         KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, "&Increment*");
         consumer.subscribe(Arrays.asList("Increment-Source-" + jobId));
         ConsumerRecords<String, String> records = consumer.poll(2000);
@@ -78,10 +78,8 @@ public class TransformationThread extends Thread {
             Transformation transformation = new Transformation(jobId, null, conn);
             try {
                 dataMap = transformation.TransformIn(value);
-                loading.excuteIncrementSQL(dataMap);
                 System.out.println(dataMap);
             } catch (IOException e) {
-                // 错误队列也行
                 e.printStackTrace();
             }
         }

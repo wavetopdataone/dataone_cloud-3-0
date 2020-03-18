@@ -265,7 +265,7 @@ public class LoadingDM implements Loading {
     @Override
     public int excuteIncrementSQL(Map dataMap) {
         Map payload = (Map) dataMap.get("payload");
-//        String dmlsql = payload.get("SQL_REDO").toString();
+        String dmlsql = payload.get("SQL_REDO").toString();
         String operation = payload.get("OPERATION").toString();
         if (operation.equalsIgnoreCase("insert")) {
             return excuteIncrementInsert(payload);
@@ -443,7 +443,7 @@ public class LoadingDM implements Loading {
                 if (null == value) {
                     nullCondition.append(" " + key + " IS NULL");
                 } else {
-                    preSql.append(" " + key + " = " + value + " and ");
+                    preSql.append(" " + key + " = " + " ? " + " and ");
                 }
             }
             preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));

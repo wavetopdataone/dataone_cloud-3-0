@@ -77,14 +77,14 @@ public class LoadingThread extends Thread {
                 try {
                     loading.excuteInsert(insertSql, dataMap ,ps);
                 } catch (Exception e) {
-//                    // todo 错误队列   王成实现
-//                    String message = e.toString();
-//                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                    String time = simpleDateFormat.format(new Date());
-//                    String errortype = "Error";
-//                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,message);
-//                    e.printStackTrace();
+                    // todo 错误队列   王成实现
+                    String message = e.toString();
+                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String time = simpleDateFormat.format(new Date());
+                    String errortype = "Error";
+                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,message);
+                    e.printStackTrace();
                 }
             }
 
