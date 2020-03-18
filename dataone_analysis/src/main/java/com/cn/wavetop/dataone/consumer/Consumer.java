@@ -15,7 +15,7 @@ public class Consumer {
          Properties props = new Properties();
         props.put("bootstrap.servers", "192.168.1.156:9092");
         props.put("group.id", jobId+tableName);
-        props.put("enable.auto.commit", "false");
+        props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
         HashMap<String, String> map = new HashMap<>();
         //HashMap<String, String> iteratorList = new HashMap<>();
