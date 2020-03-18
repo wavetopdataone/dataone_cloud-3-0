@@ -441,7 +441,7 @@ public class LoadingDM implements Loading {
                 if (null == value) {
                     nullCondition.append(" " + key + " IS NULL");
                 } else {
-                    preSql.append(" " + key + " = " + value + " and ");
+                    preSql.append(" " + key + " = " + " ? " + " and ");
                 }
             }
             preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
