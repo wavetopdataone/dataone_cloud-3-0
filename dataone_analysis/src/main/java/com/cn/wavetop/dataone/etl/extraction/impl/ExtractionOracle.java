@@ -233,6 +233,7 @@ public class ExtractionOracle implements Extraction {
 
     @Override
     public void stopTrans() {
+        // TODO 清空Topic
         this.transformationThread.stop();
     }
 

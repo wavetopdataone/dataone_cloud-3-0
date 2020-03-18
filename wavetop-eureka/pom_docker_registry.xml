@@ -67,9 +67,9 @@
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                     </imageTags>
-                    <registryUrl>192.168.1.143:5000</registryUrl>
+                    <registryUrl>192.168.1.133:5000</registryUrl>
                     <pushImage>true</pushImage>
-                    <imageName>192.168.1.143:5000/${project.artifactId}:${project.version}</imageName>
+                    <imageName>192.168.1.133:5000/${project.artifactId}:${project.version}</imageName>
                     <!--构建镜像的配置信息-->
                     <resources>
                         <resource>
@@ -78,7 +78,7 @@
                             <include>${project.artifactId}-${project.version}.jar</include>
                         </resource>
                     </resources>
-                    <dockerHost>http://192.168.1.143:2375</dockerHost>
+                    <dockerHost>http://192.168.1.133:2375</dockerHost>
                 </configuration>
             </plugin>
         </plugins>
