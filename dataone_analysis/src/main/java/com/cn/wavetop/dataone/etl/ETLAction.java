@@ -18,6 +18,8 @@ import java.util.Map;
 /**
  * @Author yongz
  * @Date 2020/3/6、11:34
+ *
+ * 开启监控线程的做法
  */
 @Component
 public class ETLAction extends Thread {
