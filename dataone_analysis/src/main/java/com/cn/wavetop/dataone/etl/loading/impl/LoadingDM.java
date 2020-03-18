@@ -439,7 +439,7 @@ public class LoadingDM implements Loading {
             for (String key : sourceMap.keySet()) {
                 Object value = sourceMap.get(key);
                 if (null == value) {
-                    nullCondition.append(" " + key + " IS NULL");
+                    nullCondition.append(" " + key + " IS NULL and");
                 } else {
                     preSql.append(" " + key + " = " + " ? " + " and ");
                 }
