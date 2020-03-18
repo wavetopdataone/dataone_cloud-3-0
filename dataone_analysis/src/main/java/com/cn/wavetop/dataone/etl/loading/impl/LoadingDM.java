@@ -446,6 +446,7 @@ public class LoadingDM implements Loading {
             }
             preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
 
+            System.out.println(preSql.toString());
             pstm = destConn.prepareStatement(preSql.toString());
 
             int i = 1;
