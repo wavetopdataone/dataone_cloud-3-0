@@ -20,12 +20,16 @@ public interface Loading {
   //导入达梦接口
   public void loadingDM(String jsonString);
 
-  // 获取insert语句
-  public String getInsert(Map dataMap);
+  // 获取全量的sql语句
+  public String getFullSQL(Map dataMap);
+
+  // 解析增量的sql语句，并执行
+  public int excuteIncrementSQL(Map dataMap);
 
   // 执行insert
 //    void excuteInsert(String insertSql, Map dataMap) throws Exception;
 
   // 执行insert 用批处理
   void excuteInsert(String insertSql, Map dataMap, PreparedStatement ps) throws Exception;
+
 }

@@ -9,6 +9,7 @@ import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+import com.sun.xml.fastinfoset.util.ValueArray;
 import lombok.Data;
 
 import java.io.ByteArrayOutputStream;
@@ -221,9 +222,6 @@ public class LoadingDM implements Loading {
             }
 
 
-
-
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -239,13 +237,13 @@ public class LoadingDM implements Loading {
     }
 
     /**
-     * 解析insert
+     * 解析全量的insert
      *
      * @param dataMap
      * @return
      */
     @Override
-    public String getInsert(Map dataMap) {
+    public String getFullSQL(Map dataMap) {
         System.out.println(dataMap);
         Map message = (Map) dataMap.get("message");
         //大字段
@@ -261,6 +259,66 @@ public class LoadingDM implements Loading {
         }
     }
 
+    /**
+     * 解析增量
+     * todo 王成
+     *
+     * @param dataMap
+     * @return
+     */
+    @Override
+    public int excuteIncrementSQL(Map dataMap) {
+        Map payload = (Map) dataMap.get("payload");
+        String dmlsql = payload.get("SQL_REDO").toString();
+        String operation = payload.get("OPERATION").toString();
+
+        if (operation.equalsIgnoreCase("insert")) {
+            return excuteIncrementInsert();
+
+        } else if (operation.equalsIgnoreCase("update")) {
+            return excuteIncrementUpdate();
+
+        } else if (operation.equalsIgnoreCase("delete")) {
+            return excuteIncrementDelete();
+        }
+        return 0;
+    }
+
+    /**
+     * TODO 王成
+     * 解析出insert语句 并执行
+     * 注：  预留二进制字段
+     * 预留错误队列处理
+     *
+     * @return
+     */
+    private int excuteIncrementInsert() {
+        return 1;
+    }
+
+    /**
+     * TODO 王成
+     * 解析出insert语句 并执行
+     * 注：  预留二进制字段
+     * 预留错误队列处理
+     *
+     * @return
+     */
+    private int excuteIncrementUpdate() {
+        return 1;
+    }
+
+    /**
+     * TODO 王成
+     * 解析出insert语句 并执行
+     * 注：  预留二进制字段
+     * 预留错误队列处理
+     *
+     * @return
+     */
+    private int excuteIncrementDelete() {
+        return 1;
+    }
 
     /**
      * 执行insert
@@ -270,20 +328,19 @@ public class LoadingDM implements Loading {
      * @throws SQLException
      */
     @Override
-    public void excuteInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
+    public void excuteInsert(String insertSql, Map dataMap, PreparedStatement ps) throws Exception {
         //大字段
         List bigdatas = (List) (((Map) dataMap.get("message")).get("big_data"));
 
         if (bigdatas == null || bigdatas.size() == 0) {
 
             //不含blob
-            excuteNoBlodByInsert(insertSql, dataMap,ps);
+            excuteNoBlodByInsert(insertSql, dataMap, ps);
         } else {
             //含blob
 //            excuteHasBlodByInsert(insertSql, dataMap, ps);
         }
     }
-
 
 
     public String noBlodToInsert(Map dataMap) {
@@ -351,6 +408,7 @@ public class LoadingDM implements Loading {
         stringBuffer.append(fields + ") values (" + value + ");");
         return stringBuffer.toString();
     }
+
     /**
      * 源端查询大字段类型数据的查询sql拼接
      */
@@ -383,22 +441,22 @@ public class LoadingDM implements Loading {
         } else {
             Integer count = 0;
             //拿到日期的列集合
-            List<String> analyCreate=  jobRelaServiceImpl.analyCreate(dataMap);
+            List<String> analyCreate = jobRelaServiceImpl.analyCreate(dataMap);
             for (Object field : payload.keySet()) {
                 if (count == payload.keySet().size() - 1) {
                     //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
-                    if(jobRelaServiceImpl.equalsDate((String)field,analyCreate)){
+                    if (jobRelaServiceImpl.equalsDate((String) field, analyCreate)) {
                         //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
-                        value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field)));
-                    }else {
+                        value.append(field + "=" + jobRelaServiceImpl.dateLength((String) payload.get(field)));
+                    } else {
                         value.append(field + "='" + payload.get(field) + "'");
                     }
                 } else {
                     //判断是不是日期类型，是 日期要用to_date包着值，如果不是进else
-                    if(jobRelaServiceImpl.equalsDate((String)field,analyCreate)){
+                    if (jobRelaServiceImpl.equalsDate((String) field, analyCreate)) {
                         //dateLength（）方法判断值得长度来确定yyyy-MM-dd还是YYYY-MM-dd hh24:mi:ss两种
-                        value.append(field + "=" +jobRelaServiceImpl.dateLength((String)payload.get(field))+" and ");
-                    }else {
+                        value.append(field + "=" + jobRelaServiceImpl.dateLength((String) payload.get(field)) + " and ");
+                    } else {
                         value.append(field + "='" + payload.get(field) + "' and ");
                     }
                     count++;
@@ -410,8 +468,6 @@ public class LoadingDM implements Loading {
     }
 
 
-
-
     /**
      * 执行不含blob的insert
      *
@@ -419,7 +475,7 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteNoBlodByInsert(String insertSql, Map dataMap,PreparedStatement ps) throws Exception {
+    public void excuteNoBlodByInsert(String insertSql, Map dataMap, PreparedStatement ps) throws Exception {
 //        PreparedStatement ps2 = destConn.prepareStatement(insertSql);
 //        PreparedStatement  ps2 = TSQL.createPreparedStatement(destConn,insertSql, null);
         Map payload = (Map) dataMap.get("payload");
@@ -431,7 +487,7 @@ public class LoadingDM implements Loading {
         }
         ps.addBatch();
         payload.clear(); // gc
-        payload=null; //gc
+        payload = null; //gc
 
     }
 
@@ -444,32 +500,32 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteHasBlodByInsert( int index,String insertSql,String selSql, Map dataMap, PreparedStatement ps) throws Exception {
-        ResultSet resultSet=null;
+    public void excuteHasBlodByInsert(int index, String insertSql, String selSql, Map dataMap, PreparedStatement ps) throws Exception {
+        ResultSet resultSet = null;
         InputStream input = null;
-        ByteArrayOutputStream baos=null;
-        oracle.sql.BLOB  blob=null;
+        ByteArrayOutputStream baos = null;
+        oracle.sql.BLOB blob = null;
         Map message = (Map) dataMap.get("message");
-        List<String> bigData=(List)message.get("big_data");
-        ps= destConn.prepareStatement(selSql);
-                 resultSet=ps.executeQuery(selSql);
-                if (resultSet.next()) {
-                    for (int i = 0; i < bigData.size(); i++) {
-                        blob = (oracle.sql.BLOB) resultSet.getBlob(bigData.get(i));
-                        input = blob.getBinaryStream();
-                        baos = new ByteArrayOutputStream();
-                        byte[] b = new byte[1024];
-                        int l = 0;
-                        while ((l = input.read(b)) != -1) {
-                            baos.write(b, 0, l);
-                        }
-                        input.close();
-                        baos.flush();
-                        baos.close();
+        List<String> bigData = (List) message.get("big_data");
+        ps = destConn.prepareStatement(selSql);
+        resultSet = ps.executeQuery(selSql);
+        if (resultSet.next()) {
+            for (int i = 0; i < bigData.size(); i++) {
+                blob = (oracle.sql.BLOB) resultSet.getBlob(bigData.get(i));
+                input = blob.getBinaryStream();
+                baos = new ByteArrayOutputStream();
+                byte[] b = new byte[1024];
+                int l = 0;
+                while ((l = input.read(b)) != -1) {
+                    baos.write(b, 0, l);
+                }
+                input.close();
+                baos.flush();
+                baos.close();
 //                        ps.setObject(i, ps.get(field));
 
-                    }
-                }
+            }
+        }
         System.out.println(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;
