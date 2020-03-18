@@ -53,37 +53,42 @@ public class TransformationThread extends Thread {
     @SneakyThrows
     @Override
     public void run() {
-        switch (sync_range) {
+        if (tableName != null)
             //全量
-            case 1:
-                fullRangTran();
-                break;
+            fullRangTran();
+        else
             //增量
-            case 2:
-                incrementRangTran();
-                break;
-            //增量+全量
-            case 3:
-
-                break;
-        }
-
+            incrementRangTran();
     }
 
     /**
      * 增量清洗
      */
     private void incrementRangTran() {
-
+        System.out.println("开始增量抓取插入");
+        Map dataMap = null;
+        Loading loading = newInstanceLoading();
+        // 获取连接
+        getDestConn();
+        KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, "&Increment*");
+        consumer.subscribe(Arrays.asList("Increment-Source-" + jobId));
+        ConsumerRecords<String, String> records = consumer.poll(2000);
+        for (final ConsumerRecord record : records) {
+            String value = (String) record.value();
+            Transformation transformation = new Transformation(jobId, null, conn);
+            try {
+                dataMap = transformation.TransformIn(value);
+                System.out.println(dataMap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
-     * 全量的清洗
+     * 获取目标端数据库连接
      */
-    private void fullRangTran() {
-        int index = 1;
-        Map dataMap = null;
-        Map message = null;
+    private void getDestConn() {
         while (destConn == null) {
             try {
                 this.destConn = DBConns.getConn(jobRelaServiceImpl.findDestDbinfoById(jobId));
@@ -97,14 +102,21 @@ public class TransformationThread extends Thread {
                 e.printStackTrace();
             }
         }
-        // SysDbinfo dest = this.jobRelaServiceImpl.findDestDbinfoById(jobId);
         try {
             destConn.setAutoCommit(false);
-//            destConn.setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    /**
+     * 全量的清洗
+     */
+    private void fullRangTran() {
+        int index = 0;
+        Map dataMap = null;
+        Map message = null;
+        getDestConn(); // 获取连接
 
         KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, tableName);
         consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
@@ -114,7 +126,7 @@ public class TransformationThread extends Thread {
         Loading loading = newInstanceLoading();
         while (true) {
 
-            ConsumerRecords<String, String> records = consumer.poll(1000);
+            ConsumerRecords<String, String> records = consumer.poll(500);
             // 开始时间戳
             long start = System.currentTimeMillis();
             for (final ConsumerRecord record : records) {
@@ -126,11 +138,10 @@ public class TransformationThread extends Thread {
                     // todo 转换
                     e.printStackTrace();
                 }
-                // todo 页面清洗
                 System.out.println(dataMap);
 
                 if (insertSql == null) {
-                    insertSql = loading.getInsert(dataMap);
+                    insertSql = loading.getFullSQL(dataMap);
                     message = (Map) dataMap.get("message");
                 }
                 try {
@@ -138,6 +149,12 @@ public class TransformationThread extends Thread {
                         ps = destConn.prepareStatement(insertSql);
                     }
                 } catch (SQLException e) {
+                    String errormessage = e.toString();
+                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String time = simpleDateFormat.format(new Date());
+                    String errortype = "Error";
+                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
                     e.printStackTrace();
                 }
 
@@ -147,7 +164,7 @@ public class TransformationThread extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
+                index++;
                 if (index == 100) {
                     // 时间戳
                     long end = System.currentTimeMillis();
@@ -164,20 +181,20 @@ public class TransformationThread extends Thread {
                             ps.clearBatch();
                             ps.close();
                             ps = null; //gc
-                        } catch (Exception e) {
+                        } catch (SQLException e) {
                             String errormessage = e.toString();
                             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             String time = simpleDateFormat.format(new Date());
                             String errortype = "Error";
-                            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                            jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,errormessage);
                             e.printStackTrace();
                         }
                     }
                     index = 0;// 当前
                     start = System.currentTimeMillis();
                 }
-                index++;
+
                 System.out.println(tableName + "--------" + index);
 
 
@@ -198,14 +215,8 @@ public class TransformationThread extends Thread {
                     ps.clearBatch();
                     ps.close();
                     ps = null; //gc
-                    index = 1;// 当前
-                } catch (Exception e) {
-                    String errormessage = e.toString();
-                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String time = simpleDateFormat.format(new Date());
-                    String errortype = "Error";
-                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                    index = 0;// 当前
+                } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 start = System.currentTimeMillis();

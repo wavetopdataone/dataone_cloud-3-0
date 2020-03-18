@@ -1,38 +1,28 @@
 package com.cn.wavetop.dataone.etl.extraction.impl;
 
 
-import com.cn.wavetop.dataone.config.SpringJDBCUtils;
+import com.cn.wavetop.dataone.config.ConfigSource;
 import com.cn.wavetop.dataone.db.DBUtil;
 import com.cn.wavetop.dataone.db.ResultMap;
-import com.cn.wavetop.dataone.destCreateTable.SuperCreateTable;
-import com.cn.wavetop.dataone.destCreateTable.impl.DMCreateSql;
-import com.cn.wavetop.dataone.destCreateTable.impl.MysqlCreateSql;
-import com.cn.wavetop.dataone.destCreateTable.impl.OracleCreateSql;
-import com.cn.wavetop.dataone.destCreateTable.impl.SqlserverCreateSql;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.Extraction;
-import com.cn.wavetop.dataone.etl.transformation.Transformation;
 import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
+import com.cn.wavetop.dataone.kafkahttputils.HttpClientKafkaUtil;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.producer.Producer;
-import com.cn.wavetop.dataone.util.DBConns;
 import com.cn.wavetop.dataone.util.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Var;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * @Author yongz
@@ -47,19 +37,20 @@ public class ExtractionOracle implements Extraction {
     private static Boolean blok = true;
     private Long jobId;
     private String tableName;
+    private List tableNames;//所有表
     private SysDbinfo sysDbinfo;
     private TransformationThread transformationThread;
     private Connection conn;//源端连接
     private Connection destConn;//目标端连接
-//    private Connection destConnByTran;//目标端连接
 
     /**
      * 全量抓取
      * 未优化的全查
+     * 已弃用
      *
      * @throws Exception
      */
-
+    @Deprecated
     public void fullRangALL() throws Exception {
         System.out.println("Oracle 全量开始");
         System.out.println(jobId);
@@ -87,7 +78,7 @@ public class ExtractionOracle implements Extraction {
                 e.printStackTrace();
             }
         }
-        startTrans(resultMap.size(),1);   //判断创建清洗线程并开启线程
+        startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
         System.out.println(tableName + "____" + resultMap.size());
         for (int i = 0; i < resultMap.size(); i++) {
 
@@ -148,7 +139,7 @@ public class ExtractionOracle implements Extraction {
 
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
         System.out.println(tableName + "------cha-------" + resultMap.size());
-        startTrans(resultMap.size(),1);   //判断创建清洗线程并开启线程
+        startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
         long start;    //开始读取的时间
         long end;    //结束读取的时间
         double readRate;    //读取速率
@@ -183,6 +174,14 @@ public class ExtractionOracle implements Extraction {
         st = null;
     }
 
+    private void alterTable(String sql, Connection destConn) throws SQLException {
+        Statement st = null;
+        st = destConn.createStatement();
+        st.executeUpdate(sql);
+        destConn.commit();
+        st.close();
+        st = null;
+    }
 
     /**
      * 增量抓取
@@ -190,6 +189,18 @@ public class ExtractionOracle implements Extraction {
     @Override
     public void incrementRang() {
         System.out.println("Oracle 增量开始");
+        StringBuffer br = new StringBuffer();
+        long scn =0;// todo 查看scn
+        for (Object tableName : tableNames) {
+            br.append(sysDbinfo.getUser().toUpperCase());
+            br.append(".");
+            br.append(tableName);
+            br.append(",");
+        }
+        String table_whitelist = br.toString().substring(0, br.toString().length() - 1);
+        String configSource = new ConfigSource(jobId, sysDbinfo, scn, table_whitelist.toString()).toJsonConfig();
+        HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSource); //创建connectorSource
+        startTrans(1, 2);   //判断创建清洗线程并开启线程
     }
 
     @Override
@@ -203,7 +214,7 @@ public class ExtractionOracle implements Extraction {
      *
      * @param size
      */
-    private void startTrans(int size,int sync_range) {
+    private void startTrans(int size, int sync_range) {
         if (size > 0) {
             if (transformationThread != null) {
                 return;
@@ -240,14 +251,7 @@ public class ExtractionOracle implements Extraction {
     }
 
 
-    public static void main(String[] args) throws InterruptedException {
-//        int index =1;
-//        while (true){
-//            System.out.println(getPageSelectSql(index,1000,"ID,ENAME","AA"));
-//           index = index +1000;
-//            Thread.sleep(100);
-//        }
-    }
+
 
     /**
      * @param index

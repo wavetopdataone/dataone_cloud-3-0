@@ -64,12 +64,39 @@ public class ETLAction {
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId,conn);
-            System.out.println("同步表："+tableById);
-            for (Object tableName : tableById) {
-                ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn));
-                ExtractionThreads.get(tableName).start();
+
+            int sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
+            switch (sync_range) {
+                //全量
+                case 1:
+                    for (Object tableName : tableById) {
+                        ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn,sync_range));
+                        ExtractionThreads.get(tableName).start();
+                    }
+                    jobExtractionThreads.put(jobId, ExtractionThreads);
+                    break;
+                //增量
+                case 2:
+                    ExtractionThreads.put("incrementRang-"+jobId,new ExtractionThread(jobId, tableById,conn,destConn,sync_range));
+                    ExtractionThreads.get("incrementRang-"+jobId).start();
+                    jobExtractionThreads.put(jobId, ExtractionThreads);
+                    break;
+                //增量+全量
+                case 3:
+                    for (Object tableName : tableById) {
+                        ExtractionThreads.put(tableName,new ExtractionThread(jobId, (String) tableName,conn,destConn,sync_range));
+                        ExtractionThreads.get(tableName).start();
+                    }
+                    ExtractionThreads.put("incrementRang-"+jobId,new ExtractionThread(jobId, tableById,conn,destConn,sync_range));
+                    ExtractionThreads.get("incrementRang-"+jobId).start();
+                    jobExtractionThreads.put(jobId, ExtractionThreads);
+                    break;
+                default:
+
             }
-            jobExtractionThreads.put(jobId, ExtractionThreads);
+
+
+
         } else {
             // todo 优化数据库连接
             // 重启，resume
