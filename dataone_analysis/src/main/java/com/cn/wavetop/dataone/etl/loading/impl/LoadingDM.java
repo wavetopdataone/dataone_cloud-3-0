@@ -370,7 +370,7 @@ public class LoadingDM implements Loading {
             String sourcevalue = String.valueOf(sourceMap.get(destEntry.getKey()));
             if (!destvalue.equals(sourcevalue)) {
                 key = destEntry.getKey();
-                preSql.append(destEntry.getKey() + " = " + "?" + " ,");
+                preSql.append(key + " = " + "?" + " ,");
             }
         }
         for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
