@@ -519,6 +519,7 @@ public class JobRelaServiceImpl {
         Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
         String jobName = sysJobrela.get().getJobName();
         Long offset = 1L;
+        
         //每一万次判断一次总数
         if (offset % 10000 == 0) {
             long count = errorLogRespository.count();
