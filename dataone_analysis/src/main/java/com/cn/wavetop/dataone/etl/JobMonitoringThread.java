@@ -135,7 +135,9 @@ public class JobMonitoringThread extends Thread {
     @Override
     public void run() {
         while (true) {
+            // 监控
             System.out.println("我要开始监控任务了！");
+            // 全量+增量
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
