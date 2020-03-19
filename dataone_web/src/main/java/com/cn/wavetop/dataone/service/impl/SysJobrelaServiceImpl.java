@@ -690,15 +690,6 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
 //                    byId.setJobStatus("11"); // 1代表运行中，11代表开始动作
                     byId.setJobStatus("1"); // 1代表运行中，11代表开始动作
                     repository.save(byId);
-                    Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"启动任务"+byId.getJobName()).jobId(id1).build();
-                    userlogRespository.save(build);
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        StackTraceElement stackTraceElement = e.getStackTrace()[0];
-                        logger.error("*"+stackTraceElement.getLineNumber()+e);
-                    }
                     Userlog build2 = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"启动任务"+byId.getJobName()+"成功").jobId(id1).build();
                     userlogRespository.save(build2);
                     //添加任务日志
@@ -745,15 +736,6 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
 //                byId.setJobStatus("21"); //  2 代表暂停中，21代表暂停动作
                 byId.setJobStatus("2"); //  2 代表暂停中，21代表暂停动作
                 repository.save(byId);
-                Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"暂停任务"+byId.getJobName()).jobId(id).build();
-                userlogRespository.save(build);
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    StackTraceElement stackTraceElement = e.getStackTrace()[0];
-                    logger.error("*"+stackTraceElement.getLineNumber()+e);
-                }
                 Userlog build2 = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"暂停任务"+byId.getJobName()+"成功").jobId(id).build();
                 userlogRespository.save(build2);
                 //添加任务日志
@@ -787,17 +769,6 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
 //                byId.setJobStatus("31"); // 3代表终止，31 代表停止功能
                 byId.setJobStatus("3"); // 3代表终止，31 代表停止功能
                 repository.save(byId);
-                Userlog build = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"停止任务"+byId.getJobName()).jobId(id).build();
-                userlogRespository.save(build);
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    StackTraceElement stackTraceElement = e.getStackTrace()[0];
-                    logger.error("*"+stackTraceElement.getLineNumber()+e);
-                }
-
-
                 Userlog build2 = Userlog.builder().time(new Date()).user(PermissionUtils.getSysUser().getLoginName()).jobName(byId.getJobName()).operate(PermissionUtils.getSysUser().getLoginName()+"停止任务"+byId.getJobName()+"成功").jobId(id).build();
                 userlogRespository.save(build2);
                 //添加任务日志

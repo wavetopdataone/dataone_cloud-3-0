@@ -50,7 +50,6 @@ public class TransformationThread extends Thread {
         }
     }
 
-    @SneakyThrows
     @Override
     public void run() {
         if (tableName != null)

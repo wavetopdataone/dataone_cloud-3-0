@@ -1,16 +1,12 @@
 package com.cn.wavetop.dataone;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import java.util.HashMap;
 
 @EnableScheduling
 @SpringCloudApplication
@@ -21,7 +17,6 @@ public class DataoneAnalysisApplication {
     public static void main(String[] args)  {
         ConfigurableApplicationContext context = SpringApplication.run(DataoneAnalysisApplication.class, args);
         new SpringContextUtil().setApplicationContext(context);  //获取bean
-
 //        while (true) {
 //            ThreadGroup group = Thread.currentThread().getThreadGroup();
 //            ThreadGroup topGroup = group;
