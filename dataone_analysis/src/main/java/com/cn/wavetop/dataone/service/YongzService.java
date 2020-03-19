@@ -314,7 +314,7 @@ public class YongzService {
                                 //todo  任务停止后 不在发送邮件了
                                 if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() == 1) {
                                     if (new ETLAction().pause(jobId)) {
-                                        sysJobrela.get().setJobStatus("21");
+                                        sysJobrela.get().setJobStatus("2");
                                         sysJobrelaRespository.save(sysJobrela.get());
                                     }
                                     emailPropert = new EmailPropert();
@@ -341,7 +341,7 @@ public class YongzService {
                             if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() != 1) {
                                 if ("1".equals(sysJobrela.get().getJobStatus())) {
                                     if (new ETLAction().pause(jobId)) {
-                                        sysJobrela.get().setJobStatus("21");
+                                        sysJobrela.get().setJobStatus("2");
                                         sysJobrelaRespository.save(sysJobrela.get());
                                     }
                                 }
