@@ -63,7 +63,8 @@ public class EmailClient extends Thread {
             BigDecimal bg1 = null;
             BigDecimal bg2 = null;
             sysUserOptional = sysUserRepository.findById(Long.valueOf(1));
-            list = repository.findEmailJobRelaUser();
+            // todo 方法放到后台了  根据jobId查询的
+//            list = repository.findEmailJobRelaUser();
             for (EmailJobrelaVo emailJobrelaVo : list) {
                 sysUserList = sysUserJobrelaRepository.selUserNameByJobId(emailJobrelaVo.getJobId());
                 emailJobrelaVo.setSysUserList(sysUserList);

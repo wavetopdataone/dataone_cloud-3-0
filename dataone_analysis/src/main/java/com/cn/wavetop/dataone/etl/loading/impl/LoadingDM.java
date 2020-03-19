@@ -569,7 +569,7 @@ public class LoadingDM implements Loading {
     }
 
     /**
-     * 源端查询大字段类型数据的查询sql拼接
+     * 源端查询大字段类型数据的查询sql拼接不是预编译的 where条件和值直接拼好的
      */
 
     public String Selblob(Map dataMap) {
@@ -626,6 +626,50 @@ public class LoadingDM implements Loading {
         return stringBuffer.toString();
     }
 
+    /**
+     * 源端查询大字段类型数据的查询sql拼接使用的是预编译的
+     */
+    public String Selblobs(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
+        Map payload = (Map) dataMap.get("payload");
+        StringBuffer stringBuffer = new StringBuffer("select ");
+        StringBuffer fields = new StringBuffer("");
+        StringBuffer value = new StringBuffer("");
+        Integer index = 0;
+        List list = (List) message.get("big_data");
+        for (int i = 0; i < list.size(); i++) {
+            if (i == list.size() - 1) {
+                fields.append(list.get(i));
+            } else {
+                fields.append(list.get(i) + ",");
+            }
+        }
+        List key = (List) payload.get("key");
+        if (key != null && key.size() > 0) {
+            for (int i = 0; i < key.size(); i++) {
+                if (i == key.size() - 1) {
+                    value.append(key.get(i) + "= ?");
+                } else {
+                    value.append(key.get(i) + "=? and ");
+                }
+            }
+        } else {
+            Integer count = 0;
+
+            for (Object field : payload.keySet()) {
+                if (count == payload.keySet().size() - 1) {
+                    value.append(field + "=  ?" );
+
+                } else {
+                    value.append(field + " = ? and ");
+                    count++;
+                }
+            }
+        }
+        stringBuffer.append(fields + " from " + destTable + " where " + value);
+        return stringBuffer.toString();
+    }
 
     /**
      * 执行不含blob的insert
@@ -665,8 +709,22 @@ public class LoadingDM implements Loading {
         ByteArrayOutputStream baos = null;
         oracle.sql.BLOB blob = null;
         Map message = (Map) dataMap.get("message");
+        Map payload = (Map) dataMap.get("payload");
+
         List<String> bigData = (List) message.get("big_data");
         ps = destConn.prepareStatement(selSql);
+        List key = (List) payload.get("key");
+        if (key != null && key.size() > 0) {
+            for (int i = 0; i < key.size(); i++) {
+                ps.setObject(i+1,key.get(i));
+            }
+        } else {
+            int i = 1;
+            for (Object field : payload.keySet()) {
+                ps.setObject(i, payload.get(field));
+                i++;
+            }
+        }
         resultSet = ps.executeQuery(selSql);
         if (resultSet.next()) {
             for (int i = 0; i < bigData.size(); i++) {
@@ -681,17 +739,9 @@ public class LoadingDM implements Loading {
                 input.close();
                 baos.flush();
                 baos.close();
-//                        ps.setObject(i, ps.get(field));
-
             }
         }
-        System.out.println(insertSql);
-        Map payload = (Map) dataMap.get("payload");
-        int i = 1;
-        for (Object field : payload.keySet()) {
-            i++;
-        }
-
+        System.out.println(baos);
         ps.execute();
         ps.close();
         destConn.commit();

@@ -106,8 +106,8 @@ public interface SysJobrelaRespository   extends JpaRepository<SysJobrela,Long>
     SysDbinfo findDbinfoById(Long id);
     @Query(value = "select sd from SysDbinfo sd,SysJobrela sj where  sj.sourceId=sd.id and sj.id=:id ")
     SysDbinfo findSourcesDbinfoById(Long id);
-    @Query(value = "select new com.cn.wavetop.dataone.entity.vo.EmailJobrelaVo(m.jobId,sj.jobName,m.jobError,m.errorQueueAlert,m.errorQueuePause,m.sourceChange) from MailnotifySettings m,SysJobrela sj where m.jobId=sj.id  and sj.jobStatus='1'")
-    List<EmailJobrelaVo> findEmailJobRelaUser();
+    @Query(value = "select new com.cn.wavetop.dataone.entity.vo.EmailJobrelaVo(m.jobId,sj.jobName,m.jobError,m.errorQueueAlert,m.errorQueuePause,m.sourceChange) from MailnotifySettings m,SysJobrela sj where m.jobId=sj.id and sj.id=:jobId  and sj.jobStatus='1'")
+    List<EmailJobrelaVo> findEmailJobRelaUser(Long jobId);
 
     @Query(value = "select sj from SysUser u,SysJobrela sj,SysUserJobrela uj where u.id=uj.userId and sj.id=uj.jobrelaId  and sj.jobName=:job_name and u.id=:userId order by sj.id desc")
     List<SysJobrela>  findJobByUserIdJobName(Long userId, String job_name);
@@ -122,7 +122,7 @@ public interface SysJobrelaRespository   extends JpaRepository<SysJobrela,Long>
     @Transactional
     @Modifying
     @Query(value = "update SysJobrela  set jobStatus=:jobStatus where id=:Id")
-    void updateStatus(Long Id,Integer jobStatus);
+    void updateStatus(Long Id,String jobStatus);
     @Query(value = "select s from SysJobrela s where s.jobStatus=1 or s.jobStatus=2")
     List<SysJobrela> findByJobStatus();
 }

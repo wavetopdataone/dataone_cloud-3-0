@@ -91,8 +91,6 @@ public class JobMonitoringThread extends Thread {
                 default:
 
             }
-
-
         } else {
             // todo 优化数据库连接
             // 重启，resume
