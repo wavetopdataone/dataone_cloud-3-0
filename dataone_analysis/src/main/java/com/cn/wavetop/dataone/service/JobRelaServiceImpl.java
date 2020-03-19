@@ -518,60 +518,57 @@ public class JobRelaServiceImpl {
         errorLog.setContent(message);
         Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
         String jobName = sysJobrela.get().getJobName();
-        Long offset = 1L;
-        
-        //每一万次判断一次总数
-        if (offset % 10000 == 0) {
-            long count = errorLogRespository.count();
-            if (count >= 100000) {
-                Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
-                String jobStatus = sysJobrela.get().getJobStatus();
-                Boolean forObject = restTemplate.getForObject("http://dataone-analysis/job/stop/"+ jobId, Boolean.class);
-                //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态
-                if (forObject && !"2".equals(jobStatus) && !"4".equals(jobStatus)) {
-                    sysJobrela.get().setJobStatus("2");//改为暂停
-                    sysJobrelaRespository.save(sysJobrela.get());
-                    userLogRepository.save(build2);
-                }
-            } else if (count >= 90000 && count < 100000) {
-                Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
+
+        long count = errorLogRespository.count();
+        if (count >= 100000) {
+            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
+            String jobStatus = sysJobrela.get().getJobStatus();
+            Boolean forObject = restTemplate.getForObject("http://dataone-analysis/job/stop/" + jobId, Boolean.class);
+            //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态
+            if (forObject && !"2".equals(jobStatus) && !"4".equals(jobStatus)) {
+                sysJobrela.get().setJobStatus("2");//改为暂停
+                sysJobrelaRespository.save(sysJobrela.get());
                 userLogRepository.save(build2);
             }
+        } else if (count >= 90000 && count < 100000) {
+            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
+            userLogRepository.save(build2);
         }
+     
         errorLogRespository.save(errorLog);
-        offset++;
+
     }
 
 
-    private static List<String> doLogAddress(Long jobId)  {
+    private static List<String> doLogAddress(Long jobId) {
 //        SysDbinfo sysDbinfo=findSourcesDbinfoById(jobId);
         //数据库连接
-        SysDbinfo sysDbinfo=SysDbinfo.builder().dbname("ORCL").host("192.168.1.25").user("system").password("oracle").port(1521L).type(1l).schema("SCOTT").build();
-        String sql=" select group#, member from v$logfile order by group#";
+        SysDbinfo sysDbinfo = SysDbinfo.builder().dbname("ORCL").host("192.168.1.25").user("system").password("oracle").port(1521L).type(1l).schema("SCOTT").build();
+        String sql = " select group#, member from v$logfile order by group#";
         Connection conn = null;
-        ResultMap resultMap=null;
-        List<String> logList=new ArrayList<>();
+        ResultMap resultMap = null;
+        List<String> logList = new ArrayList<>();
         try {
             conn = DBConns.getConn(sysDbinfo);
-             resultMap=DBUtil.query2(sql,conn);
-        for(int i=0;i<resultMap.size();i++){
-            logList.add(resultMap.get(i,"member").replaceAll("\\\\","\\\\\\\\"));
-        }
+            resultMap = DBUtil.query2(sql, conn);
+            for (int i = 0; i < resultMap.size(); i++) {
+                logList.add(resultMap.get(i, "member").replaceAll("\\\\", "\\\\\\\\"));
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 DBConns.close(conn);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-         return logList;
+        return logList;
     }
 
-    public static void main(String[]args){
-        List<String> list=doLogAddress(16L);
-        for(String a:list){
+    public static void main(String[] args) {
+        List<String> list = doLogAddress(16L);
+        for (String a : list) {
             System.out.println(a);
         }
     }
