@@ -20,7 +20,7 @@ import java.util.Map;
 public class JobMonitoringThread extends Thread {
     private Long jobId;
 
-    private static Map<Object, ExtractionThread> ExtractionThreads;
+    private  Map<Object, ExtractionThread> ExtractionThreads;
     /**
      * 保存每个任务的所有抓取线程
      * <p>
@@ -91,8 +91,6 @@ public class JobMonitoringThread extends Thread {
                 default:
 
             }
-
-
         } else {
             // todo 优化数据库连接
             // 重启，resume
