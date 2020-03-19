@@ -5,6 +5,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,10 @@ public class CustomStringJavaCompiler {
     public CustomStringJavaCompiler(String sourceCode) {
         this.sourceCode = sourceCode;
         this.fullClassName = getFullClassName(sourceCode);
+    }
+
+    public String getFullClassName(){
+        return fullClassName;
     }
 
     /**
