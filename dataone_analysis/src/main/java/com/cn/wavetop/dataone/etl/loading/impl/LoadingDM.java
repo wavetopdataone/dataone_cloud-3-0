@@ -314,6 +314,7 @@ public class LoadingDM implements Loading {
         //}
         preSql.append(fields + ") values (" + value + ");");
         PreparedStatement pstm = null;
+        int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
             int i = 1;
@@ -321,8 +322,9 @@ public class LoadingDM implements Loading {
                 pstm.setObject(i, dataMap.get(field));
                 i++;
             }
-            pstm.executeUpdate();
+            count = pstm.executeUpdate();
             destConn.commit();
+
         } catch (Exception e) {
             String message = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
@@ -344,7 +346,7 @@ public class LoadingDM implements Loading {
         payload.clear(); // gc
         payload = null; //gc
 
-        return 1;
+        return count;
     }
 
     /**
@@ -385,6 +387,7 @@ public class LoadingDM implements Loading {
         String and = whereCondition.append(nullCondition).substring(0, whereCondition.lastIndexOf("and"));
         String sql = substring + " where " + and;
         PreparedStatement pstm = null;
+        int count = 0;
         try {
             pstm = destConn.prepareStatement(sql);
             int i = 1;
@@ -393,7 +396,8 @@ public class LoadingDM implements Loading {
                 pstm.setObject(i, sourceEntry.getValue());
                 i++;
             }
-            pstm.execute();
+            count = pstm.executeUpdate();
+
             destConn.commit();
         } catch (Exception e) {
             String message = e.toString();
@@ -416,7 +420,7 @@ public class LoadingDM implements Loading {
         sourceMap = null;  // gc
         payload.clear(); // gc
         payload = null; //gc
-        return 1;
+        return count;
     }
 
     /**
@@ -432,6 +436,7 @@ public class LoadingDM implements Loading {
         Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
         PreparedStatement pstm = null;
+        int count = 0;
         try {
 
             //预编译存储语句
@@ -455,7 +460,7 @@ public class LoadingDM implements Loading {
                     i++;
                 }
             }
-            pstm.execute();
+            count = pstm.executeUpdate();
             destConn.commit();
         } catch (Exception e) {
             String message = e.toString();
@@ -476,7 +481,7 @@ public class LoadingDM implements Loading {
         sourceMap = null;  // gc
         payload.clear(); // gc
         payload = null; //gc
-        return 1;
+        return count;
     }
 
     /**
