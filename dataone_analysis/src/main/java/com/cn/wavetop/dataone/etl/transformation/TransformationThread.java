@@ -80,7 +80,11 @@ public class TransformationThread extends Thread {
                 try {
                     dataMap = transformation.TransformIn(value);
                     loading.excuteIncrementSQL(dataMap);
-                    System.out.println(dataMap);
+                    Map message = (Map) dataMap.get("message");
+                    System.out.println(message);
+                    // todo 待完善读写速率
+                    yongzService.updateRead(message, 1850L, 1L);
+                    yongzService.updateWrite(message, 1800L, 1L);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

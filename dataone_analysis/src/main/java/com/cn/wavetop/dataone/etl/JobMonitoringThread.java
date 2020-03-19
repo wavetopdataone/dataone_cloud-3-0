@@ -20,7 +20,7 @@ import java.util.Map;
 public class JobMonitoringThread extends Thread {
     private Long jobId;
 
-    private static Map<Object, ExtractionThread> ExtractionThreads;
+    private  Map<Object, ExtractionThread> ExtractionThreads;
     /**
      * 保存每个任务的所有抓取线程
      * <p>
@@ -137,7 +137,9 @@ public class JobMonitoringThread extends Thread {
     @Override
     public void run() {
         while (true) {
+            // 监控
             System.out.println("我要开始监控任务了！");
+            // 全量+增量
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
