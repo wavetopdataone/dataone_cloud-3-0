@@ -2,7 +2,6 @@ package com.cn.wavetop.dataone.etl.extraction;
 
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.YongzService;
 
