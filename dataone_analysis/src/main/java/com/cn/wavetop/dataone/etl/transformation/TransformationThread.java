@@ -178,7 +178,7 @@ public class TransformationThread extends Thread {
                     // 时间戳
                     long end = System.currentTimeMillis();
                     // 插入写入速率
-                    Long writeRate = (long) ((100.0 / (end - start)) * 3000);
+                    Long writeRate = (long) ((100.0 / (end - start)) * 4000);
                     jobRunService.updateWrite(message, writeRate, 100L);
                     System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
                     int[] ints;
@@ -217,7 +217,7 @@ public class TransformationThread extends Thread {
             if (ps != null) {
                 long end = System.currentTimeMillis();
                 // 时间戳
-                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 3000);
+                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 2000);
                 System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
 
                 jobRunService.updateWrite(message, writeRate, Long.valueOf(index));

@@ -2,17 +2,12 @@ package com.cn.wavetop.dataone.etl.loading;
 
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.consumer.Consumer;
-import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
-import com.cn.wavetop.dataone.etl.transformation.Transformation;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
-import com.cn.wavetop.dataone.util.DBConns;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -78,13 +72,7 @@ public class LoadingThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap ,ps);
                 } catch (Exception e) {
                     // todo 错误队列   王成实现
-                    String message = e.toString();
-                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String time = simpleDateFormat.format(new Date());
-                    String errortype = "Error";
-                    jobRelaServiceImpl.insertError(jobId,tableName,destTableName,time,errortype,message);
-                    e.printStackTrace();
+
                 }
             }
 
