@@ -21,7 +21,6 @@ import java.util.*;
 /**
  * @Author yongz
  * @Date 2020/3/6、16:14
- *
  */
 @Service
 public class YongzService {
@@ -149,8 +148,15 @@ public class YongzService {
      * 根据jobId查询jobInfo表的配置信息
      * getLogMinerScn()是oracle增量的自定义起点
      */
-    public SysJobinfo findJobInfoByjobId(Long jobId) {
-        return sysJobinfoRespository.findByJobId(jobId);
+    public Long getLogMinerScn(Long jobId) {
+        String logMinerScn = sysJobinfoRespository.findByJobId(jobId).getLogMinerScn();
+        long l = 0;
+        try {
+            l = Long.parseLong(logMinerScn);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return l;
     }
 
 
