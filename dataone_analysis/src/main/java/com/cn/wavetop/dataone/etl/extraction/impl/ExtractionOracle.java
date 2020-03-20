@@ -127,9 +127,9 @@ public class ExtractionOracle implements Extraction {
 
         Long sqlCount1 = DBUtil.queryCount(sqlCount.toString(), conn);
         message.put("sqlCount", sqlCount1);
-        yongzService.insertSqlCount(message);//更新监控表
+        jobRunService.insertSqlCount(message);//更新监控表
         if (sqlCount1 == null || sqlCount1 == 0L) {
-            // todo 优化该部分 没有数据
+            // todo 优化任务状态 没有数据
             return;
         }
 
@@ -156,7 +156,7 @@ public class ExtractionOracle implements Extraction {
             end = System.currentTimeMillis();    //结束读取的时间
 
             readRate = Double.valueOf(resultMap.size()) / (end - start) * 1000;
-            yongzService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
+            jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
             System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
 
             index = index + size;
@@ -188,11 +188,9 @@ public class ExtractionOracle implements Extraction {
      */
     @Override
     public void incrementRang() {
-
-
         System.out.println("Oracle 增量开始");
         StringBuffer br = new StringBuffer();
-        long scn =0;// todo 查看scn
+        long scn = jobRunService.getLogMinerScn(jobId);
         for (Object tableName : tableNames) {
             br.append(sysDbinfo.getUser().toUpperCase());
             br.append(".");
@@ -201,6 +199,8 @@ public class ExtractionOracle implements Extraction {
         }
         String table_whitelist = br.toString().substring(0, br.toString().length() - 1);
         String configSource = new ConfigSource(jobId, sysDbinfo, scn, table_whitelist.toString()).toJsonConfig();
+
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-"+jobId); //如果当前任务开启的connector 先删除connectorSource
         HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSource); //创建connectorSource
         startTrans(1, 2);   //判断创建清洗线程并开启线程
     }

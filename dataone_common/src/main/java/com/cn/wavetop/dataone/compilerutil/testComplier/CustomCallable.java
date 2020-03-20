@@ -6,7 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
 /**
- * Create by andy on 2018-12-07 13:10
+ * @Author yongz
+ * @Date 2020/03/20、15:10
  */
 public class CustomCallable implements Callable<RunInfo> {
     private String sourceCode;

@@ -5,7 +5,6 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Create by andy on 2018-12-06 21:25
+ * @Author yongz
+ * @Date 2020/03/20、14:53
  */
 public class CustomStringJavaCompiler {
     //类全名
@@ -94,7 +94,7 @@ public class CustomStringJavaCompiler {
 
     /**
      * 获取源码的class
-     * @Author yongz
+     *
      */
     public Class getScriptClass() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, UnsupportedEncodingException {
         StringClassLoader scl = new StringClassLoader();

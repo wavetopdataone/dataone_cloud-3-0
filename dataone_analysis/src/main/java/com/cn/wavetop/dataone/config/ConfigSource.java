@@ -40,10 +40,10 @@ public class ConfigSource {
                 this.config.put("reset.offset", "false");
             }
         } else if (sysDbinfo.getType() == 2L) {
-//            this.connection_url = "jdbc:mysql://" + sysDbinfo.getHost() + ":" + sysDbinfo.getPort() + "/" + sysDbinfo.getDbname() + "?user=" + sysDbinfo.getUser() + "&password=" + sysDbinfo.getPassword();
-//            this.connection_user = sysDbinfo.getUser();
-//            this.connection_password = sysDbinfo.getPassword();
+             // todo  mysql的connect source配置
+
         } else if (sysDbinfo.getType() == 3L) {
+            // todo  sqlserver 的connect source配置
 //            this.connection_url = "jdbc:sqlserver://"+sysDbinfo.getHost()+":"+sysDbinfo.getPort()+";databaseName="+sysDbinfo.getDbname();
 //            this.connection_user = sysDbinfo.getUser();
 //            this.connection_password = sysDbinfo.getPassword();

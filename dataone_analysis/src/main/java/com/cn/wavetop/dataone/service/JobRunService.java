@@ -23,7 +23,7 @@ import java.util.*;
  * @Date 2020/3/6、16:14
  */
 @Service
-public class YongzService {
+public class JobRunService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -65,6 +65,7 @@ public class YongzService {
                     destTable(message.get("destTable").toString()).
                     sqlCount((Long) message.get("sqlCount")).
                     optTime(new Date()).
+                    jobStatus(1).
                     build();//插入时间
             sysMonitoringRepository.save(sysMonitoring);
         }
@@ -148,8 +149,15 @@ public class YongzService {
      * 根据jobId查询jobInfo表的配置信息
      * getLogMinerScn()是oracle增量的自定义起点
      */
-    public SysJobinfo findJobInfoByjobId(Long jobId) {
-        return sysJobinfoRespository.findByJobId(jobId);
+    public Long getLogMinerScn(Long jobId) {
+        String logMinerScn = sysJobinfoRespository.findByJobId(jobId).getLogMinerScn();
+        long scn = 0;
+        try {
+            scn = Long.parseLong(logMinerScn);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return scn;
     }
 
 
@@ -202,8 +210,21 @@ public class YongzService {
         }
     }
 
+
     /**
-     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要勇哥来写
+     * yongz
+     *
+     * @param jobId
+     * @param sourceTable
+     * @return true是任务完成，false是任务还在跑
+     */
+    public Boolean fullOverByTableName(Long jobId, String sourceTable) {
+        SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+        return monitoring.getWriteData() >= monitoring.getSqlCount() ? true : false;
+    }
+
+    /**
+     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
      */
     public void updateJobStatus() {
         List<SysJobrela> list = sysJobrelaRespository.findByJobStatus();
