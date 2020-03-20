@@ -81,7 +81,7 @@ public class TransformationThread extends Thread {
                     loading.excuteIncrementSQL(dataMap);
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);
-                    // todo 待完善读写速率
+                    // todo 待完善读写速率 以下为测试版本
                     yongzService.updateRead(message, 1850L, 1L);
                     yongzService.updateWrite(message, 1800L, 1L);
                 } catch (IOException e) {

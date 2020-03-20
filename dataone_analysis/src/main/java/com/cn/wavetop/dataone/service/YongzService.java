@@ -148,8 +148,15 @@ public class YongzService {
      * 根据jobId查询jobInfo表的配置信息
      * getLogMinerScn()是oracle增量的自定义起点
      */
-    public SysJobinfo findJobInfoByjobId(Long jobId) {
-        return sysJobinfoRespository.findByJobId(jobId);
+    public Long getLogMinerScn(Long jobId) {
+        String logMinerScn = sysJobinfoRespository.findByJobId(jobId).getLogMinerScn();
+        long l = 0;
+        try {
+            l = Long.parseLong(logMinerScn);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return l;
     }
 
 
@@ -203,7 +210,7 @@ public class YongzService {
     }
 
     /**
-     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要勇哥来写
+     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
      */
     public void updateJobStatus() {
         List<SysJobrela> list = sysJobrelaRespository.findByJobStatus();
