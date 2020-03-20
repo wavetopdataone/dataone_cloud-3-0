@@ -5,9 +5,8 @@ import com.cn.wavetop.dataone.consumer.Consumer;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
-import com.cn.wavetop.dataone.service.YongzService;
+import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
-import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -28,7 +27,7 @@ import java.util.Map;
 
 public class TransformationThread extends Thread {
     private static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
-    private static final YongzService yongzService = (YongzService) SpringContextUtil.getBean("yongzService");
+    private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
     private static Boolean blok = true;
     private Long jobId;//jobid
     private String tableName;//表
@@ -82,8 +81,8 @@ public class TransformationThread extends Thread {
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);
                     // todo 待完善读写速率 以下为测试版本
-                    yongzService.updateRead(message, 1850L, 1L);
-                    yongzService.updateWrite(message, 1800L, 1L);
+                    jobRunService.updateRead(message, 1850L, 1L);
+                    jobRunService.updateWrite(message, 1800L, 1L);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -155,6 +154,14 @@ public class TransformationThread extends Thread {
                         ps = destConn.prepareStatement(insertSql);
                     }
                 } catch (SQLException e) {
+                  e.printStackTrace();
+                }
+
+
+                try {
+                    loading.excuteInsert(insertSql, dataMap, ps);
+                } catch (Exception e) {
+                    index--;
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -163,45 +170,43 @@ public class TransformationThread extends Thread {
                     jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
                     e.printStackTrace();
                 }
-
-
-                try {
-                    loading.excuteInsert(insertSql, dataMap, ps);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 index++;
                 if (index == 100) {
                     // 时间戳
                     long end = System.currentTimeMillis();
-                    synchronized (blok) {
-                        // 插入写入速率
-                        Long writeRate = (long) ((100.0 / (end - start)) * 3000);
-                        yongzService.updateWrite(message, writeRate, 100L);
-                        System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
-                        int[] ints;
-                        try {
-                            ints = ps.executeBatch();
-                            System.out.println(ints);
-                            destConn.commit();
-                            ps.clearBatch();
-                            ps.close();
-                            ps = null; //gc
-                        } catch (SQLException e) {
-                            String errormessage = e.toString();
-                            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            String time = simpleDateFormat.format(new Date());
-                            String errortype = "Error";
-                            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
-                            e.printStackTrace();
+                    // 插入写入速率
+                    Long writeRate = (long) ((100.0 / (end - start)) * 3000);
+                    jobRunService.updateWrite(message, writeRate, 100L);
+                    System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
+                    int[] ints;
+                    try {
+                        ints = ps.executeBatch();
+                        System.out.println(ints);
+                        destConn.commit();
+                        ps.clearBatch();
+                        ps.close();
+                        ps = null; //gc
+
+                        // 监控关闭当前
+                        if (jobRunService.fullOverByTableName(jobId, tableName)){
+                            stop();
                         }
+
+                    } catch (SQLException e) {
+                        // todo 王成 错误队列这里还不是这样写的
+//                        String errormessage = e.toString();
+//                        String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        String time = simpleDateFormat.format(new Date());
+//                        String errortype = "Error";
+//                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                        e.printStackTrace();
                     }
                     index = 0;// 当前
                     start = System.currentTimeMillis();
                 }
 
-                System.out.println(tableName + "--------" + index);
+                //System.out.println(tableName + "--------" + index);
 
 
             }
@@ -214,7 +219,7 @@ public class TransformationThread extends Thread {
                 Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 3000);
                 System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
 
-                yongzService.updateWrite(message, writeRate, Long.valueOf(index));
+                jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
                 try {
                     int[] ints = ps.executeBatch();
                     destConn.commit();
@@ -222,6 +227,13 @@ public class TransformationThread extends Thread {
                     ps.close();
                     ps = null; //gc
                     index = 0;// 当前
+
+                    // 监控关闭当前，并修改任务状态
+                    if (jobRunService.fullOverByTableName(jobId, tableName)){
+                        // 修改job
+                        stop();
+                    }
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

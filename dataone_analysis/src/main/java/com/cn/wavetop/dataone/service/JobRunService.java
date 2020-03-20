@@ -23,7 +23,7 @@ import java.util.*;
  * @Date 2020/3/6、16:14
  */
 @Service
-public class YongzService {
+public class JobRunService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -65,6 +65,7 @@ public class YongzService {
                     destTable(message.get("destTable").toString()).
                     sqlCount((Long) message.get("sqlCount")).
                     optTime(new Date()).
+                    jobStatus(1).
                     build();//插入时间
             sysMonitoringRepository.save(sysMonitoring);
         }
@@ -150,13 +151,13 @@ public class YongzService {
      */
     public Long getLogMinerScn(Long jobId) {
         String logMinerScn = sysJobinfoRespository.findByJobId(jobId).getLogMinerScn();
-        long l = 0;
+        long scn = 0;
         try {
-            l = Long.parseLong(logMinerScn);
+            scn = Long.parseLong(logMinerScn);
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        return l;
+        return scn;
     }
 
 
@@ -207,6 +208,19 @@ public class YongzService {
         } else {
             return false;
         }
+    }
+
+
+    /**
+     * yongz
+     *
+     * @param jobId
+     * @param sourceTable
+     * @return true是任务完成，false是任务还在跑
+     */
+    public Boolean fullOverByTableName(Long jobId, String sourceTable) {
+        SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+        return monitoring.getWriteData() >= monitoring.getSqlCount() ? true : false;
     }
 
     /**
