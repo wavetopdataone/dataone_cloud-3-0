@@ -33,9 +33,5 @@ public class DataoneApplication {
         return new RestTemplate();
     }
 
-    @Bean
-    @LoadBalanced
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
+
 }

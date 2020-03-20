@@ -413,6 +413,35 @@ public class JobRunService {
         return list;
     }
 
+    /**
+     * 把监控表运行中状态改为暂停中
+     * @param jobId
+     */
+    public void updateStatusPause(Long jobId){
+        List<SysMonitoring> sysMonitoringList=sysMonitoringRepository.findByJobId(jobId);
+        if(sysMonitoringList!=null&&sysMonitoringList.size()>0){
+            for(SysMonitoring sysMonitoring:sysMonitoringList){
+                if(sysMonitoring.getJobStatus()==1){
+                    sysMonitoringRepository.updateStatus(jobId,sysMonitoring.getSourceTable(),2);
+                }
+            }
+        }
+    }
+    /**
+     * 把监控表暂停中状态改为运行中
+     * @param jobId
+     */
+    public void updateStatusStart(Long jobId){
+        List<SysMonitoring> sysMonitoringList=sysMonitoringRepository.findByJobId(jobId);
+        if(sysMonitoringList!=null&&sysMonitoringList.size()>0){
+            for(SysMonitoring sysMonitoring:sysMonitoringList){
+                if(sysMonitoring.getJobStatus()==2){
+                    sysMonitoringRepository.updateStatus(jobId,sysMonitoring.getSourceTable(),1);
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Map map1=new HashMap();
         Map map2=new HashMap();
