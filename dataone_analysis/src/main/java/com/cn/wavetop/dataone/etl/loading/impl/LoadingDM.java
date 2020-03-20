@@ -325,7 +325,7 @@ public class LoadingDM implements Loading {
             count = pstm.executeUpdate();
             destConn.commit();
         } catch (Exception e) {
-            String content = dataMap.toString();
+            String content = payload.toString();
             String errormessage = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
