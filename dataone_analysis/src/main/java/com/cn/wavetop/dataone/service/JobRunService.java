@@ -220,10 +220,28 @@ public class JobRunService {
      */
     public Boolean fullOverByTableName(Long jobId, String sourceTable) {
         SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
-        return monitoring.getWriteData() >= monitoring.getSqlCount() ? true : false;
+        return monitoring.getWriteData() + monitoring.getErrorData() >= monitoring.getSqlCount() ? true : false;
     }
 
     /**
+     * 修改表的变为已终止，
+     */
+    public void updateTableStatusByJobIdAndSourceTable(Long jobId, String sourceTable, int jobStatus) {
+        SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+        monitoring.setJobStatus(jobStatus);
+        sysMonitoringRepository.save(monitoring);
+    }
+
+    /**
+     * 修改表的变为已终止，
+     */
+    public void startIn(Long jobId) {
+        List<SysMonitoring> monitoring = sysMonitoringRepository.findByJobId(jobId);
+    }
+
+
+    /**
+     * 宕机重启修改状态
      * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
      */
     public void updateJobStatus() {

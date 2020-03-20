@@ -162,12 +162,15 @@ public class TransformationThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap, ps);
                 } catch (Exception e) {
                     index--;
+                    String content =  dataMap.get("payload").toString();
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String time = simpleDateFormat.format(new Date());
-                    String errortype = "Error";
-                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                    String opttType = "fullRangTranError";
+                    if (!"null".equals(content) && content != null){
+                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+                    }
                     e.printStackTrace();
                 }
                 index++;
@@ -175,7 +178,7 @@ public class TransformationThread extends Thread {
                     // 时间戳
                     long end = System.currentTimeMillis();
                     // 插入写入速率
-                    Long writeRate = (long) ((100.0 / (end - start)) * 3000);
+                    Long writeRate = (long) ((100.0 / (end - start)) * 4000);
                     jobRunService.updateWrite(message, writeRate, 100L);
                     System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
                     int[] ints;
@@ -187,8 +190,10 @@ public class TransformationThread extends Thread {
                         ps.close();
                         ps = null; //gc
 
-                        // 监控关闭当前
+                        // 监控关闭当前，并修改表状态
                         if (jobRunService.fullOverByTableName(jobId, tableName)){
+                            // 修改job状态
+                            jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                             stop();
                         }
 
@@ -205,10 +210,6 @@ public class TransformationThread extends Thread {
                     index = 0;// 当前
                     start = System.currentTimeMillis();
                 }
-
-                //System.out.println(tableName + "--------" + index);
-
-
             }
 
 
@@ -216,7 +217,7 @@ public class TransformationThread extends Thread {
             if (ps != null) {
                 long end = System.currentTimeMillis();
                 // 时间戳
-                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 3000);
+                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 2000);
                 System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
 
                 jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
@@ -228,16 +229,17 @@ public class TransformationThread extends Thread {
                     ps = null; //gc
                     index = 0;// 当前
 
-                    // 监控关闭当前，并修改任务状态
+                    // 监控关闭当前，并修改表状态
                     if (jobRunService.fullOverByTableName(jobId, tableName)){
-                        // 修改job
+                        // 修改job状态
+                        jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                         stop();
                     }
-
+                    start = System.currentTimeMillis();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                start = System.currentTimeMillis();
+
             }
         }
     }
