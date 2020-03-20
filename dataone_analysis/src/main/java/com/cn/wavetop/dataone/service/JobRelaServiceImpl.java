@@ -502,7 +502,7 @@ public class JobRelaServiceImpl {
      * 插入错误信息
      */
     @Transactional
-    public void insertError(Long jobId, String sourceTable, String destTable, String time, String errortype, String message) {
+    public void insertError(Long jobId, String sourceTable, String destTable,String opttType, String errormessage,String time, String content) {
         ErrorLog errorLog = new ErrorLog();
         errorLog.setJobId(jobId);
         errorLog.setSourceName(sourceTable);
@@ -515,8 +515,9 @@ public class JobRelaServiceImpl {
             e.printStackTrace();
         }
         errorLog.setOptTime(parse);
-        errorLog.setOptType(errortype);
-        errorLog.setContent(message);
+        errorLog.setOptContext(errormessage);
+        errorLog.setOptType(opttType);
+        errorLog.setContent(content);
         Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
         String jobName = sysJobrela.get().getJobName();
 

@@ -324,14 +324,14 @@ public class LoadingDM implements Loading {
             }
             count = pstm.executeUpdate();
             destConn.commit();
-
         } catch (Exception e) {
-            String message = e.toString();
+            String content = payload.toString();
+            String errormessage = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
-            String errortype = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, message);
+            String opttType = "IncrementInsertError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
             e.printStackTrace();
         } finally {
             try {
@@ -399,13 +399,15 @@ public class LoadingDM implements Loading {
             count = pstm.executeUpdate();
 
             destConn.commit();
+
         } catch (Exception e) {
-            String message = e.toString();
+            String content = payload.toString();
+            String errormessage = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
-            String errortype = "IncrementUpdateError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, message);
+            String opttType = "IncrementUpdateError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
             e.printStackTrace();
         } finally {
             try {
@@ -463,12 +465,13 @@ public class LoadingDM implements Loading {
             count = pstm.executeUpdate();
             destConn.commit();
         } catch (Exception e) {
-            String message = e.toString();
+            String content = payload.toString();
+            String errormessage = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
-            String errortype = "IncrementDeleteError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, message);
+            String opttType = "IncrementDeleteError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
             e.printStackTrace();
         } finally {
             try {

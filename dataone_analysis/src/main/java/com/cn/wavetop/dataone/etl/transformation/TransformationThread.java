@@ -162,12 +162,15 @@ public class TransformationThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap, ps);
                 } catch (Exception e) {
                     index--;
+                    String content =  dataMap.get("payload").toString();
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String time = simpleDateFormat.format(new Date());
-                    String errortype = "Error";
-                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                    String opttType = "fullRangTranError";
+                    if ("null".equals(content)){
+                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+                    }
                     e.printStackTrace();
                 }
                 index++;
