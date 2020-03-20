@@ -187,8 +187,10 @@ public class TransformationThread extends Thread {
                         ps.close();
                         ps = null; //gc
 
-                        // 监控关闭当前
+                        // 监控关闭当前，并修改表状态
                         if (jobRunService.fullOverByTableName(jobId, tableName)){
+                            // 修改job状态
+                            jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                             stop();
                         }
 
@@ -228,9 +230,10 @@ public class TransformationThread extends Thread {
                     ps = null; //gc
                     index = 0;// 当前
 
-                    // 监控关闭当前，并修改任务状态
+                    // 监控关闭当前，并修改表状态
                     if (jobRunService.fullOverByTableName(jobId, tableName)){
-                        // 修改job
+                        // 修改job状态
+                        jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                         stop();
                     }
 
