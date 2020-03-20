@@ -168,7 +168,7 @@ public class TransformationThread extends Thread {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String time = simpleDateFormat.format(new Date());
                     String opttType = "fullRangTranError";
-                    if ("null".equals(content)){
+                    if (!"null".equals(content) && content != null){
                         jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
                     }
                     e.printStackTrace();
@@ -235,11 +235,11 @@ public class TransformationThread extends Thread {
                         jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                         stop();
                     }
-
+                    start = System.currentTimeMillis();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                start = System.currentTimeMillis();
+
             }
         }
     }

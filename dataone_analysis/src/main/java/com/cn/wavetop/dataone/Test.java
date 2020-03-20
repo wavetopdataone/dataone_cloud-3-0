@@ -12,8 +12,8 @@ public class Test {
     public static Map test(String args, String a, Map map) throws IOException {
         System.out.println(args+"-------"+a+"------"+map);
         System.out.println(args+"-------"+a+"------"+map);
-        System.out.println(args+"-------"+a+"------"+map);
         map.put("xuezihao2", "909");
+        map.put("xuezihao", map.get("xuezihao")+"xiugai489564");
         return map;
     }
 

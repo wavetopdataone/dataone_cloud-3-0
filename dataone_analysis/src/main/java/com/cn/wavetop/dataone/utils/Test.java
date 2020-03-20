@@ -26,8 +26,8 @@ public class Test {
                 "    public static Map test(String args, String a, Map map) throws IOException {\n" +
                 "        System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
                 "        System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
-                "        System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
                 "        map.put(\"xuezihao2\", \"909\");\n" +
+                "        map.put(\"xuezihao\", map.get(\"xuezihao\")+\"xiugai489564\");\n" +
                 "        return map;\n" +
                 "    }\n" +
                 "\n" +
@@ -41,7 +41,7 @@ public class Test {
                 "            e.printStackTrace();\n" +
                 "        }\n" +
                 "    }\n" +
-                "}\n";
+                "}";
 
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(code);
         boolean compiler1 = compiler.compiler();

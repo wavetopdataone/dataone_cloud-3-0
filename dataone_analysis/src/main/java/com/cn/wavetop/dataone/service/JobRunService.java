@@ -222,15 +222,23 @@ public class JobRunService {
         SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
         return monitoring.getWriteData() + monitoring.getErrorData() >= monitoring.getSqlCount() ? true : false;
     }
+
     /**
      * 修改表的变为已终止，
-     * yongz
      */
-    public void updateTableStatusByJobIdAndSourceTable(Long jobId, String sourceTable,int jobStatus) {
+    public void updateTableStatusByJobIdAndSourceTable(Long jobId, String sourceTable, int jobStatus) {
         SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
         monitoring.setJobStatus(jobStatus);
         sysMonitoringRepository.save(monitoring);
     }
+
+    /**
+     * 修改表的变为已终止，
+     */
+    public void startIn(Long jobId) {
+        List<SysMonitoring> monitoring = sysMonitoringRepository.findByJobId(jobId);
+    }
+
 
     /**
      * 宕机重启修改状态
