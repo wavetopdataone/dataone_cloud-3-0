@@ -43,6 +43,7 @@ public class Test {
                 "    }\n" +
                 "}\n";
 
+        String a=" ";
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(code);
         boolean compiler1 = compiler.compiler();
         System.out.println(compiler1);

@@ -166,53 +166,47 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
         List<ErrorLog> errorLogs = null;
         List<SysMonitoring> sysMonitoringListss = sysMonitoringRepository.findByJobId(job_id);
         SysJobrela sysJobrela = sysJobrelaRespository.findById(job_id.longValue());
-        if (sysMonitoringListss != null && sysMonitoringListss.size() > 0) {
-            for (SysMonitoring sysMonitoring : sysMonitoringListss) {
-                //从错误队列里面取得每张表的错误总数
-                List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoring.getDestTable());
-                sysMonitoring.setErrorData(Long.valueOf(errorLogList.size()));
-                //每张表的同步状态
-                if (sysMonitoring.getJobStatus() == null) {
-                    sysMonitoring.setJobStatus(0);
-                }
-                //todo 判断有问题，如果一张表完了
-                if (sysMonitoring.getJobStatus() != 4) {
-
-                    if(sysMonitoring.getReadData()==null||sysMonitoring.getReadData().equals("null")){
-                        sysMonitoring.setReadData(0L);
-                    }
-                    if(sysMonitoring.getErrorData()==null||sysMonitoring.getErrorData().equals("null")){
-                        sysMonitoring.setErrorData(0L);
-                    }
-                    if(sysMonitoring.getWriteData()==null||sysMonitoring.getWriteData().equals("null")){
-                        sysMonitoring.setWriteData(0L);
-                    }
-                    if(sysMonitoring.getJobStatus()==null||sysMonitoring.getJobStatus().equals("null")){
-                        sysMonitoring.setJobStatus(0);
-                    }
-
-                    if (sysMonitoring.getErrorData() +sysMonitoring.getWriteData() < sysMonitoring.getReadData() && ("1".equals(sysJobrela.getJobStatus()) || "11".equals(sysJobrela.getJobStatus()))) {
-                        sysMonitoring.setJobStatus(1);//运行中
-                    }else if (sysMonitoring.getSqlCount()!=0&&sysMonitoring.getReadData()==0) {
-                        sysMonitoring.setJobStatus(5);//未开始
-                    } else if (sysMonitoring.getErrorData() + sysMonitoring.getWriteData() == sysMonitoring.getReadData()) {
-                        sysMonitoring.setJobStatus(3);//已完成
-                    } else if ("2".equals(sysJobrela.getJobStatus()) || "21".equals(sysJobrela.getJobStatus())) {
-                        sysMonitoring.setJobStatus(2);//暂停中
-                    }else if ("3".equals(sysJobrela.getJobStatus()) || "31".equals(sysJobrela.getJobStatus())) {
-                        sysMonitoring.setJobStatus(6);//已终止
-                    }
-                }
-                sysMonitoringRepository.save(sysMonitoring);
-
-            }
-        }
-
-
-
-
-
-
+//        if (sysMonitoringListss != null && sysMonitoringListss.size() > 0) {
+//            for (SysMonitoring sysMonitoring : sysMonitoringListss) {
+//                //从错误队列里面取得每张表的错误总数
+//                List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoring.getDestTable());
+//                sysMonitoring.setErrorData(Long.valueOf(errorLogList.size()));
+//                //每张表的同步状态
+//                if (sysMonitoring.getJobStatus() == null) {
+//                    sysMonitoring.setJobStatus(0);
+//                }
+//                //todo 判断有问题，如果一张表完了
+//                if (sysMonitoring.getJobStatus() != 4) {
+//
+//                    if(sysMonitoring.getReadData()==null||sysMonitoring.getReadData().equals("null")){
+//                        sysMonitoring.setReadData(0L);
+//                    }
+//                    if(sysMonitoring.getErrorData()==null||sysMonitoring.getErrorData().equals("null")){
+//                        sysMonitoring.setErrorData(0L);
+//                    }
+//                    if(sysMonitoring.getWriteData()==null||sysMonitoring.getWriteData().equals("null")){
+//                        sysMonitoring.setWriteData(0L);
+//                    }
+//                    if(sysMonitoring.getJobStatus()==null||sysMonitoring.getJobStatus().equals("null")){
+//                        sysMonitoring.setJobStatus(0);
+//                    }
+//
+////                    if (sysMonitoring.getErrorData() +sysMonitoring.getWriteData() < sysMonitoring.getReadData() && ("1".equals(sysJobrela.getJobStatus()) || "11".equals(sysJobrela.getJobStatus()))) {
+////                        sysMonitoring.setJobStatus(1);//运行中
+////                    }else if (sysMonitoring.getSqlCount()!=0&&sysMonitoring.getReadData()==0) {
+////                        sysMonitoring.setJobStatus(5);//未开始
+////                    } else if (sysMonitoring.getErrorData() + sysMonitoring.getWriteData() == sysMonitoring.getReadData()) {
+////                        sysMonitoring.setJobStatus(3);//已完成
+////                    } else if ("2".equals(sysJobrela.getJobStatus()) || "21".equals(sysJobrela.getJobStatus())) {
+////                        sysMonitoring.setJobStatus(2);//暂停中
+////                    }else if ("3".equals(sysJobrela.getJobStatus()) || "31".equals(sysJobrela.getJobStatus())) {
+////                        sysMonitoring.setJobStatus(6);//已终止
+////                    }
+//                }
+//                sysMonitoringRepository.save(sysMonitoring);
+//
+//            }
+//        }
         Specification<SysMonitoring> querySpecifi = new Specification<SysMonitoring>() {
             @Override
             public Predicate toPredicate(Root<SysMonitoring> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
@@ -466,57 +460,57 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
             List<SysMonitoring> sysMonitoringList1 = new ArrayList<SysMonitoring>();
             SysJobrela sysJobrela = sysJobrelaRespository.findById(job_id);
             if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-                for (SysMonitoring sysMonitoring : sysMonitoringList) {
-                    sysTablerules = sysTableruleRepository.findBySourceTableAndJobId(sysMonitoring.getSourceTable(), job_id);
-                    sysMonitoringList1 = sysMonitoringRepository.findBySourceTableAndJobId(sysMonitoring.getSourceTable(), job_id);
-                    //如果目的表没有，去tablerule中找（找到的一定是修改过的）目标表，插到监控表里
-                    // 如果tablerule中没有则代表源表和目的表是一致的;
-                    if (sysMonitoringList1 != null && sysMonitoringList1.size() > 0) {
-//                        if (sysTablerules != null && sysTablerules.size() > 0) {
-//                            sysMonitoringList1.get(0).setDestTable(sysTablerules.get(0).getDestTable());
+//                for (SysMonitoring sysMonitoring : sysMonitoringList) {
+//                    sysTablerules = sysTableruleRepository.findBySourceTableAndJobId(sysMonitoring.getSourceTable(), job_id);
+//                    sysMonitoringList1 = sysMonitoringRepository.findBySourceTableAndJobId(sysMonitoring.getSourceTable(), job_id);
+//                    //如果目的表没有，去tablerule中找（找到的一定是修改过的）目标表，插到监控表里
+//                    // 如果tablerule中没有则代表源表和目的表是一致的;
+////                    if (sysMonitoringList1 != null && sysMonitoringList1.size() > 0) {
+//////                        if (sysTablerules != null && sysTablerules.size() > 0) {
+//////                            sysMonitoringList1.get(0).setDestTable(sysTablerules.get(0).getDestTable());
+//////
+//////                        } else {
+//////                            sysMonitoringList1.get(0).setDestTable(sysMonitoringList1.get(0).getSourceTable());
+//////                        }
+////                        //从错误队列里面取得每张表的错误总数
+////                        List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoringList1.get(0).getDestTable());
+////                        sysMonitoringList1.get(0).setErrorData(Long.valueOf(errorLogList.size()));
+////                        //每张表的同步状态
+////                        if (sysMonitoringList1.get(0).getJobStatus() == null) {
+////                            sysMonitoringList1.get(0).setJobStatus(0);
+////                        }
+////                        //todo 判断有问题，如果一张表完了
+////                        if (sysMonitoringList1.get(0).getJobStatus() != 4) {
+////
+////                           if(sysMonitoringList1.get(0).getReadData()==null||sysMonitoringList1.get(0).getReadData().equals("null")){
+////                               sysMonitoringList1.get(0).setReadData(0L);
+////                           }
+////                            if(sysMonitoringList1.get(0).getErrorData()==null||sysMonitoringList1.get(0).getErrorData().equals("null")){
+////                                sysMonitoringList1.get(0).setErrorData(0L);
+////                            }
+////                            if(sysMonitoringList1.get(0).getWriteData()==null||sysMonitoringList1.get(0).getWriteData().equals("null")){
+////                                sysMonitoringList1.get(0).setWriteData(0L);
+////                            }
+////                            if(sysMonitoringList1.get(0).getJobStatus()==null||sysMonitoringList1.get(0).getJobStatus().equals("null")){
+////                                sysMonitoringList1.get(0).setJobStatus(0);
+////                            }
+////
+////                            if (sysMonitoringList1.get(0).getErrorData() + sysMonitoringList1.get(0).getWriteData() < sysMonitoringList1.get(0).getReadData() && ("1".equals(sysJobrela.getJobStatus()) || "11".equals(sysJobrela.getJobStatus()))) {
+////                                sysMonitoringList1.get(0).setJobStatus(1);//运行中
+////                            }else if (sysMonitoringList1.get(0).getSqlCount()!=0&&sysMonitoringList1.get(0).getReadData()==0) {
+////                                sysMonitoringList1.get(0).setJobStatus(5);//未开始
+////                            } else if (sysMonitoringList1.get(0).getErrorData() + sysMonitoringList1.get(0).getWriteData() == sysMonitoringList1.get(0).getReadData()) {
+////                                sysMonitoringList1.get(0).setJobStatus(3);//已完成
+////                            } else if ("2".equals(sysJobrela.getJobStatus()) || "21".equals(sysJobrela.getJobStatus())) {
+////                                sysMonitoringList1.get(0).setJobStatus(2);//暂停中
+////                            }else if ("3".equals(sysJobrela.getJobStatus()) || "31".equals(sysJobrela.getJobStatus())) {
+////                                sysMonitoringList1.get(0).setJobStatus(6);//已终止
+////                            }
+////                        }
+////                        sysMonitoringRepository.save(sysMonitoringList1.get(0));
+////                    }
 //
-//                        } else {
-//                            sysMonitoringList1.get(0).setDestTable(sysMonitoringList1.get(0).getSourceTable());
-//                        }
-                        //从错误队列里面取得每张表的错误总数
-                        List<ErrorLog> errorLogList = errorLogRespository.findByJobIdAndDestName(job_id, sysMonitoringList1.get(0).getDestTable());
-                        sysMonitoringList1.get(0).setErrorData(Long.valueOf(errorLogList.size()));
-                        //每张表的同步状态
-                        if (sysMonitoringList1.get(0).getJobStatus() == null) {
-                            sysMonitoringList1.get(0).setJobStatus(0);
-                        }
-                        //todo 判断有问题，如果一张表完了
-                        if (sysMonitoringList1.get(0).getJobStatus() != 4) {
-
-                           if(sysMonitoringList1.get(0).getReadData()==null||sysMonitoringList1.get(0).getReadData().equals("null")){
-                               sysMonitoringList1.get(0).setReadData(0L);
-                           }
-                            if(sysMonitoringList1.get(0).getErrorData()==null||sysMonitoringList1.get(0).getErrorData().equals("null")){
-                                sysMonitoringList1.get(0).setErrorData(0L);
-                            }
-                            if(sysMonitoringList1.get(0).getWriteData()==null||sysMonitoringList1.get(0).getWriteData().equals("null")){
-                                sysMonitoringList1.get(0).setWriteData(0L);
-                            }
-                            if(sysMonitoringList1.get(0).getJobStatus()==null||sysMonitoringList1.get(0).getJobStatus().equals("null")){
-                                sysMonitoringList1.get(0).setJobStatus(0);
-                            }
-
-                            if (sysMonitoringList1.get(0).getErrorData() + sysMonitoringList1.get(0).getWriteData() < sysMonitoringList1.get(0).getReadData() && ("1".equals(sysJobrela.getJobStatus()) || "11".equals(sysJobrela.getJobStatus()))) {
-                                sysMonitoringList1.get(0).setJobStatus(1);//运行中
-                            }else if (sysMonitoringList1.get(0).getSqlCount()!=0&&sysMonitoringList1.get(0).getReadData()==0) {
-                                sysMonitoringList1.get(0).setJobStatus(5);//未开始
-                            } else if (sysMonitoringList1.get(0).getErrorData() + sysMonitoringList1.get(0).getWriteData() == sysMonitoringList1.get(0).getReadData()) {
-                                sysMonitoringList1.get(0).setJobStatus(3);//已完成
-                            } else if ("2".equals(sysJobrela.getJobStatus()) || "21".equals(sysJobrela.getJobStatus())) {
-                                sysMonitoringList1.get(0).setJobStatus(2);//暂停中
-                            }else if ("3".equals(sysJobrela.getJobStatus()) || "31".equals(sysJobrela.getJobStatus())) {
-                                sysMonitoringList1.get(0).setJobStatus(6);//已终止
-                            }
-                        }
-                        sysMonitoringRepository.save(sysMonitoringList1.get(0));
-                    }
-
-                }
+//                }
                 Specification<SysMonitoring> querySpecifi = new Specification<SysMonitoring>() {
                     @Override
                     public Predicate toPredicate(Root<SysMonitoring> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {

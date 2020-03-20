@@ -400,6 +400,7 @@ public class YongzService {
         map1.put("b","ff");
         map1.put("d","ff");
         map1.put("e","ff");
+        map1.put("e","ffs");
 
 
         map2.put("a","ff");
@@ -408,10 +409,8 @@ public class YongzService {
         map2.put("d","ff");
         map2.put("e","ff");
         map2.put("ef","ff");
-       List<String> list= equlasMap(map1,map2);
-        for (String a:list) {
-            System.out.println(a);
-        }
-        System.out.println(map1+"---------"+map2);
+//      Map map3=  process(map1);
+//        System.out.println(map3+"---------");
     }
+
 }
