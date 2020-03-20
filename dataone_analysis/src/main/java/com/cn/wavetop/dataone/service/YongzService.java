@@ -367,4 +367,51 @@ public class YongzService {
             return false;
         }
     }
+
+    /**
+     *
+     * @param map1 清洗前的map集合
+     * @param map2 清洗后的map集合
+     * @return  多出来的字段集合
+     */
+    public static List<String> equlasMap(Map map1, Map map2) {
+        Set<String> set1 = new HashSet<>();
+        Set<String> set2 =new HashSet<>();
+        set1.addAll(map1.keySet());
+        set2.addAll(map2.keySet());
+        Iterator<String> iterator = set2.iterator();
+        while (iterator.hasNext()) {
+            String num = iterator.next();
+            if (set1.contains(num)) {
+                iterator.remove();
+            }
+        }
+        //返回的是一个list的集合里面都是新增的字段
+        List<String> list = new ArrayList<>();
+        list.addAll(set2);
+        return list;
+    }
+
+    public static void main(String[] args) {
+        Map map1=new HashMap();
+        Map map2=new HashMap();
+        map1.put("a","ff");
+        map1.put("c","ff");
+        map1.put("b","ff");
+        map1.put("d","ff");
+        map1.put("e","ff");
+
+
+        map2.put("a","ff");
+        map2.put("c","ff");
+        map2.put("b","ff");
+        map2.put("d","ff");
+        map2.put("e","ff");
+        map2.put("ef","ff");
+       List<String> list= equlasMap(map1,map2);
+        for (String a:list) {
+            System.out.println(a);
+        }
+        System.out.println(map1+"---------"+map2);
+    }
 }
