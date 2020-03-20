@@ -72,6 +72,7 @@ public class TransformationThread extends Thread {
         consumer.subscribe(Arrays.asList("Increment-Source-" + jobId));
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(2000);
+
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
                 Transformation transformation = new Transformation(jobId, null, conn);
