@@ -69,7 +69,8 @@ public class JobRelaServiceImpl {
     @Autowired
     private UserLogRepository userLogRepository;
     // 注入restTemplate
-    private RestTemplate restTemplate = (RestTemplate) SpringContextUtil.getBean("restTemplate");
+    @Autowired
+    private RestTemplate restTemplate ;
 
     /**
      * 根据jobId查询源端数据源信息

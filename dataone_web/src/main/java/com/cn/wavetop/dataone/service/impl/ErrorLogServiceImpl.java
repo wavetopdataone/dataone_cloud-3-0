@@ -44,7 +44,8 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     @Autowired
     private SysJobrelaRespository sysJobrelaRespository;
     // 注入restTemplate
-    private RestTemplate restTemplate = (RestTemplate) SpringContextUtil.getBean("restTemplate");
+    @Autowired
+    private RestTemplate restTemplate ;
 
     @Override
     public Object getErrorlogAll() {

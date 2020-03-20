@@ -21,6 +21,7 @@ import java.util.*;
 /**
  * @Author yongz
  * @Date 2020/3/6、16:14
+ *
  */
 @Service
 public class YongzService {
@@ -203,7 +204,7 @@ public class YongzService {
     }
 
     /**
-     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要勇哥来写
+     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
      */
     public void updateJobStatus() {
         List<SysJobrela> list = sysJobrelaRespository.findByJobStatus();
