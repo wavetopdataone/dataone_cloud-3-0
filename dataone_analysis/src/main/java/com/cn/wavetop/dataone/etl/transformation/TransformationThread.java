@@ -162,7 +162,7 @@ public class TransformationThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap, ps);
                 } catch (Exception e) {
                     index--;
-                    String content = dataMap.toString();
+                    String content =  dataMap.get("payload").toString();
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
