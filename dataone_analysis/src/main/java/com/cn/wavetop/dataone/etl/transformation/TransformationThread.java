@@ -207,10 +207,6 @@ public class TransformationThread extends Thread {
                     index = 0;// 当前
                     start = System.currentTimeMillis();
                 }
-
-                //System.out.println(tableName + "--------" + index);
-
-
             }
 
 
