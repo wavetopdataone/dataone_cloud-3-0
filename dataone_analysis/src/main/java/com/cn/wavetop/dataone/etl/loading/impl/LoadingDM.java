@@ -340,7 +340,15 @@ public class LoadingDM implements Loading {
                 e.printStackTrace();
             }
         }
-
+        if (count == 0){
+            String content = payload.toString();
+            String errormessage = "0IncrementInsertError";
+            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time = simpleDateFormat.format(new Date());
+            String opttType = "IncrementInsertError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+        }
         dataMap.clear();  // gc
         dataMap = null;  // gc
         payload.clear(); // gc
@@ -416,6 +424,16 @@ public class LoadingDM implements Loading {
                 e.printStackTrace();
             }
         }
+
+        if (count == 0){
+            String content = payload.toString();
+            String errormessage = "0IncrementUpdateError";
+            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time = simpleDateFormat.format(new Date());
+            String opttType = "IncrementInsertError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+        }
         destMap.clear();  // gc
         destMap = null;  // gc
         sourceMap.clear();  // gc
@@ -479,6 +497,16 @@ public class LoadingDM implements Loading {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        if (count == 0){
+            String content = payload.toString();
+            String errormessage = "0IncrementDeleteError";
+            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time = simpleDateFormat.format(new Date());
+            String opttType = "IncrementInsertError";
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
         }
         sourceMap.clear(); // gc
         sourceMap = null;  // gc
