@@ -22,9 +22,9 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
      * @return
      */
     @Override
-    public Object save(SysCleanScript sysCleanScript,String content, Map map) {
+    public Object save(SysCleanScript sysCleanScript, Map map) {
         System.out.println(map+"-------传参");
-        CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(content);
+        CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(sysCleanScript.getScriptContent());
         boolean compiler1 = compiler.compiler();
         Map invoke=null;
         Class cls = null;

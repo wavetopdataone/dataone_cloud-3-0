@@ -25,11 +25,7 @@ public class SysCleanScriptController {
 
     @ApiOperation(value = "保存和执行脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "保存和执行脚本")
     @PostMapping("/saveAndSel")
-    public Object saveAndSel(  SysCleanScript sysCleanScript,String content, String   map){
-
-        Optional<SysScript> sysScript =sysScriptRepository.findById(11L);
-        content=sysScript.get().getScriptContent();
-        System.out.println(content+"wwwww------------------------------");
+    public Object saveAndSel(SysCleanScript sysCleanScript, String   map){
         //根据逗号截取字符串数组
         String[] str1 = map.split(",");
         //创建Map对象
@@ -42,7 +38,7 @@ public class SysCleanScriptController {
             map2.put(str2[0], str2[1]);
         }
         System.out.println(map2+"***********截取");
-        return sysCleanScriptService.save(sysCleanScript,content,map2);
+        return sysCleanScriptService.save(sysCleanScript,map2);
     }
     @PostMapping("/selData")
     @ApiOperation(value = "随机查询一条源端数据", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "随机查询一条源端数据")
