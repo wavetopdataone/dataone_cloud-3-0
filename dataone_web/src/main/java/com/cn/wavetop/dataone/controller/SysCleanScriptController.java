@@ -38,11 +38,25 @@ public class SysCleanScriptController {
             map2.put(str2[0], str2[1]);
         }
         System.out.println(map2+"***********截取");
-        return sysCleanScriptService.save(sysCleanScript,map2);
+        return sysCleanScriptService.saveAndExcues(sysCleanScript,map2);
     }
     @PostMapping("/selData")
     @ApiOperation(value = "随机查询一条源端数据", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "随机查询一条源端数据")
     public Object selData(Long jobId,String tableName){
         return  cleanOutService.selData(jobId,tableName);
     }
+
+    @PostMapping("/save")
+    @ApiOperation(value = "保存任务表的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "保存任务表的脚本")
+    public Object save(SysCleanScript sysCleanScript){
+        return  sysCleanScriptService.save(sysCleanScript);
+    }
+    @PostMapping("/findByIdAndTable")
+    @ApiOperation(value = "根据id和表名查询用户使用的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "根据id和表名查询用户使用的脚本")
+    public  Object findByIdAndTable(Long jobId,String sourceTable){
+        return  sysCleanScriptService.findByIdAndTable(jobId,sourceTable);
+    }
+
+
+
 }

@@ -25,7 +25,12 @@ public class SysScriptController {
     public Object findByName(Integer scriptFlag,String scriptName){
         return  sysScriptService.findByScriptName(scriptFlag,scriptName);
     }
-    @ApiOperation(value = "根据id删除脚本库", protocols = "HTTP", produces = "application/json", notes = "根据id删除脚本库")
+    @ApiOperation(value = "根据id查询脚本库或者模板", protocols = "HTTP", produces = "application/json", notes = "根据id查询脚本库或者模板")
+    @PostMapping("/findById")
+    public Object findById(Long id){
+        return  sysScriptService.findById(id);
+    }
+    @ApiOperation(value = "根据id删除脚本库", protocols = "HTTP", produces = "application/json", notes = "根据id删除脚本库或者模板")
     @PostMapping("/deleteById")
     public Object deleteById(Long id){
         return  sysScriptService.deleteById(id);
@@ -39,5 +44,11 @@ public class SysScriptController {
     @PostMapping("/updateName")
     public Object updateScriptName(Long id,String scriptName){
         return  sysScriptService.updateScriptName(id,scriptName);
+    }
+
+    @PostMapping("/copyScript")
+    @ApiOperation(value = "复制模板或者脚本库内容", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "复制模板或者脚本库内容")
+    public  Object copyScript(Long id){
+        return  sysScriptService.copyScript(id);
     }
 }
