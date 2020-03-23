@@ -51,6 +51,10 @@ public class JobMonitoringThread extends Thread {
 
     //开始任务
     public boolean startJob() {
+        // 任务暂停时需要把任务表状态改为暂停
+
+
+
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
         try {
@@ -61,6 +65,8 @@ public class JobMonitoringThread extends Thread {
         }
 
         if (ExtractionThreads == null) {
+            // 开启时将任务表的所有状态改为运行中
+            jobRunService.updateStatusFristStart(jobId);
             // 第一次开启，激活
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
@@ -94,7 +100,8 @@ public class JobMonitoringThread extends Thread {
 
             }
         } else {
-            // todo 优化数据库连接
+            // 重启时把暂停的状态改为运行中
+            jobRunService.updateStatusStart(jobId);
             // 重启，resume
             for (Object o : ExtractionThreads.keySet()) {
                 ExtractionThreads.get(o).resume(); //重启抓取线程
@@ -107,6 +114,9 @@ public class JobMonitoringThread extends Thread {
     //暂停任务
     public boolean pauseJob() {
         // todo 优化数据库连接（释放）
+
+        // 任务暂停时需要把任务表状态改为暂停
+        jobRunService.updateStatusPause(jobId);
         if (ExtractionThreads == null) {
             return false;
         }
