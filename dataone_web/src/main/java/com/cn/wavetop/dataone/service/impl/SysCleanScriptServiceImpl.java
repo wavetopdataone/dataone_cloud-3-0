@@ -4,6 +4,7 @@ import com.cn.wavetop.dataone.compilerutil.CustomStringJavaCompiler;
 import com.cn.wavetop.dataone.dao.SysCleanScriptRepository;
 import com.cn.wavetop.dataone.entity.SysCleanScript;
 import com.cn.wavetop.dataone.service.SysCleanScriptService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 @Service
 public class SysCleanScriptServiceImpl implements SysCleanScriptService {
+    @Autowired
+    private SysCleanScriptRepository sysCleanScriptRepository;
 
     /**
      * 保存加执行
@@ -37,7 +40,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             test.setAccessible(true);// 暴力反射
              invoke = (Map) test.invoke(o,  map);
             System.out.println("返回的map-------------"+invoke);
-
+            sysCleanScriptRepository.save(sysCleanScript);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
