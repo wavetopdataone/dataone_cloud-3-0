@@ -7,6 +7,7 @@ import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.utils.TopicsController;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -51,6 +52,7 @@ public class TransformationThread extends Thread {
 
     @Override
     public void run() {
+
         if (tableName != null)
             //全量
             fullRangTran();
@@ -153,7 +155,7 @@ public class TransformationThread extends Thread {
                         ps = destConn.prepareStatement(insertSql);
                     }
                 } catch (SQLException e) {
-                  e.printStackTrace();
+                    e.printStackTrace();
                 }
 
 
@@ -161,14 +163,14 @@ public class TransformationThread extends Thread {
                     loading.excuteInsert(insertSql, dataMap, ps);
                 } catch (Exception e) {
                     index--;
-                    String content =  dataMap.get("payload").toString();
+                    String content = dataMap.get("payload").toString();
                     String errormessage = e.toString();
                     String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String time = simpleDateFormat.format(new Date());
                     String opttType = "fullRangTranError";
-                    if (!"null".equals(content) && content != null){
-                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+                    if (!"null".equals(content) && content != null) {
+                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
                     }
                     e.printStackTrace();
                 }
@@ -184,16 +186,26 @@ public class TransformationThread extends Thread {
                     try {
                         ints = ps.executeBatch();
                         System.out.println(ints);
+                    } catch (SQLException e) {
+                        // todo 王成 错误队列这里还不是这样写的
+//                        String errormessage = e.toString();
+//                        String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        String time = simpleDateFormat.format(new Date());
+//                        String errortype = "Error";
+//                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+                        e.printStackTrace();
+                    }
+                    try {
                         destConn.commit();
                         ps.clearBatch();
                         ps.close();
                         ps = null; //gc
 
                         // 监控关闭当前，并修改表状态
-                        if (jobRunService.fullOverByTableName(jobId, tableName)){
+                        if (jobRunService.fullOverByTableName(jobId, tableName)) {
                             // 修改job状态
                             jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
-                            stop();
                         }
 
                     } catch (SQLException e) {
@@ -222,6 +234,10 @@ public class TransformationThread extends Thread {
                 jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
                 try {
                     int[] ints = ps.executeBatch();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                try {
                     destConn.commit();
                     ps.clearBatch();
                     ps.close();
@@ -229,16 +245,17 @@ public class TransformationThread extends Thread {
                     index = 0;// 当前
 
                     // 监控关闭当前，并修改表状态
-                    if (jobRunService.fullOverByTableName(jobId, tableName)){
+                    if (jobRunService.fullOverByTableName(jobId, tableName)) {
                         // 修改job状态
                         jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
+                        TopicsController.deleteTopic(tableName+"_"+jobId);
                         stop();
                     }
                     start = System.currentTimeMillis();
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }
@@ -262,4 +279,20 @@ public class TransformationThread extends Thread {
         }
     }
 
+    public void suspendMe() {
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopMe() {
+        // 资源释放
+        stop();
+    }
+
+    public void resumeMe() {
+        notify();
+    }
 }

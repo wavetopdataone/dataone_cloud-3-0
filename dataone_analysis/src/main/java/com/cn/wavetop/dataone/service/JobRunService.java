@@ -220,7 +220,35 @@ public class JobRunService {
      */
     public Boolean fullOverByTableName(Long jobId, String sourceTable) {
         SysMonitoring monitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, sourceTable);
-        return monitoring.getWriteData() + monitoring.getErrorData() >= monitoring.getSqlCount() ? true : false;
+        Long writeData = monitoring.getWriteData();
+        if (writeData == null) {
+            writeData = 0l;
+        }
+        Long errorData = monitoring.getErrorData();
+        if (errorData == null) {
+            errorData = 0l;
+        }
+        return writeData + errorData >= monitoring.getSqlCount() ? true : false;
+    }
+
+
+    /**
+     * yongz
+     *
+     * @param jobId
+     * @return true是全量结束，false是全量已结束
+     */
+    public Boolean fullOverByjobId(Long jobId) {
+        List<SysMonitoring> monitorings = sysMonitoringRepository.findByJobId(jobId);
+        if (monitorings == null || monitorings.size() < 0) {
+            return false;
+        }
+        for (SysMonitoring monitoring : monitorings) {
+            if (monitoring.getJobStatus() != 3) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

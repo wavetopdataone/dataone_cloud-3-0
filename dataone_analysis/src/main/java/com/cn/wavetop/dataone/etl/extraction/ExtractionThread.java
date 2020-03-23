@@ -10,8 +10,10 @@ import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionDM;
 import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionMySQL;
 import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionOracle;
 import com.cn.wavetop.dataone.etl.extraction.impl.ExtractionSqlServer;
+import com.cn.wavetop.dataone.kafkahttputils.HttpClientKafkaUtil;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.utils.TopicsController;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,12 +187,9 @@ public class ExtractionThread extends Thread {
     }
 
     public void stopTrans() {
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-"+jobId); //如果当前任务开启的connector 先删除connectorSource
+        TopicsController.deleteTopic(tableName+"_"+jobId);
         this.extraction.stopTrans();
-//        try {
-//            conn.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void pasueTrans() {
