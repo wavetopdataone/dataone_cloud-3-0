@@ -3,19 +3,21 @@ package com.cn.wavetop.dataone.service.impl;
 import com.cn.wavetop.dataone.dao.SysScriptRepository;
 import com.cn.wavetop.dataone.dao.SysUserRepository;
 import com.cn.wavetop.dataone.dao.SysUserScriptRepository;
-import com.cn.wavetop.dataone.entity.SysRole;
-import com.cn.wavetop.dataone.entity.SysScript;
-import com.cn.wavetop.dataone.entity.SysUser;
-import com.cn.wavetop.dataone.entity.SysUserScript;
+import com.cn.wavetop.dataone.entity.*;
 import com.cn.wavetop.dataone.entity.vo.ToData;
 import com.cn.wavetop.dataone.entity.vo.ToDataMessage;
 import com.cn.wavetop.dataone.service.SysScriptService;
 import com.cn.wavetop.dataone.util.PermissionUtils;
+import com.cn.wavetop.dataone.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class SysScriptServiceImpl implements SysScriptService {
@@ -50,6 +52,12 @@ public class SysScriptServiceImpl implements SysScriptService {
         }
 
         return ToData.builder().status("1").data(scriptNameList).build();
+    }
+
+    @Override
+    public Object findById(Long id) {
+        Optional<SysScript> sysScript = sysScriptRepository.findById(id);
+        return sysScript.get();
     }
 
     @Transactional
@@ -93,7 +101,62 @@ public class SysScriptServiceImpl implements SysScriptService {
     @Transactional
     @Override
     public Object updateScriptName(Long id, String scriptName) {
-        sysScriptRepository.updateScriptName(id,scriptName);
+        sysScriptRepository.updateScriptName(id, scriptName);
         return ToDataMessage.builder().status("1").message("修改成功").build();
     }
+
+    @Override
+    public Object copyScript(Long id) {
+        Optional<SysScript> sysScript = sysScriptRepository.findById(id);
+        String content = sysScript.get().getScriptContent();
+//        String[] copy = content.split("process(Map record) \\{");
+        Map map = new HashMap<>();
+       //类加方法 截出来最少有3个元素
+//        if (copy.length < 2) {
+//            return ToDataMessage.builder().status("0").message("获取失败").build();
+//        }
+        String copyScript = content.substring(StringUtils.getCharacterPosition(content), content.indexOf("return"));
+        map.put("status",1);
+        map.put("copyScript",copyScript);
+        return map;
+    }
+
+
+    public static void main(String[] args) {
+        String a = "import java.time.LocalDateTime;\n" +
+                "import java.time.format.DateTimeFormatter;\n" +
+                "import java.util.Map;\n" +
+                "\n" +
+                "public  class TimestampProcess {\n" +
+                "    private  static  final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(\"yyyy-MM-dd\");\n" +
+                "    private  static  final DateTimeFormatter TIMESTAMP_FORMATTER =\n" +
+                "        DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSS\");\n" +
+                "\n" +
+                "    public Map process(Map payload) {\n" +
+                "    // timestamp_type 类型为字符串，格式为：2019-07-24 17:06:54.000\n" +
+                "    final String timestampStr = (String) record.get(\"timestamp_type\");\n" +
+                "    if (timestampStr != null) {\n" +
+                "        try {\n" +
+                "            // 将字符串转换为日期对象\n" +
+                "            final LocalDateTime localDateTime = LocalDateTime.parse(timestampStr, TIMESTAMP_FORMATTER);\n" +
+                "            // 将时间对象转换为 DATE_FORMATTER 格式的字符串，转化之后的字符串为：2019-07-24\n" +
+                "            record.put(\"formatedTime\", DATE_FORMATTER.format(localDateTime));\n" +
+                "        } catch (Exception e) {\n" +
+                "        e.printStackTrace();\n" +
+                "        }\n" +
+                "    }\n" +
+                "    return record;\n" +
+                "    }\n" +
+                "}";
+        System.out.println("这是啥"+ StringUtils.getCharacterPosition(a));
+
+//        String[] b = a.split("process(Map payload) \\{");
+        System.out.println(a.substring(StringUtils.getCharacterPosition(a)+1, a.indexOf("return")));
+//        for(int i=0;i<b.length;i++){
+//            System.out.println(b[i]+"------------------");
+//        }
+
+    }
+
+
 }

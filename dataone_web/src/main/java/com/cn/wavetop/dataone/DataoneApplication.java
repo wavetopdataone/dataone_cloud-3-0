@@ -27,10 +27,11 @@ public class DataoneApplication {
 //        new EmailClient().start();
 //        new MonitoringClient().start();
     }
-
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
+
 }

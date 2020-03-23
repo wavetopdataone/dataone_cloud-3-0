@@ -3,6 +3,8 @@ package com.cn.wavetop.dataone.util;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
@@ -374,5 +376,19 @@ public class StringUtils
             }
         }
         return sb.toString();
+    }
+     //获取字符串中第2次指定字符出现的位置
+    public static int getCharacterPosition(String string){
+        //这里是获取"/"符号的位置
+        Matcher slashMatcher = Pattern.compile("\\{").matcher(string);
+        int mIdx = 0;
+        while(slashMatcher.find()) {
+            mIdx++;
+            //当"/"符号第二次出现的位置
+            if(mIdx == 2){
+                break;
+            }
+        }
+        return slashMatcher.start();
     }
 }

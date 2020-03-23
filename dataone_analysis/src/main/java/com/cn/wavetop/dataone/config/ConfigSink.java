@@ -29,6 +29,8 @@ public class ConfigSink {
     private boolean errors_log_enable = true;
     private boolean errors_log_include_messages = true;
 
+
+
     public ConfigSink(long jobId, String destTable, SysDbinfo sysDbinfo) {
         this.name = "connect-sink-" + jobId + "-" + destTable;
         this.topics = "task-" + jobId + "-" + destTable;

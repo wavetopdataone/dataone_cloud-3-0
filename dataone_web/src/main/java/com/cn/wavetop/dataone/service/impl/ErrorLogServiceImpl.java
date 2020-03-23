@@ -43,9 +43,9 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     private UserLogRepository userLogRepository;
     @Autowired
     private SysJobrelaRespository sysJobrelaRespository;
-    // 注入restTemplate
     @Autowired
-    private RestTemplate restTemplate ;
+    private RestTemplate restTemplate;
+
 
     @Override
     public Object getErrorlogAll() {
@@ -364,7 +364,6 @@ public class ErrorLogServiceImpl implements ErrorLogService {
             Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
             userLogRepository.save(build2);
         }
-
         repository.save(errorLog);
     }
 }

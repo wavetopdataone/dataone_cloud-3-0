@@ -1,6 +1,8 @@
 package com.cn.wavetop.dataone.etl.loading.impl;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
+import com.cn.wavetop.dataone.db.DBUtil;
+import com.cn.wavetop.dataone.db.ResultMap;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 
@@ -11,6 +13,7 @@ import com.cn.wavetop.dataone.util.DBConns;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.sun.xml.fastinfoset.util.ValueArray;
 import lombok.Data;
+import oracle.sql.BLOB;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -250,6 +253,7 @@ public class LoadingDM implements Loading {
             return noBlodToInsert(dataMap);
         } else {
             //含blob
+            System.out.println("含blob");
             return hasBlobToInsert(dataMap);
         }
     }
@@ -331,7 +335,7 @@ public class LoadingDM implements Loading {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
             e.printStackTrace();
         } finally {
             try {
@@ -415,7 +419,7 @@ public class LoadingDM implements Loading {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementUpdateError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
             e.printStackTrace();
         } finally {
             try {
@@ -475,7 +479,7 @@ public class LoadingDM implements Loading {
 
             int i = 1;
             for (Object field : sourceMap.keySet()) {
-                if (sourceMap.get(field) != null){
+                if (sourceMap.get(field) != null) {
                     pstm.setObject(i, sourceMap.get(field));
                     i++;
                 }
@@ -489,7 +493,7 @@ public class LoadingDM implements Loading {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementDeleteError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
             e.printStackTrace();
         } finally {
             try {
@@ -532,8 +536,10 @@ public class LoadingDM implements Loading {
             //不含blob
             excuteNoBlodByInsert(insertSql, dataMap, ps);
         } else {
+            String a = Selblobs(dataMap);
+            List<BLOB> list = selBlobResult(dataMap, a, conn);
             //含blob
-//            excuteHasBlodByInsert(insertSql, dataMap, ps);
+            excuteHasBlodByInsert(insertSql, list, dataMap, ps);
         }
     }
 
@@ -694,17 +700,103 @@ public class LoadingDM implements Loading {
             Integer count = 0;
 
             for (Object field : payload.keySet()) {
-                if (count == payload.keySet().size() - 1) {
-                    value.append(field + "=  ?" );
-
+                if (payload.get(field) != null && !"".equals(payload.get(field))) {
+                    if (count == payload.keySet().size() - 1) {
+                        value.append(field + "=  ?");
+                    } else {
+                        value.append(field + " = ? and ");
+                        count++;
+                    }
                 } else {
-                    value.append(field + " = ? and ");
-                    count++;
+                    if (count == payload.keySet().size() - 1) {
+                        value.append(field + " is null");
+                    } else {
+                        value.append(field + " is null and ");
+                        count++;
+                    }
                 }
             }
         }
         stringBuffer.append(fields + " from " + destTable + " where " + value);
         return stringBuffer.toString();
+    }
+
+    /**
+     * 源端查询大字段类型数据的查询sql拼接使用的是预编译的
+     */
+    public String selBlobInRowId(Map dataMap) {
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
+        StringBuffer stringBuffer = new StringBuffer("select ");
+        StringBuffer fields = new StringBuffer("");
+        StringBuffer value = new StringBuffer("");
+        List list = (List) message.get("big_data");
+        for (int i = 0; i < list.size(); i++) {
+            if (i == list.size() - 1) {
+                fields.append(list.get(i));
+            } else {
+                fields.append(list.get(i) + ",");
+            }
+        }
+        value.append(" ROWID_DATAONE_YONGYUBLOB_HAHA='" + message.get("ROWID_DATAONE_YONGYUBLOB_HAHA") + "'");
+        stringBuffer.append(fields + " from " + destTable + " where " + value);
+        return stringBuffer.toString();
+    }
+
+
+    public List<BLOB> selBlobResult(Map dataMap, String sql, Connection conn) {
+        ResultSet resultSet = null;
+        PreparedStatement ppst = null;
+        List<BLOB> list = new ArrayList<>();
+        Map message = (Map) dataMap.get("message");
+        Map payload = (Map) dataMap.get("payload");
+        List big_data = (List) message.get("big_data");
+        List key = (List) payload.get("key");
+
+        try {
+            ppst = conn.prepareStatement(sql);
+            int index = 1;
+
+            if (key != null && key.size() > 0) {
+                for (int i = 0; i < list.size(); i++) {
+                    ppst.setObject(index++, list.get(i));
+                }
+            } else {
+                for (Object keys : payload.keySet()) {
+                    if (payload.get(keys) != null && !"".equals(payload.get(keys))) {
+                        ppst.setObject(index++, payload.get(keys));//project_name
+                    }
+                }
+            }
+            resultSet = ppst.executeQuery();
+            if (resultSet.next()) {
+                for (Object blob : big_data) {
+                    list.add((oracle.sql.BLOB) resultSet.getBlob(blob.toString()));
+                }
+            } else {
+                sql = selBlobInRowId(dataMap);
+                ppst = conn.prepareStatement(selBlobInRowId(dataMap));
+                resultSet = ppst.executeQuery(sql);
+                if (resultSet.next()) {
+                    //yi行多个大字段
+                    for (Object blob : big_data) {
+                        list.add((oracle.sql.BLOB) resultSet.getBlob(blob.toString()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                ppst.close();
+                ppst = null;
+                resultSet.close();
+                resultSet = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 
     /**
@@ -739,20 +831,16 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteHasBlodByInsert(int index, String insertSql, String selSql, Map dataMap, PreparedStatement ps) throws Exception {
-        ResultSet resultSet = null;
-        InputStream input = null;
-        ByteArrayOutputStream baos = null;
-        oracle.sql.BLOB blob = null;
+    public void excuteHasBlodByInsert(String insertSql, List list, Map dataMap, PreparedStatement ps) throws Exception {
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
-
         List<String> bigData = (List) message.get("big_data");
-        ps = destConn.prepareStatement(selSql);
+//        ps = destConn.prepareStatement(insertSql);
         List key = (List) payload.get("key");
+        System.out.println("打印查入大字段sql" + insertSql);
         if (key != null && key.size() > 0) {
             for (int i = 0; i < key.size(); i++) {
-                ps.setObject(i+1,key.get(i));
+                ps.setObject(i + 1, key.get(i));
             }
         } else {
             int i = 1;
@@ -760,27 +848,30 @@ public class LoadingDM implements Loading {
                 ps.setObject(i, payload.get(field));
                 i++;
             }
-        }
-        resultSet = ps.executeQuery(selSql);
-        if (resultSet.next()) {
-            for (int i = 0; i < bigData.size(); i++) {
-                blob = (oracle.sql.BLOB) resultSet.getBlob(bigData.get(i));
-                input = blob.getBinaryStream();
-                baos = new ByteArrayOutputStream();
-                byte[] b = new byte[1024];
-                int l = 0;
-                while ((l = input.read(b)) != -1) {
-                    baos.write(b, 0, l);
+            System.out.println("大字段的size-----" + list.size());
+            if (list != null && list.size() > 0) {
+                //todo
+                for (Object blob : list) {
+
+                    ps.setObject(i, blob);
+
+                    System.out.println(i);
+                    i++;
                 }
-                input.close();
-                baos.flush();
-                baos.close();
+            } else {
+                for (String blob : bigData) {
+                    ps.setObject(i, blob);
+                    System.out.println(i);
+                    i++;
+                }
             }
         }
-        System.out.println(baos);
-        ps.execute();
-        ps.close();
-        destConn.commit();
+        ps.addBatch();
+        payload.clear(); // gc
+        payload = null; //gc
+//        ps.execute();
+//        ps.close();
+
     }
 
 
@@ -798,5 +889,6 @@ public class LoadingDM implements Loading {
         ps.close();
         destConn.commit();
     }
+
 
 }
