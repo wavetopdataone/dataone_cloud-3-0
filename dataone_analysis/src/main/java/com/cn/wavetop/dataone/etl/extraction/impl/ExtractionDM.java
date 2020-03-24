@@ -39,16 +39,17 @@ public class ExtractionDM implements Extraction {
 
     @Override
     public void resumeTrans() {
-
+        transformationThread.resume();
     }
 
     @Override
     public void stopTrans() {
-
+        // TODO 释放资源
+        transformationThread.stop();
     }
 
     @Override
     public void pasueTrans() {
-
+        transformationThread.suspend();
     }
 }

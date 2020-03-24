@@ -11,6 +11,7 @@ import com.cn.wavetop.dataone.kafkahttputils.HttpClientKafkaUtil;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.producer.Producer;
 import com.cn.wavetop.dataone.util.JSONUtil;
+import com.cn.wavetop.dataone.utils.TopicsController;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -124,7 +125,7 @@ public class ExtractionOracle implements Extraction {
         String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
         StringBuffer sqlCount = new StringBuffer(); // 之前的全查
         sqlCount.append(SELECT).append(" count(*) ").append(FROM).append(tableName);
-
+        // _fileds +=",''||rowid as ROWID_DATAONE_YONGYUBLOB_HAHA";
         Long sqlCount1 = DBUtil.queryCount(sqlCount.toString(), conn);
         message.put("sqlCount", sqlCount1);
         jobRunService.insertSqlCount(message);//更新监控表
@@ -146,6 +147,8 @@ public class ExtractionOracle implements Extraction {
         while (resultMap.size() > 0) {
             start = System.currentTimeMillis();    //开始读取的时间
             for (int i = 0; i < resultMap.size(); i++) {
+                message.put("ROWID_DATAONE_YONGYUBLOB_HAHA", resultMap.get(i).get("ROWID_DATAONE_YONGYUBLOB_HAHA"));
+                resultMap.get(i).remove("ROWID_DATAONE_YONGYUBLOB_HAHA");
                 DataMap data = DataMap.builder()
                         .payload(resultMap.get(i))
                         .message(message)
@@ -200,7 +203,7 @@ public class ExtractionOracle implements Extraction {
         String table_whitelist = br.toString().substring(0, br.toString().length() - 1);
         String configSource = new ConfigSource(jobId, sysDbinfo, scn, table_whitelist.toString()).toJsonConfig();
 
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-"+jobId); //如果当前任务开启的connector 先删除connectorSource
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
         HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSource); //创建connectorSource
         startTrans(1, 2);   //判断创建清洗线程并开启线程
     }
@@ -234,6 +237,7 @@ public class ExtractionOracle implements Extraction {
     @Override
     public void stopTrans() {
         // TODO 清空Topic
+        TopicsController.deleteTopic(tableName + "_" + jobId);
         this.transformationThread.stop();
     }
 
@@ -254,8 +258,6 @@ public class ExtractionOracle implements Extraction {
     }
 
 
-
-
     /**
      * @param index
      * @param size
@@ -264,9 +266,9 @@ public class ExtractionOracle implements Extraction {
      * @return
      */
     public String getPageSelectSql(long index, long size, String _fileds, String tableName) {
-        StringBuffer stringBuffer = new StringBuffer(SELECT + _fileds + FROM + "(");
-        StringBuffer stringBuffer1 = new StringBuffer(SELECT + _fileds + ",ROWNUM rn" + FROM + "(");
-        StringBuffer stringBuffer2 = new StringBuffer(SELECT + _fileds + FROM + tableName + " )" + WHERE + "ROWNUM < " + (size + index) + ")" + WHERE + "rn >=" + index);
+        StringBuffer stringBuffer = new StringBuffer(SELECT + _fileds + ",ROWID_DATAONE_YONGYUBLOB_HAHA" + FROM + "(");
+        StringBuffer stringBuffer1 = new StringBuffer(SELECT + _fileds + ",ROWID_DATAONE_YONGYUBLOB_HAHA, ROWNUM rn" + FROM + "(");
+        StringBuffer stringBuffer2 = new StringBuffer(SELECT + _fileds + ",''||rowid as ROWID_DATAONE_YONGYUBLOB_HAHA" + FROM + tableName + " )" + WHERE + "ROWNUM < " + (size + index) + ")" + WHERE + "rn >=" + index);
         stringBuffer.append(stringBuffer1.toString() + stringBuffer2.toString());
         return stringBuffer.toString();
     }

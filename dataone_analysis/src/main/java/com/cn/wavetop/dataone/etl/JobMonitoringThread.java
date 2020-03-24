@@ -4,6 +4,7 @@ import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class JobMonitoringThread extends Thread {
     private Long jobId;
 
-    private  Map<Object, ExtractionThread> ExtractionThreads;
+    private Map<Object, ExtractionThread> ExtractionThreads;
     /**
      * 保存每个任务的所有抓取线程
      * <p>
@@ -45,10 +46,15 @@ public class JobMonitoringThread extends Thread {
     }
 
     private static final JobRelaServiceImpl JobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
-
+    private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
+    private int sync_range;
 
     //开始任务
     public boolean startJob() {
+        // 任务暂停时需要把任务表状态改为暂停
+
+
+
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
         try {
@@ -59,13 +65,15 @@ public class JobMonitoringThread extends Thread {
         }
 
         if (ExtractionThreads == null) {
+            // 开启时将任务表的所有状态改为运行中
+            jobRunService.updateStatusFristStart(jobId);
+
             // 第一次开启，激活
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId, conn);
-
-            int sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
+            sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
             switch (sync_range) {
                 //全量
                 case 1:
@@ -86,13 +94,14 @@ public class JobMonitoringThread extends Thread {
                         ExtractionThreads.get(tableName).start();
                     }
                     ExtractionThreads.put("incrementRang-" + jobId, new ExtractionThread(jobId, tableById, conn, destConn, sync_range));
-                    ExtractionThreads.get("incrementRang-" + jobId).start();
+                    //ExtractionThreads.get("incrementRang-" + jobId).start();
                     break;
                 default:
 
             }
         } else {
-            // todo 优化数据库连接
+            // 重启时把暂停的状态改为运行中
+            jobRunService.updateStatusStart(jobId);
             // 重启，resume
             for (Object o : ExtractionThreads.keySet()) {
                 ExtractionThreads.get(o).resume(); //重启抓取线程
@@ -105,6 +114,9 @@ public class JobMonitoringThread extends Thread {
     //暂停任务
     public boolean pauseJob() {
         // todo 优化数据库连接（释放）
+
+        // 任务暂停时需要把任务表状态改为暂停
+        jobRunService.updateStatusPause(jobId);
         if (ExtractionThreads == null) {
             return false;
         }
@@ -137,7 +149,13 @@ public class JobMonitoringThread extends Thread {
         while (true) {
             // 监控
             System.out.println("我要开始监控任务了！");
-            // 全量+增量
+            // 全量+增量时，全量跑完才开始写增量
+            if (sync_range != 3) break;
+            if (jobRunService.fullOverByjobId(jobId)) {
+                System.out.println("开始增量");
+                ExtractionThreads.get("incrementRang-" + jobId).start();
+                return;
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -145,7 +163,6 @@ public class JobMonitoringThread extends Thread {
             }
         }
     }
-
 
 
 }
