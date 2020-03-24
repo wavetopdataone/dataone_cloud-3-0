@@ -859,6 +859,7 @@ public class LoadingDM implements Loading {
 //        ps.addBatch();
         payload.clear(); // gc
         payload = null; //gc
+        destConn.commit();
         try {
             ps.execute();
         } catch (SQLException e) {
