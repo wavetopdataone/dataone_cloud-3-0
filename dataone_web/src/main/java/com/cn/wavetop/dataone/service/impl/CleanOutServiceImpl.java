@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -37,6 +38,7 @@ public class CleanOutServiceImpl implements CleanOutService {
         }
         ResultMap resultMap = null;
         Map map = null;
+        Map map2=new HashMap();
         try {
             if (sysDbinfo.getType() == 1) {
                 String sql = "select * from ( select * from "+tableName+" order by dbms_random.value) where rownum=1";
@@ -59,6 +61,8 @@ public class CleanOutServiceImpl implements CleanOutService {
                 e.printStackTrace();
             }
         }
-        return map;
+        map2.put("status","1");
+        map2.put("data",map);
+        return map2;
     }
 }
