@@ -23,12 +23,12 @@ public class SysCleanScriptController {
     private CleanOutService cleanOutService;
 
 
-    @ApiOperation(value = "执行脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "*  status 0表示执行成功，\n" +
-            "     *  非0表示失败： 1表示编译失败，\n" +
-            "     *                2表示获取class失败，\n" +
-            "     *                3表示构造实例对象失败\n" +
-            "     *                4表示获取脚本方法失败\n" +
-            "     *                5表示执行脚本方法失败")
+    @ApiOperation(value = "执行脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json",  notes = "       *       status 0表示执行成功，\n" +
+            "     *       非0表示失败：   1表示编译失败，\n" +
+            "     *                       2表示获取class失败，\n" +
+            "     *                       3表示构造实例对象失败\n" +
+            "     *                       4表示获取脚本方法失败\n" +
+            "     *                       5表示执行脚本方法失败")
     @PostMapping("/executeScript")
     public ScriptMessage executeScript(String scriptContent, String payload) {
         Map map = JSONUtil.parseObject(payload, Map.class);
@@ -42,12 +42,12 @@ public class SysCleanScriptController {
     }
 
     @PostMapping("/saveScript")
-    @ApiOperation(value = "执行/保存任务表的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "*  status 0表示执行成功，\n" +
-            "     *  非0表示失败： 1表示编译失败，\n" +
-            "     *                2表示获取class失败，\n" +
-            "     *                3表示构造实例对象失败\n" +
-            "     *                4表示获取脚本方法失败\n" +
-            "     *                5表示执行脚本方法失败")
+    @ApiOperation(value = "执行/保存任务表的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "       *       status 0表示执行成功，\n" +
+            "     *       非0表示失败：   1表示编译失败，\n" +
+            "     *                       2表示获取class失败，\n" +
+            "     *                       3表示构造实例对象失败\n" +
+            "     *                       4表示获取脚本方法失败\n" +
+            "     *                       5表示执行脚本方法失败")
     public Object saveScript(SysCleanScript sysCleanScript, String payload) {
         Map map = JSONUtil.parseObject(payload, Map.class);
         ScriptMessage scriptMessage = sysCleanScriptService.executeScript(sysCleanScript.getScriptContent(), map);
