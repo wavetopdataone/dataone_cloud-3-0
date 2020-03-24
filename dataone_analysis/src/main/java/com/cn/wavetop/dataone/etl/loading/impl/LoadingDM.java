@@ -830,7 +830,8 @@ public class LoadingDM implements Loading {
      * @param dataMap
      * @throws SQLException
      */
-    public void excuteHasBlodByInsert(String insertSql, List list, Map dataMap, PreparedStatement ps) throws Exception {
+    public void excuteHasBlodByInsert(String insertSql, List list, Map dataMap, PreparedStatement ps2) throws Exception {
+        PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
 //        List<String> bigData = (List) message.get("big_data");
@@ -853,13 +854,21 @@ public class LoadingDM implements Loading {
                     ps.setObject(i, blob);
                     i++;
                 }
+            System.out.println("大字段的size-222222222----" + list.size());
         }
-        ps.addBatch();
+//        ps.addBatch();
         payload.clear(); // gc
         payload = null; //gc
-//        ps.execute();
+        try {
+            ps.execute();
+        } catch (SQLException e) {
+            // todo
+        }
+        destConn.commit();
+        System.out.println("执行的size-222222222----" + list.size());
+        ps.close();
+        ps =null;
 //        ps.close();
-
     }
 
 
