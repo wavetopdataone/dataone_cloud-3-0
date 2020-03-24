@@ -30,10 +30,8 @@ public class SysCleanScriptController {
             "     *                4表示获取脚本方法失败\n" +
             "     *                5表示执行脚本方法失败")
     @PostMapping("/executeScript")
-    public ScriptMessage executeScript(SysCleanScript sysCleanScript, String payload) {
-
+    public ScriptMessage executeScript(String scriptContent, String payload) {
         Map map = JSONUtil.parseObject(payload, Map.class);
-        String scriptContent = sysCleanScript.getScriptContent();
         return  sysCleanScriptService.executeScript(scriptContent,map);
     }
 
