@@ -53,7 +53,6 @@ public class JobRunService {
      */
     @Transactional
     public void insertSqlCount(Map message) {
-        System.out.println(sysMonitoringRepository + "_______sysMonitoringRepository");
 
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
