@@ -8,6 +8,8 @@ import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.service.CleanOutService;
 import com.cn.wavetop.dataone.util.DBConn;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.util.JSONUtil;
+import com.sun.org.apache.xpath.internal.objects.XObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +63,7 @@ public class CleanOutServiceImpl implements CleanOutService {
                 e.printStackTrace();
             }
         }
-        map2.put("status","1");
-        map2.put("data",map);
-        return map2;
+
+        return map;
     }
 }

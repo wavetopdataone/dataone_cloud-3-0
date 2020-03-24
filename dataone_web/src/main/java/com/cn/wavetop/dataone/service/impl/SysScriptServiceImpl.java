@@ -111,10 +111,7 @@ public class SysScriptServiceImpl implements SysScriptService {
         String content = sysScript.get().getScriptContent();
 //        String[] copy = content.split("process(Map record) \\{");
         Map map = new HashMap<>();
-       //类加方法 截出来最少有3个元素
-//        if (copy.length < 2) {
-//            return ToDataMessage.builder().status("0").message("获取失败").build();
-//        }
+
         String copyScript = content.substring(StringUtils.getCharacterPosition(content), content.indexOf("return"));
         map.put("status",1);
         map.put("copyScript",copyScript);
