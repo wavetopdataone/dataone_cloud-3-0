@@ -236,7 +236,7 @@ public class JobRunService {
      * yongz
      *
      * @param jobId
-     * @return true是全量结束，false是全量已结束
+     * @return true是全量结束，false是全量未结束
      */
     public Boolean fullOverByjobId(Long jobId) {
         List<SysMonitoring> monitorings = sysMonitoringRepository.findByJobId(jobId);
@@ -273,12 +273,22 @@ public class JobRunService {
      * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
      */
     public void updateJobStatus() {
-        List<SysJobrela> list = sysJobrelaRespository.findByJobStatus();
-        if (list != null && list.size() > 0) {
-            for (SysJobrela sysJobrela : list) {
-                sysJobrelaRespository.updateStatus(sysJobrela.getId(), "3");
-            }
-        }
+//        List<SysJobrela> list = sysJobrelaRespository.findByJobStatus();
+//        if (list != null && list.size() > 0) {
+//            for (SysJobrela sysJobrela : list) {
+//                sysJobrelaRespository.updateStatus(sysJobrela.getId(), "3");
+//            }
+//        }
+        sysJobrelaRespository.updateStatus("3");
+    }
+
+
+    /**
+     * 宕机重启修改状态
+     * 修改中台的任务状态变为已终止，todo 还有清空topic 等一些需要郑勇来写
+     */
+    public void updateJobStatusByJobId(Long jobId, String status) {
+        sysJobrelaRespository.updateStatus(jobId, status);
     }
 
     /**
@@ -310,11 +320,12 @@ public class JobRunService {
         BigDecimal bg = null;
         BigDecimal bg1 = null;
         BigDecimal bg2 = null;
-        //查找系统邮箱
-        sysUserOptional = sysUserRepository.findById(Long.valueOf(1));
         //查询正在运行的该任务的邮件通知是否配置
         list = sysJobrelaRespository.findEmailJobRelaUser(jobId);
         if (list != null && list.size() > 0) {
+            //查找系统邮箱
+            sysUserOptional = sysUserRepository.findById(Long.valueOf(1));
+
             EmailJobrelaVo emailJobrelaVo = list.get(0);
             //查询该任务关联了多少个用户
             sysUserList = sysUserJobrelaRepository.selUserNameByJobId(jobId);
@@ -475,12 +486,14 @@ public class JobRunService {
     public void updateStatusStart(Long jobId) {
         sysMonitoringRepository.updateStatus(jobId, 1, 2);
     }
+
     /**
      * 任务启动时要把所有的状态改为运行中
+     *
      * @param jobId
      */
     public void updateStatusFristStart(Long jobId) {
-        sysMonitoringRepository.updateFristStatus(jobId,1);
+        sysMonitoringRepository.updateFristStatus(jobId, 1);
     }
 
     public static void main(String[] args) {

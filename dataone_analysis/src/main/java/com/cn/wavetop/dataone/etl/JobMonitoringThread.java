@@ -54,7 +54,6 @@ public class JobMonitoringThread extends Thread {
         // 任务暂停时需要把任务表状态改为暂停
 
 
-
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
         try {
@@ -146,16 +145,60 @@ public class JobMonitoringThread extends Thread {
      */
     @Override
     public void run() {
-        while (true) {
-            // 监控
-            System.out.println("我要开始监控任务了！");
-            // 全量+增量时，全量跑完才开始写增量
-            if (sync_range != 3) break;
-            if (jobRunService.fullOverByjobId(jobId)) {
-                System.out.println("开始增量");
-                ExtractionThreads.get("incrementRang-" + jobId).start();
-                return;
+        boolean emaliFlag = true;
+        boolean fullOver = true;
+        boolean fullFalg = true;
+        boolean syncRangeFlag = true;
+
+        while (emaliFlag || syncRangeFlag) {
+            // 邮件监控
+            emaliFlag = jobRunService.EmailReminder(jobId);
+
+            // 任务状态监控
+            switch (sync_range) {
+                //全量
+                case 1:
+                    syncRangeFlag = true;
+                    if (jobRunService.fullOverByjobId(jobId)) {
+                        jobRunService.updateJobStatusByJobId(jobId,"3");
+                        syncRangeFlag = false;
+                    }
+                    break;
+                //增量
+                case 2:
+                    syncRangeFlag = false;
+                    break;
+                //增量+全量
+                case 3:
+                    syncRangeFlag = true;
+                    if (jobRunService.fullOverByjobId(jobId)) {
+                        ExtractionThreads.get("incrementRang-" + jobId).start();
+                        syncRangeFlag = false;
+                    }
+                    break;
             }
+
+//            // 全量监控
+//            if (sync_range == 1) {
+//                if (jobRunService.fullOverByjobId(jobId)) {
+//                    jobRunService.updateJobStatusByJobId(jobId,"3");
+//                    fullOver = false;
+//                }
+//            }else {
+//                fullFalg =false;
+//            }
+//
+//            // 全量+增量时，全量跑完才开始写增量
+//            if (sync_range == 3) {
+//                //  全量结束true，全量未结束false
+//                if (jobRunService.fullOverByjobId(jobId)) {
+//                    ExtractionThreads.get("incrementRang-" + jobId).start();
+//                    fullOver = false;
+//                }
+//            }else {
+//                fullOver = false;
+//            }
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
