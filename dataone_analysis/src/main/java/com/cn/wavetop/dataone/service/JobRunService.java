@@ -140,9 +140,9 @@ public class JobRunService {
     /**
      * 根据jobId和tableName更新監控表的狀態
      */
-    public void updateJobStatus(Long jobId, String tableName, int jobStatus) {
-        sysMonitoringRepository.updateStatus(jobId, tableName, jobStatus);
-    }
+//    public void updateJobStatus(Long jobId, String tableName, int jobStatus) {
+//        sysMonitoringRepository.updateStatus(jobId, tableName, jobStatus);
+//    }
 
 
     /**
@@ -464,14 +464,7 @@ public class JobRunService {
      * @param jobId
      */
     public void updateStatusPause(Long jobId) {
-        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findByJobId(jobId);
-        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            for (SysMonitoring sysMonitoring : sysMonitoringList) {
-                if (sysMonitoring.getJobStatus() == 1) {
-                    sysMonitoringRepository.updateStatus(jobId, sysMonitoring.getSourceTable(), 2);
-                }
-            }
-        }
+        sysMonitoringRepository.updateStatus(jobId, 2, 1);
     }
 
     /**
@@ -480,26 +473,14 @@ public class JobRunService {
      * @param jobId
      */
     public void updateStatusStart(Long jobId) {
-        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findByJobId(jobId);
-        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            for (SysMonitoring sysMonitoring : sysMonitoringList) {
-                if (sysMonitoring.getJobStatus() == 2) {
-                    sysMonitoringRepository.updateStatus(jobId, sysMonitoring.getSourceTable(), 1);
-                }
-            }
-        }
+        sysMonitoringRepository.updateStatus(jobId, 1, 2);
     }
     /**
      * 任务启动时要把所有的状态改为运行中
      * @param jobId
      */
     public void updateStatusFristStart(Long jobId) {
-        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findByJobId(jobId);
-        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            for (SysMonitoring sysMonitoring : sysMonitoringList) {
-                sysMonitoringRepository.updateStatus(jobId, sysMonitoring.getSourceTable(), 1);
-            }
-        }
+        sysMonitoringRepository.updateFristStatus(jobId,1);
     }
 
     public static void main(String[] args) {

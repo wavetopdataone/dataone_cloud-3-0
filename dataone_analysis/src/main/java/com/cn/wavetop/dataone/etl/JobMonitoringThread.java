@@ -67,12 +67,12 @@ public class JobMonitoringThread extends Thread {
         if (ExtractionThreads == null) {
             // 开启时将任务表的所有状态改为运行中
             jobRunService.updateStatusFristStart(jobId);
+
             // 第一次开启，激活
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId, conn);
-
             sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
             switch (sync_range) {
                 //全量
