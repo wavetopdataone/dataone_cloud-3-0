@@ -8,6 +8,8 @@ import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.service.CleanOutService;
 import com.cn.wavetop.dataone.util.DBConn;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.util.JSONUtil;
+import com.sun.org.apache.xpath.internal.objects.XObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -32,15 +35,15 @@ public class CleanOutServiceImpl implements CleanOutService {
             try {
                 conn = DBConns.getConn(sysDbinfo);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("数据库连接失效"+e.getMessage());
             }
         }
-        int number = new Random().nextInt(10) + 1;
         ResultMap resultMap = null;
         Map map = null;
+        Map map2=new HashMap();
         try {
             if (sysDbinfo.getType() == 1) {
-                String sql = "SELECT * FROM (SELECT a.*, ROWNUM rn FROM (SELECT * FROM " + tableName + ") a )WHERE rn= " + number;
+                String sql = "select * from ( select * from "+tableName+" order by dbms_random.value) where rownum=1";
                 resultMap = DBUtil.query2(sql, conn);
             } else if (sysDbinfo.getType() == 2) {
                 String sql="select * from "+tableName+" order by rand() LIMIT 1";
@@ -60,6 +63,7 @@ public class CleanOutServiceImpl implements CleanOutService {
                 e.printStackTrace();
             }
         }
+
         return map;
     }
 }
