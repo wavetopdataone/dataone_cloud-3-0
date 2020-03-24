@@ -136,6 +136,7 @@ public class TransformationThread extends Thread {
             // 开始时间戳
             long start = System.currentTimeMillis();
             for (final ConsumerRecord record : records) {
+                System.out.println("xuezihaohahahahahah");
                 String value = (String) record.value();
                 Transformation transformation = new Transformation(jobId, tableName, conn);
                 try {
@@ -193,6 +194,8 @@ public class TransformationThread extends Thread {
 
                         // 监控关闭当前，并修改表状态
                         if (jobRunService.fullOverByTableName(jobId, tableName)){
+
+                            System.out.println("zj dah zhengyong !");
                             // 修改job状态
                             jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                             stop();
@@ -232,6 +235,7 @@ public class TransformationThread extends Thread {
 
                     // 监控关闭当前，并修改表状态
                     if (jobRunService.fullOverByTableName(jobId, tableName)){
+                        System.out.println("zj dah zhengyong !");
                         // 修改job状态
                         jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                         stop();

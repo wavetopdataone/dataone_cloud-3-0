@@ -509,7 +509,7 @@ public class LoadingDM implements Loading {
             excuteNoBlodByInsert(insertSql, dataMap, ps);
         } else {
             String a = Selblobs(dataMap);
-            List<BLOB> list = selBlobResult(dataMap, a, conn);
+            List<Object> list = selBlobResult(dataMap, a, conn);
             //含blob
             excuteHasBlodByInsert(insertSql, list, dataMap, ps);
         }
@@ -716,10 +716,10 @@ public class LoadingDM implements Loading {
     }
 
 
-    public List<BLOB> selBlobResult(Map dataMap, String sql, Connection conn) {
+    public List<Object> selBlobResult(Map dataMap, String sql, Connection conn) {
         ResultSet resultSet = null;
         PreparedStatement ppst = null;
-        List<BLOB> list = new ArrayList<>();
+        List<Object> list = new ArrayList<>();
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
         List big_data = (List) message.get("big_data");
@@ -728,7 +728,6 @@ public class LoadingDM implements Loading {
         try {
             ppst = conn.prepareStatement(sql);
             int index = 1;
-
             if (key != null && key.size() > 0) {
                 for (int i = 0; i < list.size(); i++) {
                     ppst.setObject(index++, list.get(i));
@@ -743,7 +742,7 @@ public class LoadingDM implements Loading {
             resultSet = ppst.executeQuery();
             if (resultSet.next()) {
                 for (Object blob : big_data) {
-                    list.add((oracle.sql.BLOB) resultSet.getBlob(blob.toString()));
+                    list.add( resultSet.getObject(blob.toString()));
                 }
             } else {
                 sql = selBlobInRowId(dataMap);
@@ -752,7 +751,7 @@ public class LoadingDM implements Loading {
                 if (resultSet.next()) {
                     //yi行多个大字段
                     for (Object blob : big_data) {
-                        list.add((oracle.sql.BLOB) resultSet.getBlob(blob.toString()));
+                        list.add(resultSet.getObject(blob.toString()));
                     }
                 }
             }
@@ -806,7 +805,7 @@ public class LoadingDM implements Loading {
     public void excuteHasBlodByInsert(String insertSql, List list, Map dataMap, PreparedStatement ps) throws Exception {
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
-        List<String> bigData = (List) message.get("big_data");
+//        List<String> bigData = (List) message.get("big_data");
 //        ps = destConn.prepareStatement(insertSql);
         List key = (List) payload.get("key");
         System.out.println("打印查入大字段sql" + insertSql);
@@ -821,22 +820,11 @@ public class LoadingDM implements Loading {
                 i++;
             }
             System.out.println("大字段的size-----" + list.size());
-            if (list != null && list.size() > 0) {
                 //todo
                 for (Object blob : list) {
-
                     ps.setObject(i, blob);
-
-                    System.out.println(i);
                     i++;
                 }
-            } else {
-                for (String blob : bigData) {
-                    ps.setObject(i, blob);
-                    System.out.println(i);
-                    i++;
-                }
-            }
         }
         ps.addBatch();
         payload.clear(); // gc
