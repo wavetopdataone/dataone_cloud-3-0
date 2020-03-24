@@ -26,16 +26,6 @@ public class DataoneApplicationTests {
     //    private RedisTemplate<String,Object> redisTemplate;
     @Test
     public void sawq() {
-        List<SysUserDept> lists = sysUserRepository.findUserByPerms(72L, "1");
-        if (lists != null && lists.size() > 0) {
-            for (int i = 0; i < lists.size(); i++) {
-                if (lists.get(i).getRoleName().equals("管理员")) {
-                    lists.add(0, lists.get(i));
-                    lists.remove(lists.get(i+1));
-
-                }
-            }
-        }
 
     }
 }

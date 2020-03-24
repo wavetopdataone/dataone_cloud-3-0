@@ -1,6 +1,7 @@
 package com.cn.wavetop.dataone.service;
 
 import com.cn.wavetop.dataone.entity.SysCleanScript;
+import com.cn.wavetop.dataone.entity.vo.ScriptMessage;
 
 import java.util.Map;
 
@@ -12,4 +13,11 @@ public interface SysCleanScriptService {
 
     //根据id和表名查询用户使用的脚本
     Object findByIdAndTable(Long jobId,String sourceTable);
+
+    /**
+     * 执行脚本
+     * @param scriptContent
+     * @param payload
+     */
+    ScriptMessage executeScript(String scriptContent, Map payload);
 }

@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.etl;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
+import com.cn.wavetop.dataone.entity.SysMonitoring;
 import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
@@ -152,7 +153,7 @@ public class JobMonitoringThread extends Thread {
 
         while (emaliFlag || syncRangeFlag) {
             // 邮件监控
-            emaliFlag = jobRunService.EmailReminder(jobId);
+            emaliFlag = jobRunService.emailReminder(jobId);
 
             // 任务状态监控
             switch (sync_range) {
@@ -177,27 +178,6 @@ public class JobMonitoringThread extends Thread {
                     }
                     break;
             }
-
-//            // 全量监控
-//            if (sync_range == 1) {
-//                if (jobRunService.fullOverByjobId(jobId)) {
-//                    jobRunService.updateJobStatusByJobId(jobId,"3");
-//                    fullOver = false;
-//                }
-//            }else {
-//                fullFalg =false;
-//            }
-//
-//            // 全量+增量时，全量跑完才开始写增量
-//            if (sync_range == 3) {
-//                //  全量结束true，全量未结束false
-//                if (jobRunService.fullOverByjobId(jobId)) {
-//                    ExtractionThreads.get("incrementRang-" + jobId).start();
-//                    fullOver = false;
-//                }
-//            }else {
-//                fullOver = false;
-//            }
 
             try {
                 Thread.sleep(1000);

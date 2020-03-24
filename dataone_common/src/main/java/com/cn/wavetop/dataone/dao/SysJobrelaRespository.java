@@ -121,12 +121,12 @@ public interface SysJobrelaRespository   extends JpaRepository<SysJobrela,Long>
 
     @Transactional
     @Modifying
-    @Query(value = "update SysJobrela  set jobStatus=:jobStatus where s.jobStatus=1 or s.jobStatus=2")
+    @Query(value = "update SysJobrela s set jobStatus=:jobStatus where s.jobStatus=1 or s.jobStatus=2")
     void updateStatus(String jobStatus);
 
     @Transactional
     @Modifying
-    @Query(value = "update SysJobrela  set jobStatus=:jobStatus where s.id=:jobId ")
+    @Query(value = "update SysJobrela s set jobStatus=:jobStatus where s.id=:jobId ")
     void updateStatus(Long jobId,String jobStatus);
 
     @Query(value = "select s from SysJobrela s where s.jobStatus=1 or s.jobStatus=2")

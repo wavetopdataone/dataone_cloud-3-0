@@ -294,7 +294,7 @@ public class JobRunService {
     /**
      * 监听邮件提醒以及发送邮件
      */
-    public Boolean EmailReminder(Long jobId) {
+    public Boolean emailReminder(Long jobId) {
         List<EmailJobrelaVo> list = new ArrayList<>();
         ErrorQueueSettings errorQueueSettings = null;
         List<SysMonitoring> sysMonitoringList = new ArrayList<>();
@@ -406,6 +406,7 @@ public class JobRunService {
                                     }
                                     build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
                                     userLogRepository.save(build);
+                                    return  false;
                                 }
                             }
                         } else {
@@ -425,6 +426,7 @@ public class JobRunService {
                                 }
                                 build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
                                 userLogRepository.save(build);
+                                return false;
                             }
                         }
 

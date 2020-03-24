@@ -1,17 +1,18 @@
 package com.cn.wavetop.dataone.controller;
 
-import com.cn.wavetop.dataone.dao.SysScriptRepository;
 import com.cn.wavetop.dataone.entity.SysCleanScript;
-import com.cn.wavetop.dataone.entity.SysScript;
+import com.cn.wavetop.dataone.entity.vo.ScriptMessage;
 import com.cn.wavetop.dataone.service.CleanOutService;
 import com.cn.wavetop.dataone.service.SysCleanScriptService;
+import com.cn.wavetop.dataone.util.JSONUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/sys_clean")
@@ -20,43 +21,55 @@ public class SysCleanScriptController {
     private SysCleanScriptService sysCleanScriptService;
     @Autowired
     private CleanOutService cleanOutService;
-    @Autowired
-    private SysScriptRepository sysScriptRepository;
 
-    @ApiOperation(value = "保存和执行脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "保存和执行脚本")
-    @PostMapping("/saveAndSel")
-    public Object saveAndSel(SysCleanScript sysCleanScript, String   map){
-        //根据逗号截取字符串数组
-        String[] str1 = map.split(",");
-        //创建Map对象
-        Map map2 = new HashMap<>();
-        //循环加入map集合
-        for (int i = 0; i < str1.length; i++) {
-            //根据":"截取字符串数组
-            String[] str2 = str1[i].split(":");
-            //str2[0]为KEY,str2[1]为值
-            map2.put(str2[0], str2[1]);
-        }
-        System.out.println(map2+"***********截取");
-        return sysCleanScriptService.saveAndExcues(sysCleanScript,map2);
+
+    @ApiOperation(value = "执行脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "*  status 0表示执行成功，\n" +
+            "     *  非0表示失败： 1表示编译失败，\n" +
+            "     *                2表示获取class失败，\n" +
+            "     *                3表示构造实例对象失败\n" +
+            "     *                4表示获取脚本方法失败\n" +
+            "     *                5表示执行脚本方法失败")
+    @PostMapping("/executeScript")
+    public ScriptMessage executeScript(SysCleanScript sysCleanScript, String payload) {
+
+        Map map = JSONUtil.parseObject(payload, Map.class);
+        String scriptContent = sysCleanScript.getScriptContent();
+        return  sysCleanScriptService.executeScript(scriptContent,map);
     }
+
     @PostMapping("/selData")
     @ApiOperation(value = "随机查询一条源端数据", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "随机查询一条源端数据")
-    public Object selData(Long jobId,String tableName){
-        return  cleanOutService.selData(jobId,tableName);
+    public Object selData(Long jobId, String tableName) {
+        return cleanOutService.selData(jobId, tableName);
     }
 
-    @PostMapping("/save")
-    @ApiOperation(value = "保存任务表的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "保存任务表的脚本")
-    public Object save(SysCleanScript sysCleanScript){
-        return  sysCleanScriptService.save(sysCleanScript);
+    @PostMapping("/saveScript")
+    @ApiOperation(value = "执行/保存任务表的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "*  status 0表示执行成功，\n" +
+            "     *  非0表示失败： 1表示编译失败，\n" +
+            "     *                2表示获取class失败，\n" +
+            "     *                3表示构造实例对象失败\n" +
+            "     *                4表示获取脚本方法失败\n" +
+            "     *                5表示执行脚本方法失败")
+    public Object saveScript(SysCleanScript sysCleanScript, String payload) {
+        Map map = JSONUtil.parseObject(payload, Map.class);
+        ScriptMessage scriptMessage = sysCleanScriptService.executeScript(sysCleanScript.getScriptContent(), map);
+        HashMap<Object, Object> message = new HashMap<>();
+        if (scriptMessage.getStatus() == 0) {
+            sysCleanScriptService.save(sysCleanScript);
+            message.put("status", scriptMessage.getStatus());
+            message.put("message", "保存配置成功！");
+        }else {
+            message.put("status", scriptMessage.getStatus());
+            message.put("message", "编译执行失败，请调试脚本代码！");
+        }
+        return message;
     }
+
     @PostMapping("/findByIdAndTable")
     @ApiOperation(value = "根据id和表名查询用户使用的脚本", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "根据id和表名查询用户使用的脚本")
-    public  Object findByIdAndTable(Long jobId,String sourceTable){
-        return  sysCleanScriptService.findByIdAndTable(jobId,sourceTable);
+    public Object findByIdAndTable(Long jobId, String sourceTable) {
+        return sysCleanScriptService.findByIdAndTable(jobId, sourceTable);
     }
-
 
 
 }
