@@ -404,7 +404,7 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
 //            }
 
             if (readData != 0) {
-                synchronous = writeData / sqlCount;
+                synchronous = (writeData+errorDatas) / sqlCount;
             }
             map.put("read_datas", readData);
             map.put("write_datas", writeData);
