@@ -437,6 +437,7 @@ public class LoadingDM implements Loading {
         }
 
         if (count == 0){
+            
             ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
                     optContext("0IncrementUpdateError").
                     destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
