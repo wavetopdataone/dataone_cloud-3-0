@@ -154,7 +154,7 @@ public class JobRunService {
         try {
             scn = Long.parseLong(logMinerScn);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return scn;
     }
@@ -299,18 +299,18 @@ public class JobRunService {
         List<SysMonitoring> sysMonitoringList = new ArrayList<>();
         Optional<SysUser> sysUserOptional = null;
         List<SysUser> sysUserList = new ArrayList<>();
-        EmailUtils emailUtils = new EmailUtils();
-        EmailPropert emailPropert = null;
+//        EmailUtils emailUtils = new EmailUtils();
+//        EmailPropert emailPropert = null;
         Optional<SysJobrela> sysJobrela = null;
         List<ErrorLog> errorLogs = new ArrayList<>();
         ValueOperations<String, String> opsForValue = null;
-        boolean flag = false;
+//        boolean flag = false;
         try {
             opsForValue = stringRedisTemplate.opsForValue();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Userlog build = null;
+//        Userlog build = null;
         double readData = 0;
         double errorData = 0;
         double result = 0;
@@ -368,71 +368,44 @@ public class JobRunService {
                         ErrorSetup = bg2.setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
                         //查询任务
                         sysJobrela = sysJobrelaRespository.findById(jobId);
-                        if (emailJobrelaVo.getErrorQueueAlert() == 1 || emailJobrelaVo.getErrorQueuePause() == 1) {
-                            //todo  不是运行中的任务都不用再发邮件了
-                            if ("1".equals(sysJobrela.get().getJobStatus())) {
-                                //错误量/读取量>=预警量，并且勾选了邮件通知，就发送邮件
-                                if (WarnSetup <= result && emailJobrelaVo.getErrorQueueAlert() == 1) {
-                                    //放在redis的判断  邮件只发送一次 不重复发送
-                                    if (!"1".equals(opsForValue.get(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index"))) {
-                                        emailPropert = new EmailPropert();
-                                        emailPropert.setForm("上海浪擎科技有限公司");
-                                        emailPropert.setSubject("浪擎dataone错误预警通知：");
-                                        emailPropert.setMessageText("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,特此通知");
-                                        emailPropert.setSag("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,特此通知");
-                                        flag = emailUtils.sendAuthCodeEmail(sysUserOptional.get(), emailPropert, emailJobrelaVo.getSysUserList());
-                                        if (flag) {
-                                            opsForValue.set(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index", "1");
-                                        }
-                                        build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，为不影响任务正常运行，请立即查看错误信息！").jobId(emailJobrelaVo.getJobId()).build();
-                                        userLogRepository.save(build);
-                                    }
-                                }
-                                //todo  任务停止后 不在发送邮件了
-                                if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() == 1) {
-                                    if (new ETLAction().pause(jobId)) {
-                                        sysJobrela.get().setJobStatus("2");
-                                        sysJobrelaRespository.save(sysJobrela.get());
-                                    }
-                                    emailPropert = new EmailPropert();
-                                    emailPropert.setForm("上海浪擎科技有限公司");
-                                    emailPropert.setSubject("浪擎dataone错误暂停通知：");
-                                    emailPropert.setMessageText("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,已经暂停此任务");
-                                    emailPropert.setSag("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,已经暂停此任务");
-                                    flag = emailUtils.sendAuthCodeEmail(sysUserOptional.get(), emailPropert, emailJobrelaVo.getSysUserList());
-                                    if (flag) {
-                                        stringRedisTemplate.delete(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index");
-                                    }
-                                    build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
-                                    userLogRepository.save(build);
-                                    return  false;
-                                }
-                            }
-                        } else {
-                            //没有勾选邮件提醒
-                            //预警
-                            if (WarnSetup <= result && emailJobrelaVo.getErrorQueueAlert() != 1) {
-                                build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，为不影响任务正常运行，请立即查看错误信息！").jobId(emailJobrelaVo.getJobId()).build();
-                                userLogRepository.save(build);
-                            }
-                            //暂停
-                            if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() != 1) {
-                                if ("1".equals(sysJobrela.get().getJobStatus())) {
-                                    if (new ETLAction().pause(jobId)) {
-                                        sysJobrela.get().setJobStatus("2");
-                                        sysJobrelaRespository.save(sysJobrela.get());
-                                    }
-                                }
-                                build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
-                                userLogRepository.save(build);
-                                return false;
+                        boolean vflag = false;
+                        //错误队列通知加邮件的4中情况
+                        if ("1".equals(sysJobrela.get().getJobStatus())) {
+                            if (emailJobrelaVo.getErrorQueueAlert() == 1 && emailJobrelaVo.getErrorQueuePause() == 1) {
+                                //预警邮件加暂停邮件
+                                //预警邮件
+                                ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
+                                //暂停邮件
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result);
+                                return vflag;
+                            } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 0) {
+                                //预警+暂停  不带邮件
+                                //预警不带邮件
+                                ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
+                                //暂停不带邮件
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result);
+                                return vflag;
+                            } else if (emailJobrelaVo.getErrorQueueAlert() == 1 && emailJobrelaVo.getErrorQueuePause() == 0) {
+                                //预警邮件+暂停不带邮件
+                                //预警邮件
+                                ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
+                                //暂停不带邮件
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result);
+                                return vflag;
+                            } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 1) {
+                                //预警不带邮件+暂停带邮件
+                                //预警不带邮件
+                                ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
+                                //暂停邮件
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result);
+                                return vflag;
+                            } else {
+                                logger.error("暂时没有的方式");
                             }
                         }
-
                     }
                 }
             }
-
             try {
                 list.clear();
                 sysMonitoringList.clear();
@@ -497,6 +470,109 @@ public class JobRunService {
         sysMonitoringRepository.updateFristStatus(jobId, 1);
     }
 
+
+    /**
+     * 预警带邮件
+     *
+     * @param sysMonitoring  监控表
+     * @param sysUser        系统邮箱用户
+     * @param emailJobrelaVo 预警配置信息
+     * @param WarnSetup      预警量
+     * @param result         结果
+     * @param opsForValue    redis中的重复次数
+     */
+    public void ErrorQueueAlertEmail(SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double WarnSetup, double result, ValueOperations<String, String> opsForValue) {
+        if (WarnSetup <= result) {
+            EmailUtils emailUtils = new EmailUtils();
+            Boolean flag = false;
+            //放在redis的判断  邮件只发送一次 不重复发送
+            if (!"1".equals(opsForValue.get(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index"))) {
+                EmailPropert emailPropert = new EmailPropert();
+                emailPropert.setForm("上海浪擎科技有限公司");
+                emailPropert.setSubject("浪擎dataone错误预警通知：");
+                emailPropert.setMessageText("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,特此通知");
+                emailPropert.setSag("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,特此通知");
+                flag = emailUtils.sendAuthCodeEmail(sysUser, emailPropert, emailJobrelaVo.getSysUserList());
+                if (flag) {
+                    opsForValue.set(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index", "1");
+                }
+                Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，为不影响任务正常运行，请立即查看错误信息！").jobId(emailJobrelaVo.getJobId()).build();
+                userLogRepository.save(build);
+            }
+        }
+    }
+
+
+    /**
+     * @param sysJobrela     任务
+     * @param sysMonitoring  监控表
+     * @param sysUser        系统邮箱所在用户
+     * @param emailJobrelaVo 配置信息
+     * @param ErrorSetup     错误量
+     * @param result         结果
+     * @return 暂停后 告诉监控线程
+     */
+    public boolean ErrorQueuePauseEmail(SysJobrela sysJobrela, SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result) {
+        if (ErrorSetup <= result) {
+            EmailUtils emailUtils = new EmailUtils();
+            if (new ETLAction().pause(emailJobrelaVo.getJobId())) {
+                sysJobrela.setJobStatus("2");
+                sysJobrelaRespository.save(sysJobrela);
+            }
+            EmailPropert emailPropert = new EmailPropert();
+            emailPropert.setForm("上海浪擎科技有限公司");
+            emailPropert.setSubject("浪擎dataone错误暂停通知：");
+            emailPropert.setMessageText("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,已经暂停此任务");
+            emailPropert.setSag("您参与的任务" + emailJobrelaVo.getJobrelaName() + "的" + sysMonitoring.getSourceTable() + "表的错误率为" + result * 100 + "%,已经暂停此任务");
+            Boolean flag = emailUtils.sendAuthCodeEmail(sysUser, emailPropert, emailJobrelaVo.getSysUserList());
+            if (flag) {
+                stringRedisTemplate.delete(emailJobrelaVo.getJobId() + emailJobrelaVo.getJobrelaName() + sysMonitoring.getSourceTable() + "index");
+            }
+            Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
+            userLogRepository.save(build);
+        }
+        return false;
+    }
+
+    /**
+     * 预警不带邮件
+     *
+     * @param emailJobrelaVo 预警配置信息
+     * @param WarnSetup      预警量
+     */
+    public void ErrorQueueAlert(EmailJobrelaVo emailJobrelaVo, double WarnSetup, double result) {
+        //预警
+        if (WarnSetup <= result && emailJobrelaVo.getErrorQueueAlert() != 1) {
+            Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，为不影响任务正常运行，请立即查看错误信息！").jobId(emailJobrelaVo.getJobId()).build();
+            userLogRepository.save(build);
+        }
+    }
+
+    /**
+     * 暂停不带邮件
+     *
+     * @param sysJobrela     任务
+     * @param emailJobrelaVo 配置信息
+     * @param ErrorSetup     错误量
+     * @param result         结果
+     * @return 暂停后 告诉监控线程
+     */
+    public boolean ErrorQueuePause(SysJobrela sysJobrela, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result) {
+        //暂停
+        if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() != 1) {
+            if ("1".equals(sysJobrela.getJobStatus())) {
+                if (new ETLAction().pause(emailJobrelaVo.getJobId())) {
+                    sysJobrela.setJobStatus("2");
+                    sysJobrelaRespository.save(sysJobrela);
+                }
+            }
+            Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
+            userLogRepository.save(build);
+        }
+        return false;
+    }
+
+
     public static void main(String[] args) {
         Map map1 = new HashMap();
         Map map2 = new HashMap();
@@ -517,5 +593,6 @@ public class JobRunService {
 //      Map map3=  process(map1);
 //        System.out.println(map3+"---------");
     }
+
 
 }
