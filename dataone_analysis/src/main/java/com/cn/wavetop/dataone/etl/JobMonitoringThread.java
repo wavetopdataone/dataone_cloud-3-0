@@ -147,8 +147,6 @@ public class JobMonitoringThread extends Thread {
     @Override
     public void run() {
         boolean emaliFlag = true;
-        boolean fullOver = true;
-        boolean fullFalg = true;
         boolean syncRangeFlag = true;
 
         while (emaliFlag || syncRangeFlag) {
