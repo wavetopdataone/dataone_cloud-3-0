@@ -505,7 +505,7 @@ public class JobRelaServiceImpl {
     @Transactional
     public void insertError(ErrorLog errorLog) {
 
-        Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(errorLog.getJobId());
+        /*Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(errorLog.getJobId());
         String jobName = sysJobrela.get().getJobName();
 
         long count = errorLogRespository.count();
@@ -522,8 +522,7 @@ public class JobRelaServiceImpl {
         } else if (count >= 90000 && count < 100000) {
             Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(errorLog.getJobId()).build();
             userLogRepository.save(build2);
-        }
-
+        }*/
         errorLogRespository.save(errorLog);
         //更新错误信息
         sysMonitoringRepository.updateErrorData(errorLog.getJobId(),errorLog.getSourceName());
