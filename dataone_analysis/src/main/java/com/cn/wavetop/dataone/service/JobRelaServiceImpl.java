@@ -71,7 +71,8 @@ public class JobRelaServiceImpl {
     // 注入restTemplate
     @Autowired
     private RestTemplate restTemplate ;
-
+    @Autowired
+    private SysMonitoringRepository sysMonitoringRepository;
     /**
      * 根据jobId查询源端数据源信息
      */
@@ -502,30 +503,16 @@ public class JobRelaServiceImpl {
      * 插入错误信息
      */
     @Transactional
-    public void insertError(Long jobId, String sourceTable, String destTable,String opttType, String errormessage,String time, String content) {
-        ErrorLog errorLog = new ErrorLog();
-        errorLog.setJobId(jobId);
-        errorLog.setSourceName(sourceTable);
-        errorLog.setDestName(destTable);
-        Date parse = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            parse = simpleDateFormat.parse(time);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        errorLog.setOptTime(parse);
-        errorLog.setOptContext(errormessage);
-        errorLog.setOptType(opttType);
-        errorLog.setContent(content);
-        Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(jobId);
+    public void insertError(ErrorLog errorLog) {
+
+        Optional<SysJobrela> sysJobrela = sysJobrelaRespository.findById(errorLog.getJobId());
         String jobName = sysJobrela.get().getJobName();
 
         long count = errorLogRespository.count();
         if (count >= 100000) {
-            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(jobId).build();
+            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已达上限，请处理后重启").jobId(errorLog.getJobId()).build();
             String jobStatus = sysJobrela.get().getJobStatus();
-            Boolean forObject = restTemplate.getForObject("http://dataone-analysis/job/stop/" + jobId, Boolean.class);
+            Boolean forObject = restTemplate.getForObject("http://dataone-analysis/job/stop/" + errorLog.getJobId(), Boolean.class);
             //0是待激活,1是运行,2是暂停,3是终止,4是异常,5是待完善,11运行状态
             if (forObject && !"2".equals(jobStatus) && !"4".equals(jobStatus)) {
                 sysJobrela.get().setJobStatus("2");//改为暂停
@@ -533,12 +520,13 @@ public class JobRelaServiceImpl {
                 userLogRepository.save(build2);
             }
         } else if (count >= 90000 && count < 100000) {
-            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(jobId).build();
+            Userlog build2 = Userlog.builder().time(new Date()).jobName(jobName).operate("错误队列" + jobName + "已接近上限").jobId(errorLog.getJobId()).build();
             userLogRepository.save(build2);
         }
 
         errorLogRespository.save(errorLog);
-
+        //更新错误信息
+        sysMonitoringRepository.updateErrorData(errorLog.getJobId(),errorLog.getSourceName());
     }
 
 

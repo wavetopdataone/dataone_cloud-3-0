@@ -3,6 +3,7 @@ package com.cn.wavetop.dataone.etl.loading.impl;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.db.DBUtil;
 import com.cn.wavetop.dataone.db.ResultMap;
+import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 
@@ -329,13 +330,15 @@ public class LoadingDM implements Loading {
             count = pstm.executeUpdate();
             destConn.commit();
         } catch (Exception e) {
-            String content = payload.toString();
-            String errormessage = e.toString();
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext(e.toString()).
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementInsertError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+
+            jobRelaServiceImpl.insertError(errorLog);
             e.printStackTrace();
         } finally {
             try {
@@ -345,13 +348,15 @@ public class LoadingDM implements Loading {
             }
         }
         if (count == 0){
-            String content = payload.toString();
-            String errormessage = "0IncrementInsertError";
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext("0IncrementInsertError").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementInsertError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+
+            jobRelaServiceImpl.insertError(errorLog);
         }
         dataMap.clear();  // gc
         dataMap = null;  // gc
@@ -413,13 +418,15 @@ public class LoadingDM implements Loading {
             destConn.commit();
 
         } catch (Exception e) {
-            String content = payload.toString();
-            String errormessage = e.toString();
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementUpdateError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext(e.toString()).
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementUpdateError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+
+            jobRelaServiceImpl.insertError(errorLog);
             e.printStackTrace();
         } finally {
             try {
@@ -430,13 +437,15 @@ public class LoadingDM implements Loading {
         }
 
         if (count == 0){
-            String content = payload.toString();
-            String errormessage = "0IncrementUpdateError";
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext("0IncrementUpdateError").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementUpdateError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+
+            jobRelaServiceImpl.insertError(errorLog);
         }
         destMap.clear();  // gc
         destMap = null;  // gc
@@ -487,13 +496,15 @@ public class LoadingDM implements Loading {
             count = pstm.executeUpdate();
             destConn.commit();
         } catch (Exception e) {
-            String content = payload.toString();
-            String errormessage = e.toString();
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementDeleteError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext(e.toString()).
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementDeleteError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+
+            jobRelaServiceImpl.insertError(errorLog);
             e.printStackTrace();
         } finally {
             try {
@@ -504,13 +515,14 @@ public class LoadingDM implements Loading {
         }
 
         if (count == 0){
-            String content = payload.toString();
-            String errormessage = "0IncrementDeleteError";
-            String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext("0IncrementDeleteError").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("IncrementDeleteError").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+            jobRelaServiceImpl.insertError(errorLog);
         }
         sourceMap.clear(); // gc
         sourceMap = null;  // gc
