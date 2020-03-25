@@ -6,6 +6,7 @@ import com.cn.wavetop.dataone.entity.vo.ToData;
 import com.cn.wavetop.dataone.entity.vo.ToDataMessage;
 import com.cn.wavetop.dataone.service.SysFieldruleService;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.util.MappingFieldUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
     public Object VerifyDb(Long job_id, String source_name, String dest_name) {
         SysDbinfo sysDbinfo = new SysDbinfo();//源端
         SysDbinfo sysDbinfo2 = new SysDbinfo();//目标端
-        Connection conn=null;
+        Connection conn = null;
         //查詢关联的数据库连接表jobrela
         List<SysJobrela> sysJobrelaList = sysJobrelaRepository.findById(job_id.longValue());
         //查询到数据库连接
@@ -110,14 +111,14 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         if (sysDbinfo2.getType() == 1) {
             //oracle
             try {
-                conn=DBConns.getOracleConn(sysDbinfo2);
+                conn = DBConns.getOracleConn(sysDbinfo2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             sqlss = "SELECT TABLE_NAME FROM DBA_ALL_TABLES WHERE OWNER='" + sysDbinfo2.getSchema() + "'AND TEMPORARY='N' AND NESTED='NO'";
         } else if (sysDbinfo2.getType() == 2) {
             try {
-                conn=DBConns.getMySQLConn(sysDbinfo2);
+                conn = DBConns.getMySQLConn(sysDbinfo2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -126,14 +127,14 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         } else if (sysDbinfo2.getType() == 3) {
             //sqlserver
             try {
-                conn=DBConns.getSqlserverConn(sysDbinfo2);
+                conn = DBConns.getSqlserverConn(sysDbinfo2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             sqlss = "select name from sysobjects where xtype='u'";
         } else if (sysDbinfo2.getType() == 4) {
             try {
-                conn=DBConns.getDaMengConn(sysDbinfo2);
+                conn = DBConns.getDaMengConn(sysDbinfo2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -141,12 +142,12 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
             sqlss = "SELECT TABLE_NAME FROM USER_TABLES";
         }
         //查询目标端是否出现此表
-        List<String> tablename = DBConns.existsTableName(sysDbinfo2, sqlss, source_name, dest_name,conn);
+        List<String> tablename = DBConns.existsTableName(sysDbinfo2, sqlss, source_name, dest_name, conn);
         String sssql = "";
         if (sysDbinfo.getType() == 1) {
             //oracle
             try {
-                conn=DBConns.getOracleConn(sysDbinfo);
+                conn = DBConns.getOracleConn(sysDbinfo);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -154,14 +155,14 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         } else if (sysDbinfo.getType() == 2) {
             //mysql
             try {
-                conn=DBConns.getMySQLConn(sysDbinfo);
+                conn = DBConns.getMySQLConn(sysDbinfo);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             sssql = "show tables";
         }
         //查詢源端是否存在此表名
-        List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name,conn);
+        List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name, conn);
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             return ToDataMessage.builder().status("0").message("目的端表名" + dest_name + "已经存在").build();
@@ -417,15 +418,15 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                             builds.setDestFieldName(ziduan[1]);
                             builds.setJobId(sysJobrelaRelated.getSlaveJobId());
                             if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
-                                if(sysDbinfo2.getType()==2||sysDbinfo2.getType()==3){
+                                if (sysDbinfo2.getType() == 2 || sysDbinfo2.getType() == 3) {
                                     builds.setType(sysFiledTypeList.get(0).getDestFiledType().toLowerCase());
-                                }else {
+                                } else {
                                     builds.setType(sysFiledTypeList.get(0).getDestFiledType());
                                 }
                             } else {
-                                if(sysDbinfo2.getType()==2||sysDbinfo2.getType()==3) {
+                                if (sysDbinfo2.getType() == 2 || sysDbinfo2.getType() == 3) {
                                     builds.setType(ziduan[6].toLowerCase());
-                                }else{
+                                } else {
                                     builds.setType(ziduan[6]);
                                 }
                             }
@@ -449,7 +450,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                 }
             }
             //表相同但是字段发生映射改变，表也要存入tablerule
-            if (source_name.equals(dest_name)&&flag) {
+            if (source_name.equals(dest_name) && flag) {
                 byJobIdAndSourceTable = new SysTablerule();
                 byJobIdAndSourceTable.setDestTable(dest_name);
                 byJobIdAndSourceTable.setJobId(job_id);
@@ -679,6 +680,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
             //先把类型转换为目标端的类型
             for (int i = 0; i < data.size(); i++) {
                 sysFiledTypeList = new ArrayList<>();
+
                 //若果目的表字段有值就不换，无值就把源端的
                 if (data.get(i).getDestFieldName() == null || "".equals(data.get(i).getDestFieldName())) {
                     data.get(i).setDestFieldName(data.get(i).getFieldName());
@@ -690,27 +692,43 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 //                    data.get(i).setDestFieldName(data.get(i).getDestFieldName());
 //                }
                 if (sysDbinfo.getType() != sysDbinfo2.getType()) {
-                        //去找到映射的字段类型aaa
-                    String sourceFileType=  data.get(i).getType();
-                    if(sourceFileType.contains("(")){
-                        sourceFileType=sourceFileType.substring(0,sourceFileType.indexOf("("));
+                    //去找到映射的字段类型aaa
+                    String sourceFileType = data.get(i).getType();
+                    if (sourceFileType.contains("(")) {
+                        sourceFileType = sourceFileType.substring(0, sourceFileType.indexOf("("));
                     }
-                        sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), sourceFileType.toUpperCase());
-                        if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
-                            //todo 如果是mysql 和sqlserver 换成小写
-                            if(sysDbinfo2.getType()==2||sysDbinfo2.getType()==3){
-                                data.get(i).setType(sysFiledTypeList.get(0).getDestFiledType().toLowerCase());
-                            }else {
-                                data.get(i).setType(sysFiledTypeList.get(0).getDestFiledType());
-                            }
-                        }else{
-                            //todo 如果是mysql 和sqlserver 换成小写
-                            if(sysDbinfo2.getType()==2||sysDbinfo2.getType()==3){
-                                data.get(i).setType(data.get(i).getType().toLowerCase());
-                            }else {
-                                data.get(i).setType(data.get(i).getType());
+                    sysFiledTypeList = sysFiledTypeRepository.findBySourceTypeAndDestTypeAndSourceFiledType(String.valueOf(sysDbinfo.getType()), String.valueOf(sysDbinfo2.getType()), sourceFileType.toUpperCase());
+                    if (sysFiledTypeList != null && sysFiledTypeList.size() > 0) {
+                        //todo 如果是mysql 和sqlserver 换成小写
+                        if (sysDbinfo2.getType() == 2 || sysDbinfo2.getType() == 3) {
+                            data.get(i).setType(sysFiledTypeList.get(0).getDestFiledType().toLowerCase());
+                        } else {
+
+                            data.get(i).setType(sysFiledTypeList.get(0).getDestFiledType());
+
+
+                            //todo varchar类型和number类型 在oracle到dm的要加
+                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
+                                //长度加10
+                                data.get(i).setScale(data.get(i).getScale() + 10);
                             }
                         }
+                    } else {
+                        //z这个else是源端到目的端的映射找不到就显示空"";
+                        //todo 如果是mysql 和sqlserver 换成小写
+                        if (sysDbinfo2.getType() == 2 || sysDbinfo2.getType() == 3) {
+                            data.get(i).setType("".toLowerCase());
+                        } else {
+
+                            data.get(i).setType("");
+
+                            //todo varchar类型和number类型 在oracle到dm的要加
+                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
+                                //长度加10
+                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale()) + 10));
+                            }
+                        }
+                    }
                 }
             }
             if (sysFieldruleList != null && sysFieldruleList.size() > 0) {
@@ -725,7 +743,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
             }
 
             //判断是否有新增的字段
-            List<SysFieldrule> sysFieldrule = sysFieldruleRepository.findByJobIdAndSourceNameAndAddFlag(job_id, tablename,1);
+            List<SysFieldrule> sysFieldrule = sysFieldruleRepository.findByJobIdAndSourceNameAndAddFlag(job_id, tablename, 1);
             if (sysFieldrule != null && sysFieldrule.size() > 0) {
                 for (SysFieldrule sysFieldrule1 : sysFieldrule) {
                     sysFieldrule1.setFieldName(sysFieldrule1.getDestFieldName());
@@ -780,17 +798,17 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                 if (sysJobrelaRelateds != null && sysJobrelaRelateds.size() > 0) {
                     for (SysJobrelaRelated sysJobrelaRelated : sysJobrelaRelateds) {
                         sysFieldruleList = sysFieldruleRepository.findByJobIdAndSourceNameAndAddFlag(sysJobrelaRelated.getSlaveJobId(), source_name, 1);
-                       if(sysFieldruleList!=null&&sysFieldruleList.size()>0) {
-                           sysFieldruleList.get(0).setVarFlag(Long.valueOf(1));
-                       }
+                        if (sysFieldruleList != null && sysFieldruleList.size() > 0) {
+                            sysFieldruleList.get(0).setVarFlag(Long.valueOf(1));
+                        }
                     }
                 }
             } else {
                 //todo 这是没有新增字段的删除
                 //fieldrule表  为了前端展示
-              List<SysFieldrule> sysFieldruleList1=  sysFieldruleRepository.findByJobIdAndSourceNameAndFieldName(job_id,source_name,filedNames[0]);
-                if(sysFieldruleList1!=null&&sysFieldruleList1.size()>0){
-                    sysFieldruleRepository.deleteByJobIdAndSourceNameAndFieldName(job_id,source_name,filedNames[0]);
+                List<SysFieldrule> sysFieldruleList1 = sysFieldruleRepository.findByJobIdAndSourceNameAndFieldName(job_id, source_name, filedNames[0]);
+                if (sysFieldruleList1 != null && sysFieldruleList1.size() > 0) {
+                    sysFieldruleRepository.deleteByJobIdAndSourceNameAndFieldName(job_id, source_name, filedNames[0]);
                 }
                 sysFieldrule = new SysFieldrule();
                 sysFieldrule.setDestFieldName(filedNames[1]);
@@ -823,9 +841,9 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                         if (sysDesensitizations != null && sysDesensitizations.size() > 0) {
                             sysDesensitizationRepository.delete(sysDesensitizations.get(0));
                         }
-                        sysFieldruleList1=  sysFieldruleRepository.findByJobIdAndSourceNameAndFieldName(sysJobrelaRelated.getSlaveJobId(),source_name,filedNames[0]);
-                        if(sysFieldruleList1!=null&&sysFieldruleList1.size()>0){
-                            sysFieldruleRepository.deleteByJobIdAndSourceNameAndFieldName(sysJobrelaRelated.getSlaveJobId(),source_name,filedNames[0]);
+                        sysFieldruleList1 = sysFieldruleRepository.findByJobIdAndSourceNameAndFieldName(sysJobrelaRelated.getSlaveJobId(), source_name, filedNames[0]);
+                        if (sysFieldruleList1 != null && sysFieldruleList1.size() > 0) {
+                            sysFieldruleRepository.deleteByJobIdAndSourceNameAndFieldName(sysJobrelaRelated.getSlaveJobId(), source_name, filedNames[0]);
                         }
                         sysFieldrule = new SysFieldrule();
                         sysFieldrule.setDestFieldName(filedNames[1]);
@@ -880,12 +898,12 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
             if (sysJobrelaRelateds != null && sysJobrelaRelateds.size() > 0) {
                 for (SysJobrelaRelated sysJobrelaRelated : sysJobrelaRelateds) {
                     sysFieldruleList = sysFieldruleRepository.findByJobIdAndSourceNameAndAddFlag(sysJobrelaRelated.getSlaveJobId(), source_name, 1);
-                   if(sysFieldruleList!=null&&sysFieldruleList.size()>0) {
-                       sysFieldruleList.get(0).setVarFlag(Long.valueOf(2));
-                   }
+                    if (sysFieldruleList != null && sysFieldruleList.size() > 0) {
+                        sysFieldruleList.get(0).setVarFlag(Long.valueOf(2));
+                    }
                 }
             }
-            result=1;
+            result = 1;
         } else {
             result = sysFieldruleRepository.deleteByJobIdAndSourceNameAndDestNameAndFieldName(job_id, source_name, dest_name, sourceField);
             //删除过滤表
