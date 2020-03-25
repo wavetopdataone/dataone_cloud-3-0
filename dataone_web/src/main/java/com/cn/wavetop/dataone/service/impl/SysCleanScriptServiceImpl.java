@@ -81,10 +81,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
         Class cls = null;
         Object o = null;
         Method test = null;
-
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(scriptContent);
-
-
         if (compiler.compiler()) {
 
             // 获取class
