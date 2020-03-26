@@ -95,8 +95,8 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
      */
     @Transactional
     @Modifying
-    @Query("update SysMonitoring sm set sm.readData = :readData,sm.writeData = :readData,sm.sqlCount = :sqlCount,sm.destTable = :destTable ,sm.optTime = :optTime where sm.id = :id")
-    void updateSqlCount(long id, Long sqlCount, Long readData, String destTable, Date optTime);
+    @Query("update SysMonitoring sm set sm.readData = 0,sm.writeData = 0,sm.errorData = 0,sm.sqlCount = :sqlCount,sm.destTable = :destTable ,sm.optTime = :optTime where sm.id = :id")
+    void updateSqlCount(long id, Long sqlCount,  String destTable, Date optTime);
 
 
     /**

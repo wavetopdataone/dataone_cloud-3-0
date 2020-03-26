@@ -56,7 +56,7 @@ public class JobRunService {
 
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
-            sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), 0L, message.get("destTable").toString(), new Date());
+            sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), message.get("destTable").toString(), new Date());
         } else {
             SysMonitoring sysMonitoring = SysMonitoring.builder().
                     jobId((Long) message.get("jobId")).
@@ -585,7 +585,6 @@ public class JobRunService {
         }
         return false;
     }
-
 
 
     public static void main(String[] args) {

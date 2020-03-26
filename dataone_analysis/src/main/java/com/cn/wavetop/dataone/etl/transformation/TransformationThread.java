@@ -266,17 +266,20 @@ public class TransformationThread extends Thread {
 
 
     /**
-     * 全量的清洗
+     * 全量的处理
      */
     private void fullDispose() {
         getDestConn(); // 获取连接
         KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, tableName);
-        Transformation transformation = new Transformation(jobId, tableName, conn);
+        //Transformation transformation = new Transformation(jobId, tableName, conn);
         Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
         consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
         while (true) {
+
+
             List<Map> datamaps = fullTrans(consumer, mappingField); // 清洗
 
+            System.out.println(datamaps.size());
             Loading loading = newInstanceLoading();
             loading.fullLoading(datamaps);            // 导入
 

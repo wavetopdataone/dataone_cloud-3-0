@@ -34,7 +34,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class ExtractionOracle implements Extraction {
-    private static final long size = 500;
+    private static final long size = 1000;
     private static Boolean blok = true;
     private Long jobId;
     private String tableName;
@@ -43,6 +43,9 @@ public class ExtractionOracle implements Extraction {
     private TransformationThread transformationThread;
     private Connection conn;//源端连接
     private Connection destConn;//目标端连接
+
+
+//    private Producer producer ;
 
     /**
      * 全量抓取
@@ -58,7 +61,7 @@ public class ExtractionOracle implements Extraction {
         Producer producer = new Producer(null);
         Map message;
         message = getMessage(); //传输的消息
-
+        producer= new Producer(null);
         StringBuffer select_sql = new StringBuffer(); // 之前的全查
 
 
@@ -104,12 +107,10 @@ public class ExtractionOracle implements Extraction {
      */
     @Override
     public void fullRang() throws Exception {
-
+        Producer producer= new Producer(null);
         long index = 1; // 记录分页开始点
 
-        System.out.println("Oracle 全量开始");
-        System.out.println(jobId);
-        Producer producer = new Producer(null);
+
         Map message;
         message = getMessage(); //传输的消息
         message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
@@ -121,8 +122,10 @@ public class ExtractionOracle implements Extraction {
             }
         }
 
-        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
-        String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
+
+
+
+        // 监控表的sqlCount处理
         StringBuffer sqlCount = new StringBuffer(); // 之前的全查
         sqlCount.append(SELECT).append(" count(*) ").append(FROM).append(tableName);
         // _fileds +=",''||rowid as ROWID_DATAONE_YONGYUBLOB_HAHA";
@@ -134,38 +137,50 @@ public class ExtractionOracle implements Extraction {
             return;
         }
 
+
+        // 全量查询sql拼接
+        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
+        String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
         // 分页查询
         String pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
-        System.out.println(pageSelectSql);
-
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
-        System.out.println(tableName + "------cha-------" + resultMap.size());
-        startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
+
+
+        //判断创建清洗线程并开启线程
+        startTrans(resultMap.size(), 1);
+
+
         long start;    //开始读取的时间
         long end;    //结束读取的时间
         double readRate;    //读取速率
         while (resultMap.size() > 0) {
             start = System.currentTimeMillis();    //开始读取的时间
             for (int i = 0; i < resultMap.size(); i++) {
+
+                // ROWID_DATAONE_YONGYUBLOB_HAHA 是ROW_ID用于做二进制字段的抓取
                 message.put("ROWID_DATAONE_YONGYUBLOB_HAHA", resultMap.get(i).get("ROWID_DATAONE_YONGYUBLOB_HAHA"));
                 resultMap.get(i).remove("ROWID_DATAONE_YONGYUBLOB_HAHA");
                 DataMap data = DataMap.builder()
                         .payload(resultMap.get(i))
                         .message(message)
                         .build();
-//            System.out.println(data);
+
                 producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
             }
             end = System.currentTimeMillis();    //结束读取的时间
-
-            readRate = Double.valueOf(resultMap.size()) / (end - start) * 1000;
+            readRate = Double.valueOf(resultMap.size()) / (end - start) * 400;
             jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
-            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
 
             index = index + size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
             resultMap = DBUtil.query2(pageSelectSql, conn);
+
+
+
+//            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
         }
+
+
     }
 
     private void creatTable(String creatTable, Connection destConn) throws SQLException {
@@ -236,9 +251,11 @@ public class ExtractionOracle implements Extraction {
 
     @Override
     public void stopTrans() {
+//        producer.stop();
         // TODO 清空Topic
         TopicsController.deleteTopic(tableName + "_" + jobId);
         this.transformationThread.stop();
+
     }
 
     @Override
