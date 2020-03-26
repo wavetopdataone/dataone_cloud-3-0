@@ -114,6 +114,13 @@ public class ExtractionOracle implements Extraction {
         Map message;
         message = getMessage(); //传输的消息
         message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
+        System.out.println(message.get("creatTable"));
+        System.out.println(message.get("creatTable"));
+        System.out.println(message.get("creatTable"));
+        System.out.println(message.get("creatTable"));
+        System.out.println(message.get("creatTable"));
+        System.out.println(message.get("creatTable"));
+
         synchronized (blok) {
             try {
                 creatTable((String) message.get("creatTable"), destConn);

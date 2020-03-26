@@ -38,21 +38,51 @@
         "type": "struct",
         "fields": [
           {
-            "type": "int8",
-            "optional": false,
-            "field": "CLASSID"
+            "type": "string",
+            "optional": true,
+            "field": "APPROVAL_ATTACHMENT_ID"
           },
           {
             "type": "string",
-            "optional": false,
-            "field": "CLASSNAME"
+            "optional": true,
+            "field": "APPROVAL_DOC_ID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_TYPE"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_CONTENT"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "VALIDITY_FLAG"
           },
           {
             "type": "int64",
             "optional": true,
             "name": "org.apache.kafka.connect.data.Timestamp",
             "version": 1,
-            "field": "CREATETIME"
+            "field": "EXCEHANGE_TIME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "SHID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "CREATE_TIME"
           }
         ],
         "optional": true,
@@ -63,21 +93,51 @@
         "type": "struct",
         "fields": [
           {
-            "type": "int8",
-            "optional": false,
-            "field": "CLASSID"
+            "type": "string",
+            "optional": true,
+            "field": "APPROVAL_ATTACHMENT_ID"
           },
           {
             "type": "string",
-            "optional": false,
-            "field": "CLASSNAME"
+            "optional": true,
+            "field": "APPROVAL_DOC_ID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_NAME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_TYPE"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "ATTACHMENT_CONTENT"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "VALIDITY_FLAG"
           },
           {
             "type": "int64",
             "optional": true,
             "name": "org.apache.kafka.connect.data.Timestamp",
             "version": 1,
-            "field": "CREATETIME"
+            "field": "EXCEHANGE_TIME"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "SHID"
+          },
+          {
+            "type": "string",
+            "optional": true,
+            "field": "CREATE_TIME"
           }
         ],
         "optional": true,
@@ -86,20 +146,36 @@
       }
     ],
     "optional": false,
-    "name": "test.test2.classinfo.row"
+    "name": "test.test2.region_approve_doc_att_info.row"
   },
   "payload": {
-    "SCN": 20761535,
+    "SCN": 20849458,
     "SEG_OWNER": "TEST2",
-    "TABLE_NAME": "CLASSINFO",
-    "TIMESTAMP": 1585096954000,
-    "SQL_REDO": "insert into \"TEST2\".\"CLASSINFO\"(\"CLASSID\",\"CLASSNAME\",\"CREATETIME\") values (23,'fsd',TIMESTAMP ' 2020-03-25 10:10:16')",
-    "OPERATION": "INSERT",
+    "TABLE_NAME": "REGION_APPROVE_DOC_ATT_INFO",
+    "TIMESTAMP": 1585189297000,
+    "SQL_REDO": "update \"TEST2\".\"REGION_APPROVE_DOC_ATT_INFO\" set \"ATTACHMENT_CONTENT\" = NULL where \"APPROVAL_ATTACHMENT_ID\" = '11' and \"APPROVAL_DOC_ID\" IS NULL and \"ATTACHMENT_NAME\" IS NULL and \"ATTACHMENT_TYPE\" IS NULL and \"VALIDITY_FLAG\" IS NULL and \"EXCEHANGE_TIME\" IS NULL and \"SHID\" = 'A1B95C67872EEB5CE050007F01001550' and \"CREATE_TIME\" IS NULL",
+    "OPERATION": "UPDATE",
     "data": {
-      "CLASSID": 23,
-      "CLASSNAME": "fsd",
-      "CREATETIME": 1585102216000
+      "APPROVAL_ATTACHMENT_ID": "11",
+      "APPROVAL_DOC_ID": null,
+      "ATTACHMENT_NAME": null,
+      "ATTACHMENT_TYPE": null,
+      "ATTACHMENT_CONTENT": null,
+      "VALIDITY_FLAG": null,
+      "EXCEHANGE_TIME": null,
+      "SHID": "A1B95C67872EEB5CE050007F01001550",
+      "CREATE_TIME": null
     },
-    "before": null
+    "before": {
+      "APPROVAL_ATTACHMENT_ID": "11",
+      "APPROVAL_DOC_ID": null,
+      "ATTACHMENT_NAME": null,
+      "ATTACHMENT_TYPE": null,
+      "ATTACHMENT_CONTENT": null,
+      "VALIDITY_FLAG": null,
+      "EXCEHANGE_TIME": null,
+      "SHID": "A1B95C67872EEB5CE050007F01001550",
+      "CREATE_TIME": null
+    }
   }
 }

@@ -204,17 +204,62 @@ public class LoadingDM implements Loading {
         Map payload = (Map) dataMap.get("payload");
         String dmlsql = payload.get("SQL_REDO").toString();
         String operation = payload.get("OPERATION").toString();
+        //todo
+        Map message= (Map)dataMap.get("message");
+        String destTable=(String)message.get("destTable");
+        // todo,是否有大字段
+        if(true){
+            //无大字段
+          return  excuteNoBlobIncrementSQL(operation, payload,destTable);
+        }else{
+          return excuteBlobIncrementSQL(dataMap);
+        }
+    }
+
+    /**
+     * 无大字段的增删改
+     * @param operation
+     * @param payload
+     * @param destTable
+     * @return
+     */
+    public int excuteNoBlobIncrementSQL(String operation,Map payload,String destTable) {
+
         if (operation.equalsIgnoreCase("insert")) {
-            return excuteIncrementInsert(payload);
+            return excuteIncrementInsert(payload,destTable);
 
         } else if (operation.equalsIgnoreCase("update")) {
-            return excuteIncrementUpdate(payload);
+            return excuteIncrementUpdate(payload,destTable);
 
         } else if (operation.equalsIgnoreCase("delete")) {
-            return excuteIncrementDelete(payload);
+            return excuteIncrementDelete(payload,destTable);
         }
         return 0;
     }
+
+    /**
+     * 有大字段的增删改
+     * @param dataMap
+     * @return
+     */
+    public int excuteBlobIncrementSQL(Map dataMap) {
+        Map payload = (Map) dataMap.get("payload");
+        String dmlsql = payload.get("SQL_REDO").toString();
+        String operation = payload.get("OPERATION").toString();
+        Map message= (Map)dataMap.get("message");
+        String destTable=(String)message.get("destTable");
+        if (operation.equalsIgnoreCase("insert")) {
+            return excuteIncrementInsert(payload,destTable);
+
+        } else if (operation.equalsIgnoreCase("update")) {
+            return excuteIncrementUpdate(payload,destTable);
+
+        } else if (operation.equalsIgnoreCase("delete")) {
+            return excuteIncrementDelete(payload,destTable);
+        }
+        return 0;
+    }
+
 
     /**
      * TODO 王成
@@ -224,8 +269,8 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementInsert(Map payload) {
-        String dest_name = (String) payload.get("TABLE_NAME");
+    private int excuteIncrementInsert(Map payload,String destTable) {
+        String dest_name = destTable;
         Map dataMap = (Map) payload.get("data");
         StringBuffer fields = new StringBuffer("");
         StringBuffer value = new StringBuffer("");
@@ -255,8 +300,20 @@ public class LoadingDM implements Loading {
         int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
+            System.out.println("sql------"+preSql.toString());
+            System.out.println("sql------"+preSql.toString());
+            System.out.println("sql------"+preSql.toString());
+            System.out.println("sql------"+preSql.toString());
+            System.out.println("sql------"+preSql.toString());
+
             int i = 1;
             for (Object field : dataMap.keySet()) {
+                System.out.println(field+"-------------+++++"+dataMap.get(field));
+                System.out.println(field+"-------------+++++"+dataMap.get(field));
+                System.out.println(field+"-------------+++++"+dataMap.get(field));
+                System.out.println(field+"-------------+++++"+dataMap.get(field));
+                System.out.println(field+"-------------+++++"+dataMap.get(field));
+
                 pstm.setObject(i, dataMap.get(field));
                 i++;
             }
@@ -304,21 +361,22 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementUpdate(Map payload) {
-        String dest_name = (String) payload.get("TABLE_NAME");
+    private int excuteIncrementUpdate(Map payload,String destTable) {
+        String dest_name = destTable;
         Map<String, Object> destMap = (Map) payload.get("data");
         Map<String, Object> sourceMap = (Map) payload.get("before");
         StringBuffer whereCondition = new StringBuffer("");
         StringBuffer nullCondition = new StringBuffer("");
         //预编译存储语句
         StringBuffer preSql = new StringBuffer("update " + dest_name + " set ");
-        //这里的key可能不同
-        String key = "";
+        //存更新的字段值
+        List<Object> values = new ArrayList<>();
         for (Map.Entry<String, Object> destEntry : destMap.entrySet()) {
             String destvalue = String.valueOf(destEntry.getValue());
             String sourcevalue = String.valueOf(sourceMap.get(destEntry.getKey()));
             if (!destvalue.equals(sourcevalue)) {
-                key = destEntry.getKey();
+                String key = destEntry.getKey();
+                values.add(destMap.get(key));
                 preSql.append(key + " = " + "?" + " ,");
             }
         }
@@ -330,7 +388,10 @@ public class LoadingDM implements Loading {
             }
         }
         //截掉最后一个/,和and
-        String substring = preSql.toString().substring(0, preSql.lastIndexOf(","));
+        String substring = "";
+        if (preSql!=null && preSql.length()>0){
+            substring = preSql.toString().substring(0, preSql.lastIndexOf(","));
+        }
         String and = whereCondition.append(nullCondition).substring(0, whereCondition.lastIndexOf("and"));
         String sql = substring + " where " + and;
         PreparedStatement pstm = null;
@@ -338,10 +399,14 @@ public class LoadingDM implements Loading {
         try {
             pstm = destConn.prepareStatement(sql);
             int i = 1;
-            pstm.setObject(i++, destMap.get(key));
+            for (Object value : values) {
+                pstm.setObject(i++,value);
+            }
             for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
-                pstm.setObject(i, sourceEntry.getValue());
-                i++;
+                if (sourceEntry.getValue()!=null){
+                    pstm.setObject(i, sourceEntry.getValue());
+                    i++;
+                }
             }
             count = pstm.executeUpdate();
 
@@ -391,8 +456,8 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementDelete(Map payload) {
-        String dest_name = (String) payload.get("TABLE_NAME");
+    private int excuteIncrementDelete(Map payload,String destTable) {
+        String dest_name = destTable;
         Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
         PreparedStatement pstm = null;

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +38,7 @@ public class SysScriptController {
     }
     @ApiOperation(value = "添加或者修改脚本库", protocols = "HTTP", produces = "application/json", notes = "添加或者修改脚本库")
     @PostMapping("/save")
-    public Object save(SysScript sysScript){
+    public Object save(@RequestBody SysScript sysScript){
         return  sysScriptService.saveOrUpdate(sysScript);
     }
     @ApiOperation(value = "修改脚本库的脚本名称", protocols = "HTTP", produces = "application/json", notes = "修改脚本库的脚本名称")
