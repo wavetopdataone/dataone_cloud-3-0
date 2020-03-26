@@ -5,6 +5,7 @@ import com.cn.wavetop.dataone.config.SpringJDBCUtils;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,12 +19,14 @@ import java.util.Map;
 /**
  * @Author yongz
  * @Date 2020/3/6、11:34
- *
+ * <p>
  * 开启监控线程的做法
  */
 @Component
-public class ETLAction  {
-    private static Map<Object, JobMonitoringThread> jobMonitoringMap = new HashMap<Object, JobMonitoringThread>();
+public class ETLAction {
+    public static Map<Object, JobMonitoringThread> jobMonitoringMap = new HashMap<Object, JobMonitoringThread>();
+    @Autowired
+    private static  JobRunService jobRunService;
 
 
     //开始任务
@@ -31,8 +34,8 @@ public class ETLAction  {
         if (jobMonitoringMap.get(jobId) == null) {
             // 第一次开启
             jobMonitoringMap.put(jobId, new JobMonitoringThread(jobId));
-            jobMonitoringMap.get(jobId).startJob(); //启动任务
             jobMonitoringMap.get(jobId).start(); //启动监控线程
+            jobMonitoringMap.get(jobId).startJob(); //启动任务
         } else {
             // 任务重启
             jobMonitoringMap.get(jobId).startJob();//重启任务
@@ -55,10 +58,12 @@ public class ETLAction  {
 
     //终止任务
     public boolean stop(Long jobId) {
+
         JobMonitoringThread jobMonitoringThread = jobMonitoringMap.get(jobId);
         if (jobMonitoringThread == null) {
             return false;
         }
+        jobRunService.updateJobStatusByJobId(jobId, "3");
         jobMonitoringThread.stopJob(); // 关闭任务
         jobMonitoringThread.stop(); // 关闭监控线程
         jobMonitoringMap.put(jobId, null);

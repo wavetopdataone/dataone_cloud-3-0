@@ -65,7 +65,12 @@ public class JobRunService {
                     sqlCount((Long) message.get("sqlCount")).
                     optTime(new Date()).
                     jobStatus(1).
-                    build();//插入时间
+                    readData(0l).
+                    readRate(0l).
+                    writeData(0l).
+                    disposeRate(0l).
+                    errorData(0l).
+                            build();//插入时间
             sysMonitoringRepository.save(sysMonitoring);
         }
     }
@@ -98,9 +103,20 @@ public class JobRunService {
             }
             sysMonitoringRepository.updateReadData(sysMonitoringList.get(0).getId(), readData, new Date(), readRate, message.get("destTable").toString(), dayReadData, dayReadRate);
         } else {
+            // todo
             logger.error("该表不存在");
         }
         sysMonitoringList.clear();
+    }
+
+
+    /**
+     * 重置监控表
+     */
+    @Transactional
+    public void updateMonitor(Long jobId) {
+        errorLogRespository.deleteByJobId(jobId);
+        sysMonitoringRepository.updateMonitor(jobId);
     }
 
     /**
@@ -405,7 +421,7 @@ public class JobRunService {
                                     }
                                     build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
                                     userLogRepository.save(build);
-                                    return  false;
+                                    return false;
                                 }
                             }
                         } else {

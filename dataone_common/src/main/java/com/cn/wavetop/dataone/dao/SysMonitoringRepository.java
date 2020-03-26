@@ -127,8 +127,17 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
 
     SysMonitoring findByJobIdAndSourceTable(Long jobId, String sourceTable);
 
+
     @Transactional
     @Modifying
     @Query("update SysMonitoring sm set sm.errorData = sm.errorData + 1 where sm.jobId = :jobId and sm.sourceTable = :sourceName")
     void updateErrorData(Long jobId,String sourceName);
+
+
+    @Transactional
+    @Modifying
+    @Query("update SysMonitoring sm set sm.writeData = 0,sm.readData = 0,sm.errorData = 0,sm.readRate = 0,sm.disposeRate = 0 ,sm.sqlCount = 0 where sm.id = :jobId")
+    void updateMonitor(Long jobId);
+
+
 }

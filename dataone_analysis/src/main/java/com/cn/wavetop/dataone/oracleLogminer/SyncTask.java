@@ -167,8 +167,8 @@ public class SyncTask {
     }
 
     /**
-      * 
-      *  执行过程语句
+      *
+      *  执行过程语句
      */
     private static void executeCallable(String _sql, CallableStatement _call,
                                  Connection _con) throws SQLException {

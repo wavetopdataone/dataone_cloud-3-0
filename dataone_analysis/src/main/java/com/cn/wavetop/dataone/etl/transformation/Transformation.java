@@ -23,6 +23,10 @@ public class Transformation {
     private Map message = new HashMap();
     private Connection conn;
 
+
+
+//    private Map mappingField =null; //清洗映射字段
+
     public Transformation(Long jobId, String tableName, Connection conn) {
         this.jobId = jobId;
         this.tableName = tableName;
@@ -35,14 +39,14 @@ public class Transformation {
      *
      * @param value
      */
-    public Map Transform(String value) throws IOException {
+    public Map Transform(String value, Map mappingField) throws IOException {
         dataMap.putAll(JSONObject.parseObject(value));
         payload = (Map) dataMap.get("payload");
         message = (Map) dataMap.get("message");
 
 
         //字段映射
-        payload = mapping(payload, tableName);
+        payload = mapping(payload, mappingField);
         //todo 页面动态调用的清洗
 
 
@@ -107,13 +111,31 @@ public class Transformation {
 
 
     /**
-     * 字段映射
-     *
+     * 增量字段映射
+     * todo 优化
      * @param payload
      * @throws IOException
      */
-    public Map mapping(Map payload, String tableName) throws IOException {
-        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
+    public Map mapping(Map payload, String tableName ) throws IOException {
+//        if (mappingField == null) {
+        Map   mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
+//        }
+        HashMap<Object, Object> returnPayload = new HashMap<>();
+        for (Object filed : payload.keySet()) {
+            returnPayload.put(mappingField.get(filed), payload.get(filed));
+        }
+        payload.clear();
+        return returnPayload;
+    }
+
+    /**
+     * 全量
+     * @param payload
+     * @param mappingField
+     * @return
+     * @throws IOException
+     */
+    public Map mapping(Map payload, Map mappingField) throws IOException {
 
         HashMap<Object, Object> returnPayload = new HashMap<>();
         for (Object filed : payload.keySet()) {
@@ -122,5 +144,6 @@ public class Transformation {
         payload.clear();
         return returnPayload;
     }
+
 
 }
