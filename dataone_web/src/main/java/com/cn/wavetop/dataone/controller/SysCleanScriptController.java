@@ -8,6 +8,7 @@ import com.cn.wavetop.dataone.util.JSONUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,7 +49,7 @@ public class SysCleanScriptController {
             "     *                       3表示构造实例对象失败\n" +
             "     *                       4表示获取脚本方法失败\n" +
             "     *                       5表示执行脚本方法失败")
-    public Object saveScript(SysCleanScript sysCleanScript, String payload) {
+    public Object saveScript(@RequestBody  SysCleanScript sysCleanScript, String payload) {
         Map map = JSONUtil.parseObject(payload, Map.class);
         ScriptMessage scriptMessage = sysCleanScriptService.executeScript(sysCleanScript.getScriptContent(), map);
         HashMap<Object, Object> message = new HashMap<>();

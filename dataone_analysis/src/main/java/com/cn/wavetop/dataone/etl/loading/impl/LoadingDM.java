@@ -203,7 +203,7 @@ public class LoadingDM implements Loading {
         // todo,是否有大字段
         if(true){
             //无大字段
-          return  excuteNoBlobIncrementSQL(operation, dataMap,destTable);
+          return  excuteNoBlobIncrementSQL(operation, payload,destTable);
         }else{
           return excuteBlobIncrementSQL(dataMap);
         }
@@ -355,55 +355,43 @@ public class LoadingDM implements Loading {
      */
     private int excuteIncrementUpdate(Map payload,String destTable) {
         String dest_name = destTable;
-        Map<String, Object> destMap = (Map) payload.get("data");
-        Map<String, Object> sourceMap = (Map) payload.get("before");
-        StringBuffer whereCondition = new StringBuffer("");
+        Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
-        //预编译存储语句
-        StringBuffer preSql = new StringBuffer("update " + dest_name + " set ");
-        //这里的key可能不同
-        String key = "";
-        for (Map.Entry<String, Object> destEntry : destMap.entrySet()) {
-            String destvalue = String.valueOf(destEntry.getValue());
-            String sourcevalue = String.valueOf(sourceMap.get(destEntry.getKey()));
-            if (!destvalue.equals(sourcevalue)) {
-                key = destEntry.getKey();
-                preSql.append(key + " = " + "?" + " ,");
-            }
-        }
-        for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
-            if (null == (sourceEntry.getValue())) {
-                nullCondition.append(sourceEntry.getKey() + " IS NULL " + " and ");
-            } else {
-                whereCondition.append(sourceEntry.getKey() + " = " + "?" + " and ");
-            }
-        }
-        //截掉最后一个/,和and
-        String substring = preSql.toString().substring(0, preSql.lastIndexOf(","));
-        String and = whereCondition.append(nullCondition).substring(0, whereCondition.lastIndexOf("and"));
-        String sql = substring + " where " + and;
         PreparedStatement pstm = null;
         int count = 0;
         try {
-            pstm = destConn.prepareStatement(sql);
+
+            //预编译存储语句
+            StringBuffer preSql = new StringBuffer("delete from " + dest_name + " where ");
+            for (String key : sourceMap.keySet()) {
+                Object value = sourceMap.get(key);
+                if (null == value) {
+                    nullCondition.append(" " + key + " IS NULL and");
+                } else {
+                    preSql.append(" " + key + " = " + " ? " + " and ");
+                }
+            }
+            String and = preSql.append(nullCondition.toString()).substring(0, preSql.lastIndexOf("and"));
+
+            pstm = destConn.prepareStatement(and);
+
             int i = 1;
-            pstm.setObject(i++, destMap.get(key));
-            for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
-                pstm.setObject(i, sourceEntry.getValue());
-                i++;
+            for (Object field : sourceMap.keySet()) {
+                if (sourceMap.get(field) != null) {
+                    pstm.setObject(i, sourceMap.get(field));
+                    i++;
+                }
             }
             count = pstm.executeUpdate();
-
             destConn.commit();
-
         } catch (Exception e) {
             String content = payload.toString();
             String errormessage = e.toString();
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
-            String opttType = "IncrementUpdateError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+            String opttType = "IncrementDeleteError";
+            //jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
             e.printStackTrace();
         } finally {
             try {
@@ -415,16 +403,14 @@ public class LoadingDM implements Loading {
 
         if (count == 0) {
             String content = payload.toString();
-            String errormessage = "0IncrementUpdateError";
+            String errormessage = "0IncrementDeleteError";
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+            //jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
         }
-        destMap.clear();  // gc
-        destMap = null;  // gc
-        sourceMap.clear();  // gc
+        sourceMap.clear(); // gc
         sourceMap = null;  // gc
         payload.clear(); // gc
         payload = null; //gc
