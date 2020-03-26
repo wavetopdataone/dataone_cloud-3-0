@@ -281,7 +281,7 @@ public class SysMonitoringController {
         //todo 因为现在是凌晨抽取，那凌晨抽就要昨天的数据，所以要用yesterday
         String yesterDay = DateUtil.dateAdd(nowDate, -1);//昨天
         String weekDay = DateUtil.todate(yesterDay);//星期几
-        List<Long> jobIdList = sysRealTimeMonitoringRepository.selJobId(yesterDay);//查询当天的所有jobid
+        List<Long> jobIdList = sysMonitoringRepository.selJobId(yesterDay);//查询当天的所有jobid
         if (jobIdList != null && jobIdList.size() > 0) {
             for (Long jobId : jobIdList) {
                 long errorData = 0;//错误量
