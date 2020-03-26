@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.etl.transformation;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.consumer.Consumer;
+import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
@@ -166,15 +167,15 @@ public class TransformationThread extends Thread {
 
                 } catch (Exception e) {
                     index--;
-                    String content = dataMap.get("payload").toString();
-                    String errormessage = e.toString();
-                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String time = simpleDateFormat.format(new Date());
-                    String opttType = "fullRangTranError";
-                    if (!"null".equals(content) && content != null) {
-                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
-                    }
+                    ErrorLog errorLog = ErrorLog.builder().content(dataMap.get("payload").toString()).
+                            optContext(e.toString()).
+                            destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                            optTime(new Date()).
+                            optType("fullRangTranError").
+                            jobId(jobId).
+                            sourceName(tableName).build();
+
+                    jobRelaServiceImpl.insertError(errorLog);
                     e.printStackTrace();
                 }
                 index++;

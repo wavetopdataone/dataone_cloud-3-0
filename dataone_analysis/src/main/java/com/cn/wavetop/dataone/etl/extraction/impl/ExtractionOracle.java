@@ -139,7 +139,7 @@ public class ExtractionOracle implements Extraction {
         System.out.println(pageSelectSql);
 
         ResultMap resultMap = DBUtil.query2(pageSelectSql, conn);
-//        System.out.println(tableName + "------cha-------" + resultMap.size());
+        System.out.println(tableName + "------cha-------" + resultMap.size());
         startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
         long start;    //开始读取的时间
         long end;    //结束读取的时间
@@ -160,17 +160,11 @@ public class ExtractionOracle implements Extraction {
 
             readRate = Double.valueOf(resultMap.size()) / (end - start) * 1000;
             jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
-            //System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
+            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
 
             index = index + size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
             resultMap = DBUtil.query2(pageSelectSql, conn);
-
-
-            System.out.println(resultMap.size());
-            System.out.println(resultMap.size());
-            System.out.println(resultMap.size());
-            System.out.println(resultMap.size());
         }
     }
 

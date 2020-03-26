@@ -2,7 +2,6 @@ package com.cn.wavetop.dataone.consumer;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -15,7 +14,7 @@ public class Consumer {
     public static KafkaConsumer getConsumer(Long jobId, String tableName){
          Properties props = new Properties();
         props.put("bootstrap.servers", "192.168.1.156:9092");
-        props.put("group.id", jobId+tableName+new Date().getTime());
+        props.put("group.id", jobId+tableName);
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
         HashMap<String, String> map = new HashMap<>();
