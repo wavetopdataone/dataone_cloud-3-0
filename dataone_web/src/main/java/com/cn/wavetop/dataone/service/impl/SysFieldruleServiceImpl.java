@@ -163,6 +163,10 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         }
         //查詢源端是否存在此表名
         List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name, conn);
+       //增量目的段必須有表存在
+        if(tablename != null && tablename.size() > 0&&sysJobrelaList.get(0).getSyncRange()==2){
+            return ToDataMessage.builder().status("1").build();
+        }
         //查看目的端是否存在表名
         if (tablename != null && tablename.size() > 0) {
             return ToDataMessage.builder().status("0").message("目的端表名" + dest_name + "已经存在").build();
@@ -710,7 +714,8 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                             //todo varchar类型和number类型 在oracle到dm的要加
                             if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
                                 //长度加10
-                                data.get(i).setScale(data.get(i).getScale() + 10);
+
+                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+10 ));
                             }
                         }
                     } else {
@@ -725,7 +730,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                             //todo varchar类型和number类型 在oracle到dm的要加
                             if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
                                 //长度加10
-                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale()) + 10));
+                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+ 10 ));
                             }
                         }
                     }

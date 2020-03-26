@@ -80,6 +80,12 @@ public class TransformationThread extends Thread {
                 Transformation transformation = new Transformation(jobId, null, conn);
                 try {
                     dataMap = transformation.TransformIn(value);
+                    System.out.println("------------"+dataMap);
+                    System.out.println("------------"+dataMap);
+                    System.out.println("------------"+dataMap);
+                    System.out.println("------------"+dataMap);
+                    System.out.println("------------"+dataMap);
+                    System.out.println("------------"+dataMap);
                     loading.excuteIncrementSQL(dataMap);
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);

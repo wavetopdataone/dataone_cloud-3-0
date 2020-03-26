@@ -397,11 +397,12 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
 
             }
             if ((sysMonitoringList.size() - index) != 0) {
-                readRate = readRate / (sysMonitoringList.size() - index);
+                readRate =Math.ceil(readRate / (sysMonitoringList.size() - index));
+
             }
-//            if ((sysMonitoringList.size() - index1) != 0) {
-//                disposeRate = disposeRate / (sysMonitoringList.size() - index1);
-//            }
+            if ((sysMonitoringList.size() - index1) != 0) {
+                disposeRate = Math.ceil(disposeRate / (sysMonitoringList.size() - index1));
+            }
 
             if (readData != 0) {
                 synchronous = (writeData+errorDatas) / sqlCount;
