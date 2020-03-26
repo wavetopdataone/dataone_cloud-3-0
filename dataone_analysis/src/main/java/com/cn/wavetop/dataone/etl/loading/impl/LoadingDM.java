@@ -9,7 +9,9 @@ import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.alibaba.fastjson.JSONObject;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
+import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
+import com.cn.wavetop.dataone.utils.TopicsController;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.sun.xml.fastinfoset.util.ValueArray;
 import lombok.Data;
@@ -30,10 +32,17 @@ import java.util.Date;
 @Data
 public class LoadingDM implements Loading {
     public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
+
     private Long jobId;//jobid
     private String tableName;//源端表
     private Connection destConn;//目的端连接
     private Connection conn;//源端连接
+
+
+    private Map message = null;
+    private PreparedStatement ps = null;
+    private String insertSql = null;
 
 
     public LoadingDM(Long jobId, String tableName) {
@@ -58,179 +67,97 @@ public class LoadingDM implements Loading {
         this.conn = conn;
     }
 
-
-    /**
-     * 二进制的预编译
-     * 大字段的预编译
-     * <p>
-     * <p>
-     * 这样写你怎么扩展？
-     * 这样写你怎么给我算写入速率?
-     * ...........
-     */
     @Override
-    public void loadingDM(String jsonString) {
-    /*String jsonString = "{\n" +
-            "  \"payload\": {\n" +
-            "    \"ENAME\": \"SMITHJ\",\n" +
-            "    \"COMM\": \"\",\n" +
+    public void fullLoading(List<Map> list) {
 
-            "    \"EMPNO\": \"9999\",\n" +
-            "    \"MGR\": \"7900\",\n" +
-            "    \"JOB\": \"CLERK\",\n" +
-            "    \"DEPTNO\": \"20\",\n" +
-            "    \"SAL\": \"800\"\n" +
-            "  },\n" +
-            "  \"message\": {\n" +
-            "    \"destTable\": \"EMP\",\n" +
-            "    \"sourceTable\": \"EMP\",\n" +
-            "    \"creatTable\": \"等待薛梓浩的建表语句\",\n" +
-            "    \"big_data\": [],\n" +
-            "    \"stop_flag\": \"等待定义\",\n" +
-            "    \"key\": []\n" +
-            "  }\n" +
-            "}";*/
-        JSONObject jsonObject = JSONObject.parseObject(jsonString);
-        SysDbinfo oracle = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(1521)).dbname("orcl").user("scott").password("oracle").build();
-        SysDbinfo dameng = SysDbinfo.builder().host("192.168.1.25").port(Long.valueOf(5236)).dbname("DMSERVER").user("SYSDBA").password("SYSDBA").build();
+        int index = list.size();
 
-        Map payload = (Map) jsonObject.get("payload");
-        Map message = (Map) jsonObject.get("message");
-
-
-        String destTable = (String) message.get("destTable");
-        String sourceTable = (String) message.get("sourceTable");
-        //大字段
-        List bigdatas = (List) message.get("big_data");
-        //停止标志
-        //String stop_flag = (String) message.get("stop_flag");
-
-
-        //数据库操作方式
-        //String dml = (String) model.get("dml");
-
-        //数据库主键(可能有联合主键,size二)
-        List key = (List) message.get("key");
-        int primarykeySize = key.size();
-
-        //连接oracle和达梦数据库连接
-        Connection oracleConn = null;
-        Connection daMengConn = null;
-        try {
-            oracleConn = DBConns.getOracleConn(oracle);
-            daMengConn = DBConns.getDaMengConn(dameng);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Statement stmt = null;
-        PreparedStatement pstmt = null;
-        //连接DM数据库
-        //JSONObject object = JSONObject.parseObject(tableName);
-        //Map<String, Object> map1 = JSONObject.toJavaObject(object, Map.class);
-
-        List list = new ArrayList<>();
-
-        try {
-            //stmt = oracleConn.createStatement();
-            //预编译存储语句
-            StringBuffer preSql = new StringBuffer("");
-            //对应的所有字段
-            StringBuffer preField = new StringBuffer("");
-            //解析map的schame得到list集合
-            int columnCountNew = payload.size();
-
-            //拼接update语句where后面的条件
-            StringBuffer stringBuffer = new StringBuffer("");
-
-            //先直接插入
-            for (int i = 0; i < columnCountNew - 1; i++) {
-                preSql.append("?,");
+        long start = System.currentTimeMillis();
+        for (Map dataMap : list) {
+            if (insertSql == null) {
+                insertSql = getFullSQL(dataMap);
+                message = (Map) dataMap.get("message");
             }
-            preSql.append("?");
-            Object value;
-            int index = 1;
-            for (Object field : payload.keySet()) {
-
-
-                value = payload.get(field);
-                list.add(value);
-                stringBuffer.append(field + "= '" + value + "' ");
-                if (columnCountNew == index) {
-
-                    preField.append(field);
-
-                } else {
-                    preField.append(field + ",");
-                    ++index;
-                }
-            }
-
-            String insertSql = "insert into " + destTable + " (" + preField + ") " + " values(" + preSql
-                    + ")";
-            PreparedStatement ps = daMengConn.prepareStatement(insertSql);
-            //取出value
-            for (int i = 0; i < columnCountNew; i++) {
-                ps.setObject(i + 1, list.get(i));
-            }
-            ps.execute();
-            //System.out.println("execute = " + execute);
-            if (bigdatas != null && bigdatas.size() > 0) {
-                //大字段单独去查数据库,先从源端拿出大字段.再预编译插入到目的端
-                //拼接update语句set后面的
-                StringBuffer bigBuffer = new StringBuffer("");
-
-        /*for (int i = 0; i < bigdatas.size() - 1; i++) {
-          bigBuffer.append(bigdatas.get(i) + ",");
-        }
-        bigBuffer.append(bigdatas.size()-1);*/
-                String sql = "select " + bigBuffer + " from " + sourceTable;
-                //String sql = "select * from EMP";
-                ResultSet rs = stmt.executeQuery(sql);
-
-                daMengConn.setAutoCommit(false);
-
-
-                while (rs.next()) {
-                    //取出数据
-                    int length = bigdatas.size();
-                    for (int i = 0; i < length - 1; i++) {
-                        String object = (String) rs.getObject(i + 1);
-                        bigBuffer.append(bigdatas.get(i) + " = " + "?, ");
-                    }
-                    bigBuffer.append(bigdatas.get(length - 1) + " = " + "? ");
-                }
-
-                String updateBigSql = "update " + destTable + " set " + bigBuffer + " where " + stringBuffer;
-
-                pstmt = daMengConn.prepareStatement(updateBigSql);
-                // 内部有一个指针,只能取指针指向的那条记录
-                while (rs.next()) { // 指针移动一行,有数据才返回true
-                    // 取出数据
-                    int length = bigdatas.size();
-                    for (int i = 0; i < length - 1; i++) {
-                        Object object = rs.getObject(i + 1);
-                        //预编译设值
-                        pstmt.setObject(i + 1, object);
-                    }
-
-                }
-
-                daMengConn.commit();
-            }
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
             try {
-                //pstmt.close();
-                oracleConn.close();
-                daMengConn.close();
+                if (ps == null) {
+                    ps = destConn.prepareStatement(insertSql);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+            try {
+                excuteInsert(insertSql, dataMap, ps);
+            } catch (Exception e) {
+                index--;
+                String content = dataMap.get("payload").toString();
+                String errormessage = e.toString();
+                String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String time = simpleDateFormat.format(new Date());
+                String opttType = "fullRangTranError";
+                if (!"null".equals(content) && content != null) {
+                    jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+                }
+                e.printStackTrace();
+            }
+
         }
+
+        if (list.size() > 0) {
+            // 一批数据处理
+            long end = System.currentTimeMillis();
+            // 时间戳
+            Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 1000);
+
+            try {
+                ps.executeBatch();
+            }
+            catch (BatchUpdateException e2) {
+                // todo 王成 错误队列这里还不是这样写的
+                try {
+                    destConn.rollback();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                for (Map dataMap : list) {
+
+                    try {
+                        excuteInsert(insertSql, dataMap, null);
+                    } catch (Exception e) {
+                        index--;
+                        String content = dataMap.get("payload").toString();
+                        String errormessage = e.toString();
+                        String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String time = simpleDateFormat.format(new Date());
+                        String opttType = "fullRangTranError";
+                        if (!"null".equals(content) && content != null) {
+                            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
+                        }
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                destConn.commit();
+                ps.clearBatch();
+                ps.close();
+                ps = null; //gc
+                jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    @Override
+    public void incrementLoading(List<Map> list) {
 
     }
 
@@ -344,14 +271,14 @@ public class LoadingDM implements Loading {
                 e.printStackTrace();
             }
         }
-        if (count == 0){
+        if (count == 0) {
             String content = payload.toString();
             String errormessage = "0IncrementInsertError";
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
         }
         dataMap.clear();  // gc
         dataMap = null;  // gc
@@ -429,14 +356,14 @@ public class LoadingDM implements Loading {
             }
         }
 
-        if (count == 0){
+        if (count == 0) {
             String content = payload.toString();
             String errormessage = "0IncrementUpdateError";
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
         }
         destMap.clear();  // gc
         destMap = null;  // gc
@@ -503,14 +430,14 @@ public class LoadingDM implements Loading {
             }
         }
 
-        if (count == 0){
+        if (count == 0) {
             String content = payload.toString();
             String errormessage = "0IncrementDeleteError";
             String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String time = simpleDateFormat.format(new Date());
             String opttType = "IncrementInsertError";
-            jobRelaServiceImpl.insertError(jobId, tableName, destTableName,opttType, errormessage,time ,content);
+            jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
         }
         sourceMap.clear(); // gc
         sourceMap = null;  // gc
@@ -770,7 +697,7 @@ public class LoadingDM implements Loading {
             resultSet = ppst.executeQuery();
             if (resultSet.next()) {
                 for (Object blob : big_data) {
-                    list.add( resultSet.getObject(blob.toString()));
+                    list.add(resultSet.getObject(blob.toString()));
                 }
             } else {
                 sql = selBlobInRowId(dataMap);
@@ -806,18 +733,31 @@ public class LoadingDM implements Loading {
      * @throws SQLException
      */
     public void excuteNoBlodByInsert(String insertSql, Map dataMap, PreparedStatement ps) throws Exception {
-//        PreparedStatement ps2 = destConn.prepareStatement(insertSql);
+        PreparedStatement ps2 = destConn.prepareStatement(insertSql);
 //        PreparedStatement  ps2 = TSQL.createPreparedStatement(destConn,insertSql, null);
         Map payload = (Map) dataMap.get("payload");
+        if (ps == null) {
 
-        int i = 1;
-        for (Object field : payload.keySet()) {
-            ps.setObject(i, payload.get(field));
-            i++;
+            int i = 1;
+            for (Object field : payload.keySet()) {
+                ps2.setObject(i, payload.get(field));
+                i++;
+            }
+            ps2.executeUpdate();
+            destConn.commit();
+            ps2.close();
+            ps2= null;
+
+        } else {
+
+            int i = 1;
+            for (Object field : payload.keySet()) {
+                ps.setObject(i, payload.get(field));
+                i++;
+            }
+            ps.addBatch();
+
         }
-        ps.addBatch();
-        payload.clear(); // gc
-        payload = null; //gc
 
     }
 
@@ -849,11 +789,11 @@ public class LoadingDM implements Loading {
                 i++;
             }
             System.out.println("大字段的size-----" + list.size());
-                //todo
-                for (Object blob : list) {
-                    ps.setObject(i, blob);
-                    i++;
-                }
+            //todo
+            for (Object blob : list) {
+                ps.setObject(i, blob);
+                i++;
+            }
             System.out.println("大字段的size-222222222----" + list.size());
         }
 //        ps.addBatch();
@@ -868,7 +808,7 @@ public class LoadingDM implements Loading {
         destConn.commit();
         System.out.println("执行的size-222222222----" + list.size());
         ps.close();
-        ps =null;
+        ps = null;
 //        ps.close();
     }
 

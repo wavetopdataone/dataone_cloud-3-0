@@ -6,6 +6,7 @@ import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,8 +18,13 @@ import java.util.Map;
 public interface Loading {
    JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
 
-  //导入达梦接口
-  public void loadingDM(String jsonString);
+
+   // 全量加载
+  void fullLoading(List<Map> list);
+
+  // 增量加载
+  void incrementLoading(List<Map> list);
+
 
   // 获取全量的sql语句
   public String getFullSQL(Map dataMap);

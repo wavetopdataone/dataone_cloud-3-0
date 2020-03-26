@@ -23,6 +23,7 @@ public class JobMonitoringThread extends Thread {
     private Long jobId;
 
     private Map<Object, ExtractionThread> ExtractionThreads;
+
     /**
      * 保存每个任务的所有抓取线程
      * <p>
@@ -53,7 +54,7 @@ public class JobMonitoringThread extends Thread {
     //开始任务
     public boolean startJob() {
         // 任务暂停时需要把任务表状态改为暂停
-
+        jobRunService.updateMonitor(jobId);
 
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
@@ -137,6 +138,7 @@ public class JobMonitoringThread extends Thread {
             ExtractionThreads.get(o).stopTrans();//终止清洗进程
         }
         ExtractionThreads.clear();
+        ExtractionThreads = null;
         return true;
     }
 
@@ -146,10 +148,14 @@ public class JobMonitoringThread extends Thread {
      */
     @Override
     public void run() {
+        // 启动监控线程的第一件事是将监控表的实时数据变为0
+
+
         boolean emaliFlag = true;
         boolean syncRangeFlag = true;
 
         while (emaliFlag || syncRangeFlag) {
+            System.out.println("监控！");
             // 邮件监控
             emaliFlag = jobRunService.emailReminder(jobId);
 
@@ -159,8 +165,11 @@ public class JobMonitoringThread extends Thread {
                 case 1:
                     syncRangeFlag = true;
                     if (jobRunService.fullOverByjobId(jobId)) {
-                        jobRunService.updateJobStatusByJobId(jobId,"3");
-                        syncRangeFlag = false;
+                        ETLAction.jobMonitoringMap.put(jobId,null);
+                        ETLAction.jobMonitoringMap.remove(jobId);
+                        stopJob();
+                        jobRunService.updateJobStatusByJobId(jobId, "3");
+                        return;
                     }
                     break;
                 //增量

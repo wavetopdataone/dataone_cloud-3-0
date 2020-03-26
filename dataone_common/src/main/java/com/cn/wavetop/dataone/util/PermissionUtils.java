@@ -34,9 +34,9 @@ public class PermissionUtils {
 
     //邮箱验证
     public static boolean flag(String email) {
-    // TODO Auto-ge 
+    // TODO Auto-ge
             String regex="";
-    //电子邮件  
+    //电子邮件
     String check = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
     return email.matches(check);
     }

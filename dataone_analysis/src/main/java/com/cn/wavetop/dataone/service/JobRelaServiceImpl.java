@@ -542,6 +542,7 @@ public class JobRelaServiceImpl {
     }
 
 
+
     private static List<String> doLogAddress(Long jobId) {
 //        SysDbinfo sysDbinfo=findSourcesDbinfoById(jobId);
         //数据库连接

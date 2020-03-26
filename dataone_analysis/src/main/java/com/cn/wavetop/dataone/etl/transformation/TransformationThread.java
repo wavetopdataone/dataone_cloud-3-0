@@ -13,13 +13,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.io.IOException;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author yongz
@@ -55,7 +54,8 @@ public class TransformationThread extends Thread {
 
         if (tableName != null)
             //全量
-            fullRangTran();
+//            fullRangTran();
+            fullDispose();
         else
             //增量
             incrementRangTran();
@@ -132,16 +132,17 @@ public class TransformationThread extends Thread {
         String insertSql = null;
         PreparedStatement ps = null;
         Loading loading = newInstanceLoading();
+        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
         while (true) {
 
             ConsumerRecords<String, String> records = consumer.poll(500);
             // 开始时间戳
             long start = System.currentTimeMillis();
+            Transformation transformation = new Transformation(jobId, tableName, conn);
             for (final ConsumerRecord record : records) {
                 String value = (String) record.value();
-                Transformation transformation = new Transformation(jobId, tableName, conn);
                 try {
-                    dataMap = transformation.Transform(value);
+                    dataMap = transformation.Transform(value, mappingField);
                 } catch (IOException e) {
                     // todo 转换
                     e.printStackTrace();
@@ -162,6 +163,7 @@ public class TransformationThread extends Thread {
 
                 try {
                     loading.excuteInsert(insertSql, dataMap, ps);
+
                 } catch (Exception e) {
                     index--;
                     String content = dataMap.get("payload").toString();
@@ -181,42 +183,42 @@ public class TransformationThread extends Thread {
                     long end = System.currentTimeMillis();
                     // 插入写入速率
                     Long writeRate = (long) ((100.0 / (end - start)) * 4000);
-                    jobRunService.updateWrite(message, writeRate, 100L);
-                    System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
                     int[] ints;
                     try {
                         ints = ps.executeBatch();
-                        System.out.println(ints);
+
+                    } catch (BatchUpdateException e2) {
+                        int[] arrEx = e2.getUpdateCounts();
+                        System.out.println(arrEx.length);
+                        for (int i = 0; i < arrEx.length; i++) {
+                            System.out.println(arrEx[i]);
+                        }
                     } catch (SQLException e) {
                         // todo 王成 错误队列这里还不是这样写的
-//                        String errormessage = e.toString();
-//                        String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        String time = simpleDateFormat.format(new Date());
-//                        String errortype = "Error";
-//                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
                         e.printStackTrace();
                     }
+
                     try {
                         destConn.commit();
                         ps.clearBatch();
                         ps.close();
                         ps = null; //gc
-
+                        jobRunService.updateWrite(message, writeRate, 100L);
+                        System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
                         // 监控关闭当前，并修改表状态
                         if (jobRunService.fullOverByTableName(jobId, tableName)) {
                             // 修改job状态
                             jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                         }
 
+                    } catch (BatchUpdateException e2) {
+                        int[] arrEx = e2.getUpdateCounts();
+                        System.out.println(arrEx.length);
+                        for (int i = 0; i < arrEx.length; i++) {
+                            System.out.println(arrEx[i]);
+                        }
                     } catch (SQLException e) {
-                        // todo 王成 错误队列这里还不是这样写的
-//                        String errormessage = e.toString();
-//                        String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-//                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        String time = simpleDateFormat.format(new Date());
-//                        String errortype = "Error";
-//                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, time, errortype, errormessage);
+
                         e.printStackTrace();
                     }
                     index = 0;// 当前
@@ -249,7 +251,7 @@ public class TransformationThread extends Thread {
                     if (jobRunService.fullOverByTableName(jobId, tableName)) {
                         // 修改job状态
                         jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
-                        TopicsController.deleteTopic(tableName+"_"+jobId);
+                        TopicsController.deleteTopic(tableName + "_" + jobId);
                         stop();
                     }
                     start = System.currentTimeMillis();
@@ -260,6 +262,56 @@ public class TransformationThread extends Thread {
             }
         }
     }
+
+
+    /**
+     * 全量的清洗
+     */
+    private void fullDispose() {
+        getDestConn(); // 获取连接
+        KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, tableName);
+        Transformation transformation = new Transformation(jobId, tableName, conn);
+        Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
+        consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
+        while (true) {
+            List<Map> datamaps = fullTrans(consumer, mappingField); // 清洗
+
+            Loading loading = newInstanceLoading();
+            loading.fullLoading(datamaps);            // 导入
+
+            //监控关闭当前，并修改表状态
+            if (jobRunService.fullOverByTableName(jobId, tableName)) {
+                // 修改job状态
+                jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
+                TopicsController.deleteTopic(tableName + "_" + jobId);
+                stop();
+            }
+        }
+
+    }
+
+    private List<Map> fullTrans(KafkaConsumer consumer, Map mappingField) {
+        ArrayList<Map> dataMaps = new ArrayList<>();
+        Map dataMap = null;
+        int i = 0;
+
+        ConsumerRecords<String, String> records = consumer.poll(100);
+        // 开始时间戳
+        for (final ConsumerRecord record : records) {
+            String value = (String) record.value();
+            Transformation transformation = new Transformation(jobId, tableName, conn);
+            try {
+                dataMap = transformation.Transform(value, mappingField);
+            } catch (IOException e) {
+                // todo 转换
+                e.printStackTrace();
+            }
+            transformation = null;
+            dataMaps.add(dataMap);
+        }
+        return dataMaps;
+    }
+
 
     //todo
     public Loading newInstanceLoading() {
@@ -281,11 +333,7 @@ public class TransformationThread extends Thread {
     }
 
     public void suspendMe() {
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        suspend();
     }
 
     public void stopMe() {
@@ -294,6 +342,6 @@ public class TransformationThread extends Thread {
     }
 
     public void resumeMe() {
-        notify();
+        resume();
     }
 }
