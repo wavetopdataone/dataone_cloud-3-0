@@ -39,6 +39,7 @@ public class CleanOutServiceImpl implements CleanOutService {
                 logger.error("数据库连接失效"+e.getMessage());
             }
         }
+
         ResultMap resultMap = null;
         Map map = null;
         Map map2=new HashMap();
