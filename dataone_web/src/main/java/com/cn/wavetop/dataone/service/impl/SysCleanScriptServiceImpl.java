@@ -32,10 +32,10 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
      */
     @Override
     public Object saveAndExcues(SysCleanScript sysCleanScript, Map map) {
-        System.out.println(map+"-------传参");
+        System.out.println(map + "-------传参");
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(sysCleanScript.getScriptContent());
         boolean compiler1 = compiler.compiler();
-        Map invoke=null;
+        Map invoke = null;
         Class cls = null;
         try {
             cls = compiler.getScriptClass();
@@ -44,8 +44,8 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             Object o = cls.newInstance();
             Method test = cls.getMethod("test", Map.class);
             test.setAccessible(true);// 暴力反射
-             invoke = (Map) test.invoke(o,  map);
-            System.out.println("返回的map-------------"+invoke);
+            invoke = (Map) test.invoke(o, map);
+            System.out.println("返回的map-------------" + invoke);
             sysCleanScriptRepository.save(sysCleanScript);
         } catch (Exception e) {
             e.printStackTrace();
@@ -57,22 +57,24 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
     @Override
     public Object save(SysCleanScript sysCleanScript) {
         List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(sysCleanScript.getJobId(), sysCleanScript.getSourceTable());
-        SysCleanScript sysCleanScript1=null;
+        SysCleanScript sysCleanScript1 = null;
         if (list != null && list.size() > 0) {
             list.get(0).setScriptContent(sysCleanScript.getScriptContent());
-             sysCleanScript1 = sysCleanScriptRepository.save(list.get(0));
+            sysCleanScript1 = sysCleanScriptRepository.save(list.get(0));
+        } else {
+            sysCleanScript1=sysCleanScriptRepository.save(sysCleanScript);
         }
-            if (sysCleanScript1 != null) {
-                return ToDataMessage.builder().status("1").message("保存成功").build();
-            } else {
-                return ToDataMessage.builder().status("0").message("保存失败").build();
-            }
+        if (sysCleanScript1 != null) {
+            return ToDataMessage.builder().status("1").message("保存成功").build();
+        } else {
+            return ToDataMessage.builder().status("0").message("保存失败").build();
         }
+    }
 
 
     @Override
     public Object findByIdAndTable(Long jobId, String sourceTable) {
-        List<SysCleanScript> list= sysCleanScriptRepository.findByJobIdAndSourceTable(jobId,sourceTable);
+        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, sourceTable);
         return ToData.builder().status("1").data(list).build();
     }
 
@@ -107,7 +109,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
 
             // 获取方法
             try {
-                test = cls.getMethod("process",   Map.class);
+                test = cls.getMethod("process", Map.class);
             } catch (Exception e) {
                 System.out.println("获取脚本方法失败！请检查方法名和参数类型");
 
@@ -121,7 +123,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             // 执行方法
             try {
 
-                Map result = (Map) test.invoke(o,  payload);
+                Map result = (Map) test.invoke(o, payload);
 
                 return ScriptMessage.builder()
 //                        .errorMessage(compiler.getCompilerMessage())
