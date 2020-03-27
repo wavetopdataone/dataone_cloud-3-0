@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.etl.transformation;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.consumer.Consumer;
+import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
@@ -80,12 +81,6 @@ public class TransformationThread extends Thread {
                 Transformation transformation = new Transformation(jobId, null, conn);
                 try {
                     dataMap = transformation.TransformIn(value);
-                    System.out.println("------------"+dataMap);
-                    System.out.println("------------"+dataMap);
-                    System.out.println("------------"+dataMap);
-                    System.out.println("------------"+dataMap);
-                    System.out.println("------------"+dataMap);
-                    System.out.println("------------"+dataMap);
                     loading.excuteIncrementSQL(dataMap);
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);
@@ -172,15 +167,15 @@ public class TransformationThread extends Thread {
 
                 } catch (Exception e) {
                     index--;
-                    String content = dataMap.get("payload").toString();
-                    String errormessage = e.toString();
-                    String destTableName = jobRelaServiceImpl.destTableName(jobId, this.tableName);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String time = simpleDateFormat.format(new Date());
-                    String opttType = "fullRangTranError";
-                    if (!"null".equals(content) && content != null) {
-                        jobRelaServiceImpl.insertError(jobId, tableName, destTableName, opttType, errormessage, time, content);
-                    }
+                    ErrorLog errorLog = ErrorLog.builder().content(dataMap.get("payload").toString()).
+                            optContext(e.toString()).
+                            destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                            optTime(new Date()).
+                            optType("fullRangTranError").
+                            jobId(jobId).
+                            sourceName(tableName).build();
+
+                    jobRelaServiceImpl.insertError(errorLog);
                     e.printStackTrace();
                 }
                 index++;
@@ -271,17 +266,20 @@ public class TransformationThread extends Thread {
 
 
     /**
-     * 全量的清洗
+     * 全量的处理
      */
     private void fullDispose() {
         getDestConn(); // 获取连接
         KafkaConsumer<String, String> consumer = Consumer.getConsumer(jobId, tableName);
-        Transformation transformation = new Transformation(jobId, tableName, conn);
+        //Transformation transformation = new Transformation(jobId, tableName, conn);
         Map mappingField = jobRelaServiceImpl.findMapField(jobId, tableName, conn);
         consumer.subscribe(Arrays.asList(tableName + "_" + jobId));
         while (true) {
+
+
             List<Map> datamaps = fullTrans(consumer, mappingField); // 清洗
 
+            System.out.println(datamaps.size());
             Loading loading = newInstanceLoading();
             loading.fullLoading(datamaps);            // 导入
 
