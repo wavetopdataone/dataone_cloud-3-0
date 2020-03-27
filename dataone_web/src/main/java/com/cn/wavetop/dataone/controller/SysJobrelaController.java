@@ -143,7 +143,6 @@ public class SysJobrelaController {
         return service.addUserByJobId(jobId,userId);
     }
 
-
     @ApiOperation(value = "后台查询", httpMethod = "GET", protocols = "HTTP", produces = "application/json", notes = "后台查询")
     @GetMapping("/findById")
     public Object findDbinfoById(Long jobId) {

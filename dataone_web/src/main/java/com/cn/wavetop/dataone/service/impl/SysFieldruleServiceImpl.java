@@ -163,8 +163,8 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
         }
         //查詢源端是否存在此表名
         List<String> sourcetablename = DBConns.existsTableName(sysDbinfo, sssql, source_name, dest_name, conn);
-       //增量目的段必須有表存在
-        if(tablename != null && tablename.size() > 0&&sysJobrelaList.get(0).getSyncRange()==2){
+        //增量目的段必須有表存在
+        if (tablename != null && tablename.size() > 0 && sysJobrelaList.get(0).getSyncRange() == 2) {
             return ToDataMessage.builder().status("1").build();
         }
         //查看目的端是否存在表名
@@ -712,11 +712,16 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 
 
                             //todo varchar类型和number类型 在oracle到dm的要加
-//                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
-                                //长度加10
+                            System.out.println("长度" + data.get(i).getScale());
+                            System.out.println("长度" + data.get(i).getScale());
+                            try {
+                                if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
+                                    //长度加10
+                                    data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale()) + 10));
+                                }
+                            } catch (Exception e) {
 
-                               // data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+10 ));
-//                            }
+                            }
                         }
                     } else {
                         //z这个else是源端到目的端的映射找不到就显示空"";
@@ -724,13 +729,14 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
                         if (sysDbinfo2.getType() == 2 || sysDbinfo2.getType() == 3) {
                             data.get(i).setType("".toLowerCase());
                         } else {
+                            try {
+                                //todo varchar类型和number类型 在oracle到dm的要加
+                                if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
+                                    //长度加10
+                                    data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale()) + 10));
+                                }
+                            } catch (Exception e) {
 
-                            data.get(i).setType("");
-
-                            //todo varchar类型和number类型 在oracle到dm的要加
-                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
-                                //长度加10
-                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+ 10 ));
                             }
                         }
                     }
