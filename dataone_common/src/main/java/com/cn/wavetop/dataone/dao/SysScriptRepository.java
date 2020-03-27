@@ -33,10 +33,6 @@ public interface SysScriptRepository extends JpaRepository<SysScript,Long> {
     @Query(value = "select sc from SysScript sc,SysUserScript suc,SysUser su where sc.id=suc.scriptId and su.deptId=suc.deptId and su.id=:userId and sc.id=:id and sc.scriptFlag<>1")
     List<SysScript> findByUserIdAndId(Long userId,Long id);
 
-    //根据用户和id查询
-    @Query(value = "select sc from SysScript sc,SysUserScript suc,SysUser su where sc.id=suc.scriptId and su.deptId=suc.deptId and su.id=:userId and sc.scriptName=:scriptName and su.id=:id and sc.scriptFlag<>1")
-    SysScript findByUserIdAndScriptName(Long userId,Long id,String scriptName);
-
 
     @Modifying
     @Query("update SysScript set scriptName=:scriptName where id=:id")

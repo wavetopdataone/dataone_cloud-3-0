@@ -79,7 +79,7 @@ public class SysScriptServiceImpl implements SysScriptService {
     public Object save(SysScript sysScript) {
         List<SysScript> sysScriptList = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), sysScript.getScriptName());
         if (sysScriptList != null && sysScriptList.size() > 0) {
-            return ToDataMessage.builder().status("0").message("该用户已经存在名称为"+sysScriptList.get(0).getScriptName()+"的脚本名称了").build();
+            return ToDataMessage.builder().status("0").message("该用户已经存在名称为" + sysScriptList.get(0).getScriptName() + "的脚本名称了").build();
         } else {
             SysScript sys = sysScriptRepository.save(sysScript);
             String prems = null;
@@ -96,6 +96,7 @@ public class SysScriptServiceImpl implements SysScriptService {
         }
         return ToDataMessage.builder().status("1").message("添加成功").build();
     }
+
     /**
      * 修改
      *
@@ -105,33 +106,37 @@ public class SysScriptServiceImpl implements SysScriptService {
     @Transactional
     @Override
     public Object update(SysScript sysScript) {
-        System.out.println("sysScript----"+sysScript);
+        System.out.println("sysScript----" + sysScript);
+        //aa   bb
         Optional<SysScript> sysScriptList = sysScriptRepository.findById(sysScript.getId());
-        if (sysScriptList != null ) {
-            SysScript sysScript1 =  sysScriptRepository.findByUserIdAndScriptName(PermissionUtils.getSysUser().getId(),sysScriptList.get().getId(),sysScriptList.get().getScriptName());
-              if(sysScript1!=null){
-                  sysScript1.setScriptContent(sysScript.getScriptContent());
-                  sysScript1.setScriptName(sysScript.getScriptName());
-                  sysScriptRepository.save(sysScript1);
-              }else{
-                  return ToDataMessage.builder().status("0").message("脚本名称重复").build();
-              }
+        if (sysScriptList != null) {
+            List<SysScript> sysScriptListss = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), sysScript.getScriptName());
+            if (sysScriptListss != null && sysScriptListss.size() > 0) {
+                if (!sysScriptListss.get(0).getId().equals(sysScript.getId())) {
+                    return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
+                }
+            }
+            sysScriptList.get().setScriptContent(sysScript.getScriptContent());
+            sysScriptList.get().setScriptName(sysScript.getScriptName());
+            sysScriptRepository.save(sysScriptList.get());
         } else {
             return ToDataMessage.builder().status("0").message("不存在此脚本").build();
         }
         return ToDataMessage.builder().status("1").message("修改成功").build();
+
     }
 
     @Transactional
     @Override
     public Object updateScriptName(Long id, String scriptName) {
-        SysScript sysScript1 = sysScriptRepository.findByUserIdAndScriptName(PermissionUtils.getSysUser().getId(), id, scriptName);
-        if (sysScript1 != null) {
-            sysScriptRepository.updateScriptName(id, scriptName);
-            return ToDataMessage.builder().status("1").message("修改成功").build();
-        }else{
-            return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
+        List<SysScript> sysScriptList = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), scriptName);
+        if (sysScriptList != null && sysScriptList.size() > 0) {
+            if (!sysScriptList.get(0).getId().equals(id)) {
+                return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
+            }
         }
+        sysScriptRepository.updateScriptName(id, scriptName);
+        return ToDataMessage.builder().status("1").message("修改成功").build();
     }
 
     @Override
@@ -142,8 +147,8 @@ public class SysScriptServiceImpl implements SysScriptService {
         Map map = new HashMap<>();
 
         String copyScript = content.substring(StringUtils.getCharacterPosition(content), content.indexOf("return"));
-        map.put("status",1);
-        map.put("copyScript",copyScript);
+        map.put("status", 1);
+        map.put("copyScript", copyScript);
         return map;
     }
 
@@ -174,10 +179,10 @@ public class SysScriptServiceImpl implements SysScriptService {
                 "    return record;\n" +
                 "    }\n" +
                 "}";
-        System.out.println("这是啥"+ StringUtils.getCharacterPosition(a));
+        System.out.println("这是啥" + StringUtils.getCharacterPosition(a));
 
 //        String[] b = a.split("process(Map payload) \\{");
-        System.out.println(a.substring(StringUtils.getCharacterPosition(a)+1, a.indexOf("return")));
+        System.out.println(a.substring(StringUtils.getCharacterPosition(a) + 1, a.indexOf("return")));
 //        for(int i=0;i<b.length;i++){
 //            System.out.println(b[i]+"------------------");
 //        }
