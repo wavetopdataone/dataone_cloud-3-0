@@ -50,7 +50,7 @@ import java.util.Date;
 public class JobRelaServiceImpl {
     //    private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-//    private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
+    //    private SysFilterTableRepository sysFilterTableRepository = (SysFilterTableRepository) SpringContextUtil.getBean("sysFilterTableRepository");
 //    private SysDbinfoRespository sysDbinfoRespository = (SysDbinfoRespository) SpringContextUtil.getBean("sysDbinfoRespository");
 //    private SysTableruleRepository sysTableruleRepository = (SysTableruleRepository) SpringContextUtil.getBean("sysTableruleRepository");
 
@@ -70,9 +70,10 @@ public class JobRelaServiceImpl {
     private UserLogRepository userLogRepository;
     // 注入restTemplate
     @Autowired
-    private RestTemplate restTemplate ;
+    private RestTemplate restTemplate;
     @Autowired
     private SysMonitoringRepository sysMonitoringRepository;
+
     /**
      * 根据jobId查询源端数据源信息
      */
@@ -525,9 +526,8 @@ public class JobRelaServiceImpl {
         }*/
         errorLogRespository.save(errorLog);
         //更新错误信息
-        sysMonitoringRepository.updateErrorData(errorLog.getJobId(),errorLog.getSourceName());
+        sysMonitoringRepository.updateErrorData(errorLog.getJobId(), errorLog.getSourceName());
     }
-
 
 
     private static List<String> doLogAddress(Long jobId) {
@@ -562,4 +562,35 @@ public class JobRelaServiceImpl {
             System.out.println(a);
         }
     }
+
+
+//    public void setMonitor(Long jobId, Connection conn) {
+//
+//
+//        List<SysMonitoring> SysMonitorings = sysMonitoringRepository.findByJobId(jobId);
+//        if (SysMonitorings == null || SysMonitorings.size() <= 0) {
+//            List tableById = findTableById(jobId, conn);
+//            for (Object sourceTable : tableById) {
+//                sysMonitoringRepository.save(
+//                        SysMonitoring.builder().
+//                                jobId((Long) jobId).
+//                                sourceTable(sourceTable.toString()).
+//                                destTable(getDestTable(jobId, sourceTable.toString())).
+//                                sqlCount(0l).
+//                                optTime(new Date()).
+//                                readData(0l).
+//                                readRate(0l).
+//                                writeData(0l).
+//                                disposeRate(0l).
+//                                errorData(0l).
+//                                build()
+//                );
+//            }
+//
+//
+//        }
+//
+//    }
+
+
 }

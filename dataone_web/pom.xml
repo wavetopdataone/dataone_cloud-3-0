@@ -294,6 +294,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.cn.wavetop.dataone.DataoneApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

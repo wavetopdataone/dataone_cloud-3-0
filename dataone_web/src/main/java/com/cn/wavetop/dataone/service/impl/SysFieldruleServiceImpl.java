@@ -712,11 +712,11 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 
 
                             //todo varchar类型和number类型 在oracle到dm的要加
-                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
+//                            if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
                                 //长度加10
 
-                                data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+10 ));
-                            }
+                               // data.get(i).setScale(String.valueOf(Integer.parseInt(data.get(i).getScale())+10 ));
+//                            }
                         }
                     } else {
                         //z这个else是源端到目的端的映射找不到就显示空"";

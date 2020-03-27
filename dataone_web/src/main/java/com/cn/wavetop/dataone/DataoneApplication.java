@@ -15,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 @EnableScheduling
 @SpringCloudApplication
-@EnableDiscoveryClient
-@SpringBootApplication
 @EnableFeignClients
 public class DataoneApplication {
 
