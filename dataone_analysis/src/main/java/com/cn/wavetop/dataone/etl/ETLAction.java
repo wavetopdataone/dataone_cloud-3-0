@@ -26,7 +26,7 @@ import java.util.Map;
 public class ETLAction {
     public static Map<Object, JobMonitoringThread> jobMonitoringMap = new HashMap<Object, JobMonitoringThread>();
     @Autowired
-    private static  JobRunService jobRunService;
+    private JobRunService jobRunService;
 
 
     //开始任务
@@ -63,6 +63,8 @@ public class ETLAction {
         if (jobMonitoringThread == null) {
             return false;
         }
+        System.out.println("jobRunService"+jobRunService);
+        System.out.println("jobId"+jobId);
         jobRunService.updateJobStatusByJobId(jobId, "3");
         jobMonitoringThread.stopJob(); // 关闭任务
         jobMonitoringThread.stop(); // 关闭监控线程

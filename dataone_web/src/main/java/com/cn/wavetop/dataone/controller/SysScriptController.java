@@ -36,10 +36,15 @@ public class SysScriptController {
     public Object deleteById(Long id){
         return  sysScriptService.deleteById(id);
     }
-    @ApiOperation(value = "添加或者修改脚本库", protocols = "HTTP", produces = "application/json", notes = "添加或者修改脚本库")
+    @ApiOperation(value = "添加脚本库", protocols = "HTTP", produces = "application/json", notes = "添加脚本库")
     @PostMapping("/save")
     public Object save(@RequestBody SysScript sysScript){
-        return  sysScriptService.saveOrUpdate(sysScript);
+        return  sysScriptService.save(sysScript);
+    }
+    @ApiOperation(value = "修改脚本库", protocols = "HTTP", produces = "application/json", notes = "修改脚本库")
+    @PostMapping("/update")
+    public Object update(@RequestBody SysScript sysScript){
+        return  sysScriptService.update(sysScript);
     }
     @ApiOperation(value = "修改脚本库的脚本名称", protocols = "HTTP", produces = "application/json", notes = "修改脚本库的脚本名称")
     @PostMapping("/updateName")

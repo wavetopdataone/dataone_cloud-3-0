@@ -85,8 +85,8 @@ public class TransformationThread extends Thread {
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);
                     // todo 待完善读写速率 以下为测试版本
-                    jobRunService.updateRead(message, 1850L, 1L);
-                    jobRunService.updateWrite(message, 1800L, 1L);
+                    jobRunService.updateReadIn(message, 1850L, 1L);
+                    jobRunService.updateWriteIn(message, 1800L, 1L);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

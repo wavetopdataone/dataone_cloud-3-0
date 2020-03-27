@@ -116,6 +116,11 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
     @Query("update SysMonitoring sm set sm.readData = :readData,sm.optTime = :optTime,sm.readRate = :readRate,sm.destTable = :destTable, sm.dayReadData=:dayReadData,sm.dayReadRate=:dayReadRate where sm.id = :id")
     void updateReadData(long id, Long readData, Date optTime, Long readRate, String destTable,Long dayReadData,Double dayReadRate);
 
+    @Transactional
+    @Modifying
+    @Query("update SysMonitoring sm set sm.readData = :readData,sm.sqlCount = sm.sqlCount+1,sm.optTime = :optTime,sm.readRate = :readRate,sm.destTable = :destTable, sm.dayReadData=:dayReadData,sm.dayReadRate=:dayReadRate where sm.id = :id")
+    void updateReadDataIn(long id, Long readData, Date optTime, Long readRate, String destTable,Long dayReadData,Double dayReadRate);
+
     /**
      * dataone_analysis
      * @param id
@@ -129,6 +134,8 @@ public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Lon
     @Query("update SysMonitoring sm set sm.writeData = :writeData,sm.optTime = :optTime,sm.disposeRate = :disposeRate,sm.destTable = :destTable, sm.dayWriteData=:dayWriteData,sm.dayWriteRate=:dayWriteRate where sm.id = :id")
     void updateWriteData(long id, Long writeData, Date optTime, Long disposeRate, String destTable,Long dayWriteData,Double dayWriteRate);
 
+
+   
     SysMonitoring findByJobIdAndSourceTable(Long jobId, String sourceTable);
 
 
