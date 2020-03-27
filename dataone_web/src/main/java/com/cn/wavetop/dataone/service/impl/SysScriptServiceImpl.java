@@ -131,6 +131,7 @@ public class SysScriptServiceImpl implements SysScriptService {
     public Object updateScriptName(Long id, String scriptName) {
         List<SysScript> sysScriptList = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), scriptName);
         if (sysScriptList != null && sysScriptList.size() > 0) {
+            System.out.println(sysScriptList.get(0).getId()+"----------"+id);
             if (!sysScriptList.get(0).getId().equals(id)) {
                 return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
             }
