@@ -34,6 +34,7 @@ public class CleanOutServiceImpl implements CleanOutService {
         while (conn == null) {
             try {
                 conn = DBConns.getConn(sysDbinfo);
+                Thread.sleep(2000);
             } catch (Exception e) {
                 logger.error("数据库连接失效"+e.getMessage());
             }
