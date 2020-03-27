@@ -135,8 +135,13 @@ public class SysScriptServiceImpl implements SysScriptService {
                 return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
             }
         }
-        sysScriptRepository.updateScriptName(id, scriptName);
-        return ToDataMessage.builder().status("1").message("修改成功").build();
+       Integer result= sysScriptRepository.updateScriptName(id, scriptName);
+        if(result>0) {
+            return ToDataMessage.builder().status("1").message("修改成功").build();
+        }else{
+            return ToDataMessage.builder().status("0").message("修改失败").build();
+
+        }
     }
 
     @Override
