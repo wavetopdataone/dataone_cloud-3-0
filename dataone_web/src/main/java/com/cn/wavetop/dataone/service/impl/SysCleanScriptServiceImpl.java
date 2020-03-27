@@ -62,7 +62,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             list.get(0).setScriptContent(sysCleanScript.getScriptContent());
             sysCleanScript1 = sysCleanScriptRepository.save(list.get(0));
         } else {
-            sysCleanScript1=sysCleanScriptRepository.save(sysCleanScript);
+            sysCleanScriptRepository.save(sysCleanScript);
         }
         if (sysCleanScript1 != null) {
             return ToDataMessage.builder().status("1").message("保存成功").build();
