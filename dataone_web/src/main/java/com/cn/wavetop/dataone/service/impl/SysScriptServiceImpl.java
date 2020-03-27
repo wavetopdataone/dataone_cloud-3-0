@@ -76,11 +76,10 @@ public class SysScriptServiceImpl implements SysScriptService {
      */
     @Transactional
     @Override
-    public Object saveOrUpdate(SysScript sysScript) {
+    public Object save(SysScript sysScript) {
         List<SysScript> sysScriptList = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), sysScript.getScriptName());
         if (sysScriptList != null && sysScriptList.size() > 0) {
-            //修改
-            sysScriptList.get(0).setScriptContent(sysScript.getScriptContent());
+            return ToDataMessage.builder().status("0").message("该用户已经存在名称为"+sysScriptList.get(0).getScriptName()+"的脚本名称了").build();
         } else {
             SysScript sys = sysScriptRepository.save(sysScript);
             String prems = null;
@@ -97,12 +96,42 @@ public class SysScriptServiceImpl implements SysScriptService {
         }
         return ToDataMessage.builder().status("1").message("添加成功").build();
     }
+    /**
+     * 修改
+     *
+     * @param
+     * @return
+     */
+    @Transactional
+    @Override
+    public Object update(SysScript sysScript) {
+        System.out.println("sysScript----"+sysScript);
+        Optional<SysScript> sysScriptList = sysScriptRepository.findById(sysScript.getId());
+        if (sysScriptList != null ) {
+            SysScript sysScript1 =  sysScriptRepository.findByUserIdAndScriptName(PermissionUtils.getSysUser().getId(),sysScriptList.get().getId(),sysScriptList.get().getScriptName());
+              if(sysScript1!=null){
+                  sysScript1.setScriptContent(sysScript.getScriptContent());
+                  sysScript1.setScriptName(sysScript.getScriptName());
+                  sysScriptRepository.save(sysScript1);
+              }else{
+                  return ToDataMessage.builder().status("0").message("脚本名称重复").build();
+              }
+        } else {
+            return ToDataMessage.builder().status("0").message("不存在此脚本").build();
+        }
+        return ToDataMessage.builder().status("1").message("修改成功").build();
+    }
 
     @Transactional
     @Override
     public Object updateScriptName(Long id, String scriptName) {
-        sysScriptRepository.updateScriptName(id, scriptName);
-        return ToDataMessage.builder().status("1").message("修改成功").build();
+        SysScript sysScript1 = sysScriptRepository.findByUserIdAndScriptName(PermissionUtils.getSysUser().getId(), id, scriptName);
+        if (sysScript1 != null) {
+            sysScriptRepository.updateScriptName(id, scriptName);
+            return ToDataMessage.builder().status("1").message("修改成功").build();
+        }else{
+            return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
+        }
     }
 
     @Override

@@ -8,7 +8,8 @@ public interface SysScriptService {
     Object findAll(Integer scriptFlag);
     Object findById(Long id);
     Object deleteById(Long id);
-    Object saveOrUpdate(SysScript sysScript);
+    Object save(SysScript sysScript);
+    Object update(SysScript sysScript);
     Object updateScriptName(Long id,String scriptName);
     Object  copyScript(Long id);
 }
