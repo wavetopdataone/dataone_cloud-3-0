@@ -148,6 +148,9 @@ public class JobMonitoringThread extends Thread {
      */
     @Override
     public void run() {
+        // 更新任务监控表
+//        jobRunService.setMonitor(jobId);
+
         // 启动监控线程的第一件事是将监控表的实时数据变为0
 
 

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -110,6 +111,52 @@ public class JobRunService {
     }
 
     /**
+     * 用于增量
+     * @param message
+     * @param readRate
+     * @param readData
+     */
+    @Transactional
+    public void updateReadIn(Map message, Long readRate, Long readData) {
+        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
+        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
+            //为了页面图展示用的历史读取量
+            Long dayReadData = readData;
+            if (sysMonitoringList.get(0).getDayReadData() != null) {
+                dayReadData = readData + sysMonitoringList.get(0).getDayReadData();
+            }
+            //如果读取速率比之前的小就不更新历史读取速率
+            Double dayReadRate = Double.valueOf(readRate);
+            if (sysMonitoringList.get(0).getDayReadRate() != null) {
+                if (readRate < sysMonitoringList.get(0).getDayReadRate()) {
+                    dayReadRate = sysMonitoringList.get(0).getDayReadRate();
+                }
+            }
+            //读取量累加
+            if (sysMonitoringList.get(0).getReadData() != null) {
+                readData += sysMonitoringList.get(0).getReadData();
+            }
+            sysMonitoringRepository.updateReadDataIn(sysMonitoringList.get(0).getId(), readData, new Date(), readRate, message.get("destTable").toString(), dayReadData, dayReadRate);
+        } else {
+            sysMonitoringRepository.save(
+                        SysMonitoring.builder().
+                                jobId((Long) message.get("jobId")).
+                                sourceTable(message.get("sourceTable").toString()).
+                                destTable(message.get("destTable").toString()).
+                                sqlCount(1l).
+                                optTime(new Date()).
+                                readData(readData).
+                                readRate(readRate).
+                                build()
+                );
+
+
+        }
+        sysMonitoringList.clear();
+    }
+
+
+    /**
      * 重置监控表
      */
     @Transactional
@@ -147,6 +194,44 @@ public class JobRunService {
             sysMonitoringRepository.updateWriteData(sysMonitoringList.get(0).getId(), writeData, new Date(), writeRate, message.get("destTable").toString(), dayWriteData, dayWriteRate);
         } else {
             logger.error("该表不存在");
+        }
+        sysMonitoringList.clear();
+    }
+
+    @Transactional
+    public void updateWriteIn(Map message, Long writeRate, Long writeData) {
+        List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), Long.parseLong(message.get("jobId").toString()));
+        if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
+            //为了页面图展示用的历史读取量
+            Long dayWriteData = writeData;
+            if (sysMonitoringList.get(0).getDayWriteData() != null) {
+                dayWriteData = writeData + sysMonitoringList.get(0).getDayWriteData();
+            }
+            //如果写入速率比之前的小就不更新历史读取速率
+            Double dayWriteRate = Double.valueOf(writeRate);
+            if (sysMonitoringList.get(0).getDayWriteRate() != null) {
+                if (writeRate < sysMonitoringList.get(0).getDayWriteRate()) {
+                    dayWriteRate = sysMonitoringList.get(0).getDayWriteRate();
+                }
+            }
+            //寫入量量累加
+            if (sysMonitoringList.get(0).getWriteData() != null) {
+                writeData += sysMonitoringList.get(0).getWriteData();
+            }
+            sysMonitoringRepository.updateWriteData(sysMonitoringList.get(0).getId(), writeData, new Date(), writeRate, message.get("destTable").toString(), dayWriteData, dayWriteRate);
+        } else {
+            sysMonitoringRepository.save(
+                    SysMonitoring.builder().
+                            jobId((Long) message.get("jobId")).
+                            sourceTable(message.get("sourceTable").toString()).
+                            destTable(message.get("destTable").toString()).
+                            sqlCount(1l).
+                            optTime(new Date()).
+                            readData(writeRate).
+                            readRate(writeData).
+                            build()
+            );
+
         }
         sysMonitoringList.clear();
     }
@@ -254,7 +339,10 @@ public class JobRunService {
      */
     public Boolean fullOverByjobId(Long jobId) {
         List<SysMonitoring> monitorings = sysMonitoringRepository.findByJobId(jobId);
-        if (monitorings == null || monitorings.size() < 0) {
+        System.out.println(monitorings+"monitorings"+"sice"+monitorings.size());
+        System.out.println(monitorings+"monitorings");
+        System.out.println(monitorings+"monitorings");
+        if (monitorings == null || monitorings.size() <= 0) {
             return false;
         }
         for (SysMonitoring monitoring : monitorings) {
@@ -607,5 +695,7 @@ public class JobRunService {
 //      Map map3=  process(map1);
 //        System.out.println(map3+"---------");
     }
+
+
 
 }
