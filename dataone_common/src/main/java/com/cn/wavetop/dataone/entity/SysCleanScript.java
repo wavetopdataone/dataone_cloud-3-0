@@ -24,4 +24,5 @@ public class SysCleanScript {
     private String sourceTable;
     private String scriptContent;
     private String remark;
+    private Integer flag;
 }

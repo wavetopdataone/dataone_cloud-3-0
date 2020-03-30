@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface SysCleanScriptRepository extends JpaRepository<SysCleanScript,Long> {
-          List<SysCleanScript> findByJobIdAndSourceTable(Long jobId, String sourceTable);
+    List<SysCleanScript> findByJobIdAndSourceTable(Long jobId, String sourceTable);
+
+    List<SysCleanScript> findByJobIdAndSourceTableAndFlag(Long jobId, String sourceTable,Integer flag);
 }
