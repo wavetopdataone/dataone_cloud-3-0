@@ -57,7 +57,10 @@ public class SysCleanScriptController {
         HashMap<Object, Object> message = new HashMap<>();
         if (scriptMessage.getStatus() == 0) {
             SysCleanScript sysCleanScript1=SysCleanScript.builder().jobId(sysCleanScript.getJobId()).
-                    sourceTable(sysCleanScript.getSourceTable()).scriptContent(sysCleanScript.getScriptContent()).build();
+                    sourceTable(sysCleanScript.getSourceTable()).
+                    scriptContent(sysCleanScript.getScriptContent()).
+                    flag(1).
+                    build();
             sysCleanScriptService.save(sysCleanScript1);
             message.put("status", scriptMessage.getStatus());
             message.put("message", "保存配置成功！");
@@ -73,6 +76,10 @@ public class SysCleanScriptController {
     public Object findByIdAndTable(Long jobId, String sourceTable) {
         return sysCleanScriptService.findByIdAndTable(jobId, sourceTable);
     }
-
+    @PostMapping("/saveScriptFlag")
+    @ApiOperation(value = "任务表是否使用脚本，1使用 0不使用", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "任务表是否使用脚本，1使用 0不使用")
+    public Object saveScriptFlag(Long jobId, String sourceTable,Integer flag) {
+        return sysCleanScriptService.saveScriptFlag(jobId, sourceTable,flag);
+    }
 
 }

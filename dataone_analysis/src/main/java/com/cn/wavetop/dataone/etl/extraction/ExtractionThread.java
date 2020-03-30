@@ -87,7 +87,6 @@ public class ExtractionThread extends Thread {
         }
     }
 
-    private RestTemplate restTemplate = new RestTemplate();
 
 
     @SneakyThrows

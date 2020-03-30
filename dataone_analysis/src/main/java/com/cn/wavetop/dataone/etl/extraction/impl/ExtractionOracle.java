@@ -44,7 +44,6 @@ public class ExtractionOracle implements Extraction {
     private Connection conn;//源端连接
     private Connection destConn;//目标端连接
 
-
 //    private Producer producer ;
 
     /**
@@ -61,7 +60,7 @@ public class ExtractionOracle implements Extraction {
         Producer producer = new Producer(null);
         Map message;
         message = getMessage(); //传输的消息
-        producer= new Producer(null);
+        producer = new Producer(null);
         StringBuffer select_sql = new StringBuffer(); // 之前的全查
 
 
@@ -107,7 +106,7 @@ public class ExtractionOracle implements Extraction {
      */
     @Override
     public void fullRang() throws Exception {
-        Producer producer= new Producer(null);
+        Producer producer = new Producer(null);
         long index = 1; // 记录分页开始点
 
 
@@ -123,8 +122,6 @@ public class ExtractionOracle implements Extraction {
                 e.printStackTrace();
             }
         }
-
-
 
 
         // 监控表的sqlCount处理
@@ -170,13 +167,16 @@ public class ExtractionOracle implements Extraction {
                 producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
             }
             end = System.currentTimeMillis();    //结束读取的时间
-            readRate = Double.valueOf(resultMap.size()) / (end - start) * 400;
+
+            readRate = (end != start)
+                    ? Double.valueOf(resultMap.size()) / (end - start) * 500
+                    : Double.valueOf(resultMap.size()) / (1) * 500;
+
             jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
 
             index = index + size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
             resultMap = DBUtil.query2(pageSelectSql, conn);
-
 
 
 //            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
