@@ -99,7 +99,7 @@ public class LoadingDM implements Loading {
                         jobId(jobId).
                         sourceName(tableName).build();
 //                if (!"null".equals(content) && content != null) {
-                    jobRelaServiceImpl.insertError(errorLog);
+                jobRelaServiceImpl.insertError(errorLog);
 //                }
                 e.printStackTrace();
             }
@@ -114,8 +114,7 @@ public class LoadingDM implements Loading {
 
             try {
                 ps.executeBatch();
-            }
-            catch (BatchUpdateException e2) {
+            } catch (BatchUpdateException e2) {
                 index = list.size();
                 // todo 王成 错误队列这里还不是这样写的
                 try {
@@ -205,40 +204,42 @@ public class LoadingDM implements Loading {
         String dmlsql = payload.get("SQL_REDO").toString();
         String operation = payload.get("OPERATION").toString();
         //todo
-        Map message= (Map)dataMap.get("message");
-        String destTable=(String)message.get("destTable");
+        Map message = (Map) dataMap.get("message");
+        String destTable = (String) message.get("destTable");
         // todo,是否有大字段
-        if(true){
+        if (true) {
             //无大字段
-          return  excuteNoBlobIncrementSQL(operation, payload,destTable);
-        }else{
-          return excuteBlobIncrementSQL(dataMap);
+            return excuteNoBlobIncrementSQL(operation, payload, destTable);
+        } else {
+            return excuteBlobIncrementSQL(dataMap);
         }
     }
 
     /**
      * 无大字段的增删改
+     *
      * @param operation
      * @param payload
      * @param destTable
      * @return
      */
-    public int excuteNoBlobIncrementSQL(String operation,Map payload,String destTable) {
+    public int excuteNoBlobIncrementSQL(String operation, Map payload, String destTable) {
 
         if (operation.equalsIgnoreCase("insert")) {
-            return excuteIncrementInsert(payload,destTable);
+            return excuteIncrementInsert(payload, destTable);
 
         } else if (operation.equalsIgnoreCase("update")) {
-            return excuteIncrementUpdate(payload,destTable);
+            return excuteIncrementUpdate(payload, destTable);
 
         } else if (operation.equalsIgnoreCase("delete")) {
-            return excuteIncrementDelete(payload,destTable);
+            return excuteIncrementDelete(payload, destTable);
         }
         return 0;
     }
 
     /**
      * 有大字段的增删改
+     *
      * @param dataMap
      * @return
      */
@@ -246,18 +247,269 @@ public class LoadingDM implements Loading {
         Map payload = (Map) dataMap.get("payload");
         String dmlsql = payload.get("SQL_REDO").toString();
         String operation = payload.get("OPERATION").toString();
-        Map message= (Map)dataMap.get("message");
-        String destTable=(String)message.get("destTable");
+        Map message = (Map) dataMap.get("message");
+        List<String> listData = (List) message.get("big_data");
+        String destTable = (String) message.get("destTable");
         if (operation.equalsIgnoreCase("insert")) {
-            return excuteIncrementInsert(payload,destTable);
+            return excuteIncrementBlobInsert(payload, destTable, listData);
 
         } else if (operation.equalsIgnoreCase("update")) {
-            return excuteIncrementUpdate(payload,destTable);
+            return excuteIncrementBlobUpdate(payload, destTable,listData);
 
         } else if (operation.equalsIgnoreCase("delete")) {
-            return excuteIncrementDelete(payload,destTable);
+            return excuteIncrementBlobDelete(payload, destTable,listData);
         }
         return 0;
+    }
+
+    /**
+     * 携帶大字段
+     * 解析出insert语句 并执行
+     */
+    private int excuteIncrementBlobInsert(Map payload, String destTable, List<String> bigData) {
+        Map dataMap = (Map) payload.get("data");
+
+        //todo  查詢大字段
+        String a = Selblobs(dataMap);
+        List<Object> list = selBlobResult(dataMap, a, conn);
+
+        StringBuffer fields = new StringBuffer("");
+        StringBuffer value = new StringBuffer("");
+        //预编译存储语句
+        StringBuffer preSql = new StringBuffer("insert into " + destTable + " (");
+        for (Object key : dataMap.keySet()) {
+            if (bigData.contains(key)) {
+                continue;
+            }
+            fields.append(key + ",");
+            value.append("?,");
+        }
+        int index = 1;
+        for (Object bigKey : bigData) {
+            if (index == bigData.size()) {
+                fields.append(bigKey);
+                value.append(" ?");
+            } else {
+                fields.append(bigKey + " ,");
+                value.append(" ? ,");
+                index++;
+            }
+        }
+        preSql.append(fields + ") values (" + value + ");");
+        PreparedStatement pstm = null;
+        int count = 0;
+        try {
+            pstm = destConn.prepareStatement(preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            int i = 1;
+            for (Object field : dataMap.keySet()) {
+                if (bigData.contains(field)) {
+                    continue;
+                }
+                pstm.setObject(i++, dataMap.get(field));
+            }
+            for (Object bigValue : list) {
+                pstm.setObject(i++, bigValue);
+            }
+            count = pstm.executeUpdate();
+            destConn.commit();
+        } catch (Exception e) {
+        } finally {
+            try {
+                pstm.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (count == 0) {
+            ErrorLog errorLog = ErrorLog.builder().content(dataMap.get("payload").toString()).
+                    optContext("0").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("fullLoading").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+            jobRelaServiceImpl.insertError(errorLog);
+        }
+        dataMap.clear();  // gc
+        dataMap = null;  // gc
+        payload.clear(); // gc
+        payload = null; //gc
+
+        return count;
+//        return 1;
+    }
+
+    /**
+     * 携帶大字段的更新
+     * 解析出update语句 并执行
+     */
+    private int excuteIncrementBlobUpdate(Map payload, String destTable, List<String> bigData) {
+        Map dataMap = (Map) payload.get("data");
+        Map before = (Map) payload.get("before");
+
+        //todo  查詢大字段
+        String a = Selblobs(dataMap);
+        List<Object> list = selBlobResult(dataMap, a, conn);
+
+        StringBuffer where = new StringBuffer(" where ");
+        StringBuffer value = new StringBuffer("");
+        //预编译存储语句
+
+        StringBuffer preSql = new StringBuffer("update  " + destTable + " set ");
+        for (Object key : dataMap.keySet()) {
+            if (bigData.contains(key)) {
+                continue;
+            }
+            Object destvalue = dataMap.get(key);
+            Object sourcevalue = before.get(key);
+            if (!destvalue.equals(sourcevalue)) {
+                preSql.append(key + " = " + "?" + " ,");
+
+            }
+
+        }
+        int index = 0;
+        for (Object bigKey : bigData) {
+            if (index == bigData.size() - 1) {
+                preSql.append(bigKey + " = " + "?");
+            } else {
+                preSql.append(bigKey + " = " + "?" + " ,");
+                index++;
+            }
+        }
+        for (Object key : before.keySet()) {
+            if (bigData.contains(key)) {
+                continue;
+            }
+            if (before.get(key) == null) {
+                where.append(key + " IS NULL and");
+            } else {
+                where.append(key + " = " + before.get(key) + " and");
+            }
+        }
+        where.substring(0, where.lastIndexOf("and"));
+        preSql.append(where);
+        PreparedStatement pstm = null;
+        int count = 0;
+        try {
+            pstm = destConn.prepareStatement(preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            int i = 1;
+            for (Object field : dataMap.keySet()) {
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
+
+                if (bigData.contains(field)) {
+                    continue;
+                } else {
+                    if(dataMap.get(field)!=null) {
+                        pstm.setObject(i++, dataMap.get(field));
+                    }
+                }
+            }
+            for (Object bigValue : list) {
+                pstm.setObject(i++, bigValue);
+            }
+            count = pstm.executeUpdate();
+            destConn.commit();
+        } catch (Exception e) {
+        } finally {
+            try {
+                pstm.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (count == 0) {
+            ErrorLog errorLog = ErrorLog.builder().content(dataMap.get("payload").toString()).
+                    optContext("0").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("fullLoading").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+            jobRelaServiceImpl.insertError(errorLog);
+        }
+        dataMap.clear();  // gc
+        dataMap = null;  // gc
+        payload.clear(); // gc
+        payload = null; //gc
+
+        return count;
+//        return 1;
+    }
+    /**
+     * 携帶大字段的更新
+     * 解析出delete语句 并执行
+     */
+    private int excuteIncrementBlobDelete(Map payload, String destTable, List<String> bigData) {
+        Map<String, String> sourceMap = (Map) payload.get("before");
+        StringBuffer nullCondition = new StringBuffer("");
+        PreparedStatement pstm = null;
+        int count = 0;
+        try {
+
+            //预编译存储语句
+            StringBuffer preSql = new StringBuffer("delete from " + destTable + " where ");
+            for (String key : sourceMap.keySet()) {
+                if(bigData.contains(key)){
+                    continue;
+                }
+                Object value = sourceMap.get(key);
+                if (null == value) {
+                    nullCondition.append( key + " IS NULL and");
+                } else {
+                    nullCondition.append( key + " = " + " ? " + " and ");
+                }
+            }
+            String and = preSql.append(nullCondition.substring(0, preSql.lastIndexOf("and"))).toString();
+
+            pstm = destConn.prepareStatement(and);
+
+            int i = 1;
+            for (Object field : sourceMap.keySet()) {
+                if(bigData.contains(field)){
+                    continue;
+                }
+                if (sourceMap.get(field) != null) {
+                    pstm.setObject(i, sourceMap.get(field));
+                    i++;
+                }
+            }
+            count = pstm.executeUpdate();
+            destConn.commit();
+        } catch (Exception e) {
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext(e.toString()).
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("fullLoading").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+            jobRelaServiceImpl.insertError(errorLog);
+        } finally {
+            try {
+                pstm.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (count == 0) {
+            ErrorLog errorLog = ErrorLog.builder().content(payload.toString()).
+                    optContext("0").
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("fullLoading").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+            jobRelaServiceImpl.insertError(errorLog);
+        }
+        sourceMap.clear(); // gc
+        sourceMap = null;  // gc
+        payload.clear(); // gc
+        payload = null; //gc
+        return count;
     }
 
 
@@ -269,7 +521,7 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementInsert(Map payload,String destTable) {
+    private int excuteIncrementInsert(Map payload, String destTable) {
         String dest_name = destTable;
         Map dataMap = (Map) payload.get("data");
         StringBuffer fields = new StringBuffer("");
@@ -300,19 +552,19 @@ public class LoadingDM implements Loading {
         int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
-            System.out.println("sql------"+preSql.toString());
-            System.out.println("sql------"+preSql.toString());
-            System.out.println("sql------"+preSql.toString());
-            System.out.println("sql------"+preSql.toString());
-            System.out.println("sql------"+preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            System.out.println("sql------" + preSql.toString());
+            System.out.println("sql------" + preSql.toString());
 
             int i = 1;
             for (Object field : dataMap.keySet()) {
-                System.out.println(field+"-------------+++++"+dataMap.get(field));
-                System.out.println(field+"-------------+++++"+dataMap.get(field));
-                System.out.println(field+"-------------+++++"+dataMap.get(field));
-                System.out.println(field+"-------------+++++"+dataMap.get(field));
-                System.out.println(field+"-------------+++++"+dataMap.get(field));
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                System.out.println(field + "-------------+++++" + dataMap.get(field));
 
                 pstm.setObject(i, dataMap.get(field));
                 i++;
@@ -361,7 +613,7 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementUpdate(Map payload,String destTable) {
+    private int excuteIncrementUpdate(Map payload, String destTable) {
         String dest_name = destTable;
         Map<String, Object> destMap = (Map) payload.get("data");
         Map<String, Object> sourceMap = (Map) payload.get("before");
@@ -389,7 +641,7 @@ public class LoadingDM implements Loading {
         }
         //截掉最后一个/,和and
         String substring = "";
-        if (preSql!=null && preSql.length()>0){
+        if (preSql != null && preSql.length() > 0) {
             substring = preSql.toString().substring(0, preSql.lastIndexOf(","));
         }
         String and = whereCondition.append(nullCondition).substring(0, whereCondition.lastIndexOf("and"));
@@ -400,10 +652,10 @@ public class LoadingDM implements Loading {
             pstm = destConn.prepareStatement(sql);
             int i = 1;
             for (Object value : values) {
-                pstm.setObject(i++,value);
+                pstm.setObject(i++, value);
             }
             for (Map.Entry<String, Object> sourceEntry : sourceMap.entrySet()) {
-                if (sourceEntry.getValue()!=null){
+                if (sourceEntry.getValue() != null) {
                     pstm.setObject(i, sourceEntry.getValue());
                     i++;
                 }
@@ -456,7 +708,7 @@ public class LoadingDM implements Loading {
      *
      * @return
      */
-    private int excuteIncrementDelete(Map payload,String destTable) {
+    private int excuteIncrementDelete(Map payload, String destTable) {
         String dest_name = destTable;
         Map<String, String> sourceMap = (Map) payload.get("before");
         StringBuffer nullCondition = new StringBuffer("");
@@ -740,7 +992,7 @@ public class LoadingDM implements Loading {
                 fields.append(list.get(i) + ",");
             }
         }
-        value.append(" ROWID_DATAONE_YONGYUBLOB_HAHA='" + message.get("ROWID_DATAONE_YONGYUBLOB_HAHA") + "'");
+        value.append(" ROWID='" + message.get("ROWID_DATAONE_YONGYUBLOB_HAHA") + "'");
         stringBuffer.append(fields + " from " + destTable + " where " + value);
         return stringBuffer.toString();
     }
@@ -837,6 +1089,7 @@ public class LoadingDM implements Loading {
         PreparedStatement ps = destConn.prepareStatement(insertSql);
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
+        Integer result = 0;
 //        List<String> bigData = (List) message.get("big_data");
 //        ps = destConn.prepareStatement(insertSql);
         List key = (List) payload.get("key");
@@ -857,19 +1110,17 @@ public class LoadingDM implements Loading {
                 ps.setObject(i, blob);
                 i++;
             }
-            System.out.println("大字段的size-222222222----" + list.size());
         }
 //        ps.addBatch();
         payload.clear(); // gc
         payload = null; //gc
         destConn.commit();
         try {
-            ps.execute();
+            result = ps.executeUpdate();
         } catch (SQLException e) {
             // todo
         }
         destConn.commit();
-        System.out.println("执行的size-222222222----" + list.size());
         ps.close();
         ps = null;
 //        ps.close();

@@ -74,7 +74,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
 
     @Override
     public Object findByIdAndTable(Long jobId, String sourceTable) {
-        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTableAndFlag(jobId, sourceTable,1);
         return ToData.builder().status("1").data(list).build();
     }
 
@@ -146,5 +146,20 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
         }
     }
 
+   public  Object saveScriptFlag(Long jobId, String sourceTable,Integer flag){
+       List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+      if(list!=null&&list.size()>0){
+          list.get(0).setFlag(flag);
+         sysCleanScriptRepository.save(list.get(0));
+         if(flag==1) {
+             return ToDataMessage.builder().status("1").message("开启成功").build();
+         }else{
+             return ToDataMessage.builder().status("1").message("关闭成功").build();
+         }
+      }else{
+          return ToDataMessage.builder().status("0").message("该表暂未配置脚本，请先配置脚本").build();
+      }
+
+   }
 
 }

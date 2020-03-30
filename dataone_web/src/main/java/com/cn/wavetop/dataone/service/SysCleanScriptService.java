@@ -13,7 +13,8 @@ public interface SysCleanScriptService {
 
     //根据id和表名查询用户使用的脚本
     Object findByIdAndTable(Long jobId,String sourceTable);
-
+   //是否使用脚本
+    Object saveScriptFlag(Long jobId, String sourceTable,Integer flag);
     /**
      * 执行脚本
      * @param scriptContent
