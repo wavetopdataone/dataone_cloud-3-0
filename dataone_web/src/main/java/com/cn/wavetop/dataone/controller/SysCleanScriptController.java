@@ -2,6 +2,7 @@ package com.cn.wavetop.dataone.controller;
 
 import com.cn.wavetop.dataone.entity.SysCleanScript;
 import com.cn.wavetop.dataone.entity.vo.ScriptMessage;
+import com.cn.wavetop.dataone.entity.vo.SysCleanScriptVo;
 import com.cn.wavetop.dataone.service.CleanOutService;
 import com.cn.wavetop.dataone.service.SysCleanScriptService;
 import com.cn.wavetop.dataone.util.JSONUtil;
@@ -49,12 +50,15 @@ public class SysCleanScriptController {
             "     *                       3表示构造实例对象失败\n" +
             "     *                       4表示获取脚本方法失败\n" +
             "     *                       5表示执行脚本方法失败")
-    public Object saveScript(@RequestBody  SysCleanScript sysCleanScript, String payload) {
-        Map map = JSONUtil.parseObject(payload, Map.class);
+    public Object saveScript(@RequestBody SysCleanScriptVo sysCleanScript) {
+        System.out.println(sysCleanScript+"--------------");
+        Map map = JSONUtil.parseObject(sysCleanScript.getPayload(), Map.class);
         ScriptMessage scriptMessage = sysCleanScriptService.executeScript(sysCleanScript.getScriptContent(), map);
         HashMap<Object, Object> message = new HashMap<>();
         if (scriptMessage.getStatus() == 0) {
-            sysCleanScriptService.save(sysCleanScript);
+            SysCleanScript sysCleanScript1=SysCleanScript.builder().jobId(sysCleanScript.getJobId()).
+                    sourceTable(sysCleanScript.getSourceTable()).scriptContent(sysCleanScript.getScriptContent()).build();
+            sysCleanScriptService.save(sysCleanScript1);
             message.put("status", scriptMessage.getStatus());
             message.put("message", "保存配置成功！");
         }else {
