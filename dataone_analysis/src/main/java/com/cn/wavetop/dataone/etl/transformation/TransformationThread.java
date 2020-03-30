@@ -9,6 +9,7 @@ import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
 import com.cn.wavetop.dataone.utils.TopicsController;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -81,6 +82,7 @@ public class TransformationThread extends Thread {
                 Transformation transformation = new Transformation(jobId, null, conn);
                 try {
                     dataMap = transformation.TransformIn(value);
+                    System.out.println(dataMap+"------------------------");
                     loading.excuteIncrementSQL(dataMap);
                     Map message = (Map) dataMap.get("message");
                     System.out.println(message);

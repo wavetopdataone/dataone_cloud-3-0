@@ -339,9 +339,9 @@ public class JobRunService {
      */
     public Boolean fullOverByjobId(Long jobId) {
         List<SysMonitoring> monitorings = sysMonitoringRepository.findByJobId(jobId);
-        System.out.println(monitorings+"monitorings"+"sice"+monitorings.size());
-        System.out.println(monitorings+"monitorings");
-        System.out.println(monitorings+"monitorings");
+//        System.out.println(monitorings+"monitorings"+"sice"+monitorings.size());
+//        System.out.println(monitorings+"monitorings");
+//        System.out.println(monitorings+"monitorings");
         if (monitorings == null || monitorings.size() <= 0) {
             return false;
         }
