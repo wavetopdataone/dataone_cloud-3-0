@@ -11,6 +11,10 @@ import java.sql.SQLException;
 public class Test {
     public static void main(String[] args) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, InterruptedException {
 
+        Double readRate = Double.valueOf(4) / 1 * 500;
+        System.out.println(readRate);
+        System.out.println(readRate.equals("Infinity"));
+
         SysDbinfo build = SysDbinfo.builder().type(4l).
                 dbname("DMSERVER").
                 password("SYSDBA").host("192.168.1.156").schema("SYSDBA").port(5236L).build();

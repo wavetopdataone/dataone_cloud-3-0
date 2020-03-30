@@ -55,6 +55,7 @@ public class JobRunService {
     @Transactional
     public void insertSqlCount(Map message) {
 
+
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), message.get("destTable").toString(), new Date());
@@ -339,9 +340,7 @@ public class JobRunService {
      */
     public Boolean fullOverByjobId(Long jobId) {
         List<SysMonitoring> monitorings = sysMonitoringRepository.findByJobId(jobId);
-        System.out.println(monitorings+"monitorings"+"sice"+monitorings.size());
-        System.out.println(monitorings+"monitorings");
-        System.out.println(monitorings+"monitorings");
+
         if (monitorings == null || monitorings.size() <= 0) {
             return false;
         }

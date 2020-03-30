@@ -1,84 +1,36 @@
-package com.cn.wavetop.dataone.service.impl;
+package com.cn.wavetop.dataone.service;
 
 import com.cn.wavetop.dataone.compilerutil.CustomStringJavaCompiler;
 import com.cn.wavetop.dataone.dao.SysCleanScriptRepository;
 import com.cn.wavetop.dataone.entity.SysCleanScript;
 import com.cn.wavetop.dataone.entity.vo.ScriptMessage;
-import com.cn.wavetop.dataone.entity.vo.ToData;
-import com.cn.wavetop.dataone.entity.vo.ToDataMessage;
-import com.cn.wavetop.dataone.service.SysCleanScriptService;
-import com.cn.wavetop.dataone.util.StringUtils;
-import org.apache.poi.ss.formula.functions.Today;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @Author yongz
+ * @Date 2020/3/30、11:19
+ */
 @Service
-public class SysCleanScriptServiceImpl implements SysCleanScriptService {
+public class SysCleanScriptImpl {
+
     @Autowired
     private SysCleanScriptRepository sysCleanScriptRepository;
 
-    /**
-     * 保存加执行
-     *
-     * @param sysCleanScript
-     * @return
-     */
-    @Override
-    public Object saveAndExcues(SysCleanScript sysCleanScript, Map map) {
-        System.out.println(map + "-------传参");
-        CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(sysCleanScript.getScriptContent());
-        boolean compiler1 = compiler.compiler();
-        Map invoke = null;
-        Class cls = null;
-        try {
-            cls = compiler.getScriptClass();
-            String fullClassName = compiler.getFullClassName();
-            // 反射的基础
-            Object o = cls.newInstance();
-            Method test = cls.getMethod("test", Map.class);
-            test.setAccessible(true);// 暴力反射
-            invoke = (Map) test.invoke(o, map);
-            System.out.println("返回的map-------------" + invoke);
-            sysCleanScriptRepository.save(sysCleanScript);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-        }
-        return invoke;
-    }
-
-    @Override
-    public Object save(SysCleanScript sysCleanScript) {
-        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(sysCleanScript.getJobId(), sysCleanScript.getSourceTable());
-        SysCleanScript sysCleanScript1 = null;
-        if (list != null && list.size() > 0) {
-            list.get(0).setScriptContent(sysCleanScript.getScriptContent());
-            sysCleanScript1 = sysCleanScriptRepository.save(list.get(0));
+    public Map executeScript(Long jobId, String tableName, Map payload) {
+        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, tableName);
+        System.out.println("SysCleanScript:" + SysCleanScript);
+        if (SysCleanScript != null && SysCleanScript.size() > 0) {
+            return executeScript(SysCleanScript.get(0).getScriptContent(), payload).getResult();
         } else {
-            sysCleanScriptRepository.save(sysCleanScript);
-        }
-        if (sysCleanScript1 != null) {
-            return ToDataMessage.builder().status("1").message("保存成功").build();
-        } else {
-            return ToDataMessage.builder().status("0").message("保存失败").build();
+            return null;
         }
     }
 
-
-    @Override
-    public Object findByIdAndTable(Long jobId, String sourceTable) {
-        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, sourceTable);
-        return ToData.builder().status("1").data(list).build();
-    }
-
-    @Override
     public ScriptMessage executeScript(String scriptContent, Map payload) {
         Class cls = null;
         Object o = null;
@@ -146,5 +98,29 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
         }
     }
 
+    public Class getScriptCls(String scriptContent) {
+        Class cls = null;
+        CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(scriptContent);
+        if (compiler.compiler()) {
+            // 获取class
+            try {
+                cls = compiler.getScriptClass();
+            } catch (Exception e) {
+                return null;
+            }
+            return cls;
+        } else {
+            return null;
+        }
+    }
+
+    public Class getScriptCls(Long jobId, String tableName) {
+        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, tableName);
+        if (SysCleanScript != null && SysCleanScript.size() > 0) {
+            return getScriptCls(SysCleanScript.get(0).getScriptContent());
+        } else {
+            return null;
+        }
+    }
 
 }
