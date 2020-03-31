@@ -303,13 +303,14 @@ public class TransformationThread extends Thread {
 
             //监控关闭当前，并修改表状态
             if (jobRunService.fullOverByTableName(jobId, tableName)) {
+
                 // 修改job状态
                 jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                 TopicsController.deleteTopic(tableName + "_" + jobId);
 
                 try {
                     this.destConn.close();
-                    this.conn.close();
+                  //  this.conn.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
