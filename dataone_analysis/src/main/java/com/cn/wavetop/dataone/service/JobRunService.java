@@ -6,6 +6,7 @@ import com.cn.wavetop.dataone.entity.*;
 import com.cn.wavetop.dataone.entity.vo.EmailJobrelaVo;
 import com.cn.wavetop.dataone.entity.vo.EmailPropert;
 import com.cn.wavetop.dataone.etl.ETLAction;
+import com.cn.wavetop.dataone.etl.JobMonitoringThread;
 import com.cn.wavetop.dataone.util.EmailUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -395,7 +396,7 @@ public class JobRunService {
     /**
      * 监听邮件提醒以及发送邮件
      */
-    public Boolean emailReminder(Long jobId) {
+    public Boolean emailReminder(Long jobId, JobMonitoringThread jobMonitoringThread) {
         List<EmailJobrelaVo> list = new ArrayList<>();
         ErrorQueueSettings errorQueueSettings = null;
         List<SysMonitoring> sysMonitoringList = new ArrayList<>();
@@ -478,28 +479,28 @@ public class JobRunService {
                                 //预警邮件
                                 ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
                                 //暂停邮件
-                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result);
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 0) {
                                 //预警+暂停  不带邮件
                                 //预警不带邮件
                                 ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
                                 //暂停不带邮件
-                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result);
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 1 && emailJobrelaVo.getErrorQueuePause() == 0) {
                                 //预警邮件+暂停不带邮件
                                 //预警邮件
                                 ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
                                 //暂停不带邮件
-                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result);
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 1) {
                                 //预警不带邮件+暂停带邮件
                                 //预警不带邮件
                                 ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
                                 //暂停邮件
-                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result);
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
                                 return vflag;
                             } else {
                                 logger.error("暂时没有的方式");
@@ -613,10 +614,10 @@ public class JobRunService {
      * @param result         结果
      * @return 暂停后 告诉监控线程
      */
-    public boolean ErrorQueuePauseEmail(SysJobrela sysJobrela, SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result) {
+    public boolean ErrorQueuePauseEmail(SysJobrela sysJobrela, SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result,JobMonitoringThread jobMonitoringThread) {
         if (ErrorSetup <= result) {
             EmailUtils emailUtils = new EmailUtils();
-            if (new ETLAction().pause(emailJobrelaVo.getJobId())) {
+            if (jobMonitoringThread.pauseJob()) {
                 sysJobrela.setJobStatus("2");
                 sysJobrelaRespository.save(sysJobrela);
             }
@@ -631,6 +632,7 @@ public class JobRunService {
             }
             Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
             userLogRepository.save(build);
+            jobMonitoringThread.suspend();
         }
         return false;
     }
@@ -658,17 +660,18 @@ public class JobRunService {
      * @param result         结果
      * @return 暂停后 告诉监控线程
      */
-    public boolean ErrorQueuePause(SysJobrela sysJobrela, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result) {
+    public boolean ErrorQueuePause(SysJobrela sysJobrela, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result,JobMonitoringThread jobMonitoringThread) {
         //暂停
         if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() != 1) {
             if ("1".equals(sysJobrela.getJobStatus())) {
-                if (new ETLAction().pause(emailJobrelaVo.getJobId())) {
+                if (jobMonitoringThread.pauseJob()) {
                     sysJobrela.setJobStatus("2");
                     sysJobrelaRespository.save(sysJobrela);
                 }
             }
             Userlog build = Userlog.builder().time(new Date()).jobName(emailJobrelaVo.getJobrelaName()).operate("发现任务异常，其中【" + emailJobrelaVo.getJobrelaName() + "】错误率已达到" + result * 100 + "%，系统自动暂停了该任务，请立即解决！").jobId(emailJobrelaVo.getJobId()).build();
             userLogRepository.save(build);
+            jobMonitoringThread.suspend();
         }
         return false;
     }

@@ -160,7 +160,7 @@ public class JobMonitoringThread extends Thread {
         while (emaliFlag || syncRangeFlag) {
             System.out.println("监控！");
             // 邮件监控
-            //emaliFlag = jobRunService.emailReminder(jobId);
+            emaliFlag = jobRunService.emailReminder(jobId,this);
 
             // 任务状态监控
             switch (sync_range) {

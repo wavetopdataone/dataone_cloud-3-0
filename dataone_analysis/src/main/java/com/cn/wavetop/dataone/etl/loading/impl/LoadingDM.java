@@ -72,6 +72,12 @@ public class LoadingDM implements Loading {
     public void fullLoading(List<Map> list) {
 
         int index = list.size();
+        System.out.println(list.size());
+        System.out.println(list.size());
+        System.out.println(list.size());
+        System.out.println(list.size());
+        System.out.println(list.size());
+
 
         long start = System.currentTimeMillis();
         for (Map dataMap : list) {
@@ -143,11 +149,16 @@ public class LoadingDM implements Loading {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             try {
                 destConn.commit();
                 ps.clearBatch();
                 ps.close();
-                ps = null; //gc
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            ps = null; //gc
+            try {
                 // 一批数据处理
                 long end = System.currentTimeMillis();
                 // 时间戳
@@ -155,7 +166,7 @@ public class LoadingDM implements Loading {
 
                 jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -254,10 +265,10 @@ public class LoadingDM implements Loading {
             return excuteIncrementBlobInsert(payload, destTable, listData);
 
         } else if (operation.equalsIgnoreCase("update")) {
-            return excuteIncrementBlobUpdate(payload, destTable,listData);
+            return excuteIncrementBlobUpdate(payload, destTable, listData);
 
         } else if (operation.equalsIgnoreCase("delete")) {
-            return excuteIncrementBlobDelete(payload, destTable,listData);
+            return excuteIncrementBlobDelete(payload, destTable, listData);
         }
         return 0;
     }
@@ -402,7 +413,7 @@ public class LoadingDM implements Loading {
                 if (bigData.contains(field)) {
                     continue;
                 } else {
-                    if(dataMap.get(field)!=null) {
+                    if (dataMap.get(field) != null) {
                         pstm.setObject(i++, dataMap.get(field));
                     }
                 }
@@ -438,6 +449,7 @@ public class LoadingDM implements Loading {
         return count;
 //        return 1;
     }
+
     /**
      * 携帶大字段的更新
      * 解析出delete语句 并执行
@@ -452,14 +464,14 @@ public class LoadingDM implements Loading {
             //预编译存储语句
             StringBuffer preSql = new StringBuffer("delete from " + destTable + " where ");
             for (String key : sourceMap.keySet()) {
-                if(bigData.contains(key)){
+                if (bigData.contains(key)) {
                     continue;
                 }
                 Object value = sourceMap.get(key);
                 if (null == value) {
-                    nullCondition.append( key + " IS NULL and");
+                    nullCondition.append(key + " IS NULL and");
                 } else {
-                    nullCondition.append( key + " = " + " ? " + " and ");
+                    nullCondition.append(key + " = " + " ? " + " and ");
                 }
             }
             String and = preSql.append(nullCondition.substring(0, preSql.lastIndexOf("and"))).toString();
@@ -468,7 +480,7 @@ public class LoadingDM implements Loading {
 
             int i = 1;
             for (Object field : sourceMap.keySet()) {
-                if(bigData.contains(field)){
+                if (bigData.contains(field)) {
                     continue;
                 }
                 if (sourceMap.get(field) != null) {

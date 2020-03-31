@@ -162,4 +162,20 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
 
    }
 
+    public Object equalFlag(Long jobId, String sourceTable){
+        List<SysCleanScript> list = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, sourceTable);
+         if(list!=null&&list.size()>0){
+              if(list.get(0).getFlag()==1){
+                  return ToDataMessage.builder().status("1").build();
+
+              }else{
+                  return ToDataMessage.builder().status("0").build();
+              }
+         }else{
+             return ToDataMessage.builder().status("0").build();
+         }
+
+
+    }
+
 }
