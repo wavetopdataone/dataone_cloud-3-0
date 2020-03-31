@@ -16,7 +16,7 @@ public class TestReadConfig {
     private static   String directory;
 
     public String put(){
-        System.out.println(directory);
+        // System.out.println(directory);
         return directory;
     }
 

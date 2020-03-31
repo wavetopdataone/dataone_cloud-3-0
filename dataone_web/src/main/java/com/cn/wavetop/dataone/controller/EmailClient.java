@@ -35,7 +35,7 @@ public class EmailClient extends Thread {
 
     @Override
     public void run() {
-        System.out.println(repository+"----");
+        // System.out.println(repository+"----");
         List<EmailJobrelaVo> list = new ArrayList<>();
         ErrorQueueSettings errorQueueSettings = null;
         List<SysMonitoring> sysMonitoringList = new ArrayList<>();

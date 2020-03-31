@@ -68,27 +68,27 @@ public class JobThread extends Thread {
             switch (sync_range) {
                 case 1:
 //                    fullRang(); // 全量
-                    System.out.println("执行全量任务:" + jodId);
+                    // System.out.println("执行全量任务:" + jodId);
                     file = new File(sqlPath + "/full_offset");
                     universalRang(file, "FULL", "0.sql", true);
                     break;
 
                 case 2:
 //                    incrementRang();// 增量
-                    System.out.println("执行增量任务:" + jodId);
+                    // System.out.println("执行增量任务:" + jodId);
                     file = new File(sqlPath + "/increment_offset");
                     universalRang(file, "INCREMENT", "0.sql", true);
                     break;
 
                 case 3:
 
-                    System.out.println("执行全量+增量任务:" + jodId);
+                    // System.out.println("执行全量+增量任务:" + jodId);
                     fullAndIncrementRang(); // 增量+全量
                     break;
 
                 case 4:
 
-                    System.out.println("执行存量任务:" + jodId);
+                    // System.out.println("执行存量任务:" + jodId);
                     stockRang(); // 存量
                     break;
 
@@ -138,7 +138,7 @@ public class JobThread extends Thread {
      * @param flag 判断全量+增量的方法调用时不再开启消费线程
      */
     private void universalRang(File file, String rang, String startSql, Boolean flag) {
-//        System.out.println("进来了啊。没错啊！");
+//        // System.out.println("进来了啊。没错啊！");
         ArrayList<String> fileNames = TestGetFiles.getAllFileName(sqlPath);
 //        File file = new File(sqlPath + "/full_offset"); // 创建文件记录java读取的位置
         if (!file.exists()) {
@@ -157,7 +157,7 @@ public class JobThread extends Thread {
                     continue;
                 }
                 if ((fileName.contains(rang) && fileName.contains(startSql))) {
-//                    System.out.println("真的进来了啊。没错啊！");
+//                    // System.out.println("真的进来了啊。没错啊！");
                     try {
                         FileUtils.writeTxtFile(readFile(sqlPath + "/" + fileName, 0), file);  // 读取文件，并更新offset信息
                         // 任务既然到了这里了，则说明已经有数据生成了，既然有数据生成了，则需要开启消费者线程！
@@ -216,7 +216,7 @@ public class JobThread extends Thread {
         }
         String[] full_offsetContent = FileUtils.readTxtFile(full_offset).split("----");
 
-//            System.out.println(Arrays.toString(offsetContent));
+//            // System.out.println(Arrays.toString(offsetContent));
         // 判断全量文件是否有内容！！！
         if (full_offsetContent.length <= 1) {
             // 判断有没有全量文件，有则开始读全量文件
@@ -296,7 +296,7 @@ public class JobThread extends Thread {
 
                 if (str.equals("") || str.equals("WAVETOP_LINE_BREAK")) {
                 } else {
-                    System.out.println(str);
+                    // System.out.println(str);
 //                    kafkaTemplate.send("JodId_" + jodId, str); //发送消息
                     producer.sendMsg("JodId_" + jodId, str);//发送消息
                     log.info("The producer_job" + jodId + " Thread, message is :" + str);
@@ -317,7 +317,7 @@ public class JobThread extends Thread {
             producer.stop(); // 关闭生产者
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            // System.out.println(e.getMessage());
         }
 
         return content.toString();
@@ -336,7 +336,7 @@ public class JobThread extends Thread {
     public void startMe(int jodId) {
         stopMe = true;
 //        long writeData = jobconsumers.get("consumer_job_" + jodId).getWriteData();
-//        System.out.println("startMe:jobId" + jodId + "---writeData:" + writeData);
+//        // System.out.println("startMe:jobId" + jodId + "---writeData:" + writeData);
 //        jobconsumers.put("consumer_job_" + jodId, new JobConsumerThread(jodId, writeData));
 //        jobconsumers.get("consumer_job_" + jodId).start();
     }

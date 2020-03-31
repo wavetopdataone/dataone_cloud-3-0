@@ -108,7 +108,7 @@ public class DBUtil {
             int rows = rs.getRow();
             int columns = meta.getColumnCount();
 
-            // System.out.println("columns = "+columns);
+            // // System.out.println("columns = "+columns);
 
             if (rows <= 0) {
                 return new String[0][0];
@@ -119,7 +119,7 @@ public class DBUtil {
             while (rs.next()) {
                 for (int i = 0; i < columns; i++) {
 
-                    // System.out.println(rs.getString(i + 1));
+                    // // System.out.println(rs.getString(i + 1));
                     if (meta.getColumnType(i + 1) == Types.DATE) {
 
                         arr[row][i] = DateUtils.format(rs.getTimestamp(i + 1));
@@ -445,7 +445,7 @@ public class DBUtil {
 //                MyResultSet rs = com.cn.wavetop.dataone.db.DBUtil.queryPG("select id,title,normalcontent,to_char(createdate,'yyyy-MM-dd HH24:mi:ss'),infotype,infokey,infofrom from eq_myarticle where typelist=1",5,20);
 //
 //
-//                System.out.println(rs.totalRows);
+//                // System.out.println(rs.totalRows);
 //                // Connection con = DBConn.getInstance().getConnection();
 //                // Statement st = con.createStatement();
 //                // ResultSet rs =

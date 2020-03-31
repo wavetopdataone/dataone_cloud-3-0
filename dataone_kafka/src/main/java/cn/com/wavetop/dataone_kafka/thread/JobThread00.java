@@ -63,7 +63,7 @@ public class JobThread00 extends Thread {
                 }
             }
             String[] offsetContent = FileUtils.readTxtFile(file).split("----");
-//            System.out.println(Arrays.toString(offsetContent));
+//            // System.out.println(Arrays.toString(offsetContent));
             // 判断offset文件是否有内容！！！
             if (offsetContent.length <= 1) {
                 // 判断有没有全量文件，有则开始读全量文件
@@ -112,7 +112,7 @@ public class JobThread00 extends Thread {
                     String befor = offsetContent[0].substring(0, offsetContent[0].indexOf(".sql") - 1);
                     int i = Integer.parseInt(offsetContent[0].substring(offsetContent[0].indexOf(".sql") - 1, offsetContent[0].indexOf(".sql"))) + 1;
                     String fileName_ = befor + i + ".sql";
-//                    System.out.println(fileName_); // 打印下一个需要跑的文件
+//                    // System.out.println(fileName_); // 打印下一个需要跑的文件
 
                     if (new File(fileName_).exists()) {
                         try {
@@ -161,7 +161,7 @@ public class JobThread00 extends Thread {
 
                 if (str.equals("") || str.equals("WAVETOP_LINE_BREAK")) {
                 } else {
-                    System.out.println(str);
+                    // System.out.println(str);
 //                    kafkaTemplate.send("JodId_" + jodId, str); //发送消息
                     producer.sendMsg("JodId_" + jodId, str);//发送消息
                     log.info("The producer_job" + jodId + " Thread, message is :" + str);
@@ -179,7 +179,7 @@ public class JobThread00 extends Thread {
             producer.stop(); // 关闭生产者
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            // System.out.println(e.getMessage());
         }
 
         return content.toString();

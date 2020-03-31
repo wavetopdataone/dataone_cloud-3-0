@@ -55,8 +55,8 @@ public class ExtractionOracle implements Extraction {
      */
     @Deprecated
     public void fullRangALL() throws Exception {
-        System.out.println("Oracle 全量开始");
-        System.out.println(jobId);
+        // System.out.println("Oracle 全量开始");
+        // System.out.println(jobId);
         Producer producer = new Producer(null);
         Map message;
         message = getMessage(); //传输的消息
@@ -82,14 +82,14 @@ public class ExtractionOracle implements Extraction {
             }
         }
         startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
-        System.out.println(tableName + "____" + resultMap.size());
+        // System.out.println(tableName + "____" + resultMap.size());
         for (int i = 0; i < resultMap.size(); i++) {
 
             DataMap data = DataMap.builder()
                     .payload(resultMap.get(i))
                     .message(message)
                     .build();
-//            System.out.println(data);
+//            // System.out.println(data);
             producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
         }
         destConn.close();
@@ -180,7 +180,7 @@ public class ExtractionOracle implements Extraction {
             resultMap = DBUtil.query2(pageSelectSql, conn);
 
 
-//            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
+//            // System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
         }
 
     }
@@ -208,7 +208,7 @@ public class ExtractionOracle implements Extraction {
      */
     @Override
     public void incrementRang() {
-        System.out.println("Oracle 增量开始");
+        // System.out.println("Oracle 增量开始");
         StringBuffer br = new StringBuffer();
         long scn = jobRunService.getLogMinerScn(jobId);
         for (Object tableName : tableNames) {
@@ -227,7 +227,7 @@ public class ExtractionOracle implements Extraction {
 
     @Override
     public void fullAndIncrementRang() {
-        System.out.println("Oracle 全量+增量开始");
+        // System.out.println("Oracle 全量+增量开始");
     }
 
 
@@ -264,12 +264,12 @@ public class ExtractionOracle implements Extraction {
         }
 
         // 释放数据连接
-        try {
-            this.destConn.close();
-            this.conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            this.destConn.close();
+//            this.conn.close();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         if (this.transformationThread != null) {
             this.transformationThread.stop();
         }

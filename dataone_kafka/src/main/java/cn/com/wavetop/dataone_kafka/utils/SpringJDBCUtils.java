@@ -18,7 +18,7 @@ public class SpringJDBCUtils {
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
         SysDbinfo source = restTemplate.getForObject("http://localhost:8000/toback/findById/97", SysDbinfo.class);
-        System.out.println(source);
+        // System.out.println(source);
         JdbcTemplate register = SpringJDBCUtils.register(source);
         register.execute("IF NOT EXISTS (SELECT TAB.NAME FROM TEST1.SYS.TABLES AS TAB LEFT JOIN TEST1.SYS.SCHEMAS AS SC ON TAB.SCHEMA_ID = SC.SCHEMA_ID WHERE TAB.NAME='sys_user' AND SC.NAME='dbo') CREATE TABLE TEST1.dbo.sys_user (id bigint ,avatar NVARCHAR(255) NULL,del_flag NVARCHAR(255) NULL,dept_id bigint NULL,email NVARCHAR(255) NULL,login_date datetime NULL,login_ip NVARCHAR(255) NULL,login_name NVARCHAR(255) NULL,parent_id bigint NULL,password NVARCHAR(255) NULL,phonenumber NVARCHAR(255) NULL,role_id bigint NULL,salt NVARCHAR(255) NULL,sex NVARCHAR(255) NULL,status NVARCHAR(255) NULL,user_id bigint NULL,user_name NVARCHAR(255) NULL,PRIMARY KEY (id )) ");
     }

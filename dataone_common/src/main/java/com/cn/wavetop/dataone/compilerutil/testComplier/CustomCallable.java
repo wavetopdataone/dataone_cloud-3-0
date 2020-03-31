@@ -19,7 +19,7 @@ public class CustomCallable implements Callable<RunInfo> {
     //方案1
     //@Override
     //public RunInfo call() throws Exception {
-    //    System.out.println("开始执行call" + LocalTime.now());
+    //    // System.out.println("开始执行call" + LocalTime.now());
     //    RunInfo runInfo = new RunInfo();
     //    CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(sourceCode);
     //    if (compiler.compiler()) {
@@ -40,7 +40,7 @@ public class CustomCallable implements Callable<RunInfo> {
     //    }
     //    runInfo.setCompilerTakeTime(compiler.getCompilerTakeTime());
     //    runInfo.setCompilerMessage(compiler.getCompilerMessage());
-    //    System.out.println("call over" + LocalTime.now());
+    //    // System.out.println("call over" + LocalTime.now());
     //    return runInfo;
     //}
 

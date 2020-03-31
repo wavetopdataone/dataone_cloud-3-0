@@ -22,24 +22,24 @@ public class TestModel {
     public static void main(String[] args) throws JSQLParserException {
 //        Schema schema = mysqlToSchema("IF NOT EXISTS (SELECT TAB.NAME FROM TEST1.SYS.TABLES AS TAB LEFT JOIN TEST1.SYS.SCHEMAS AS SC ON TAB.SCHEMA_ID = SC.SCHEMA_ID WHERE TAB.NAME='sys_menu' AND SC.NAME='dbo') CREATE TABLE TEST1.dbo.sys_menu (id bigint ,icon NVARCHAR(255) NULL,menu_id bigint NULL,menu_name NVARCHAR(255) NULL,menu_type NVARCHAR(255) NULL,order_num NVARCHAR(255) NULL,parent_id bigint NULL,parent_name NVARCHAR(255) NULL,perms NVARCHAR(255) NULL,target NVARCHAR(255) NULL,url NVARCHAR(255) NULL,visible NVARCHAR(255) NULL,create_time datetime NULL,create_user NVARCHAR(255) NULL,update_time datetime NULL,update_user NVARCHAR(255) NULL,PRIMARY KEY (id ))", 2);
 ////        getStringTime(1575455606000L);
-//        System.out.println(schema);
+//        // System.out.println(schema);
 //        HashMap<String, Schema> schemas = new HashMap<>();
 //        schemas.put(schema.getName(), schema);
 //        String data = toJsonString2("INSERT INTO \"test\".\"file1\"(\"date\",\"time\") VALUES (TO_DATE('2019-12-04 00:00:00','YYYY-MM-DD HH24:MI:SS'),'00:00:00')", schemas, 2);
-//        System.out.println(data);
+//        // System.out.println(data);
 
-//        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
-//        System.out.println(getStringTime(1578931200000L, "yyyy-MM-dd HH:mm:ss"));
-//        System.out.println(getTimestamp("2019-10-09 00:00:00","yyyy"));
-
-
-//        System.out.println(getTimestamp("1970-01-01 08:00:00", "yyyy-MM-dd  HH:mm:ss"));
-        System.out.println(getTimestamp("1900-01-01", "yyyy-MM-dd"));
-        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd")+getTimestamp("1900-01-01", "yyyy-MM-dd"));
-        System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
+//        // System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
+//        // System.out.println(getStringTime(1578931200000L, "yyyy-MM-dd HH:mm:ss"));
+//        // System.out.println(getTimestamp("2019-10-09 00:00:00","yyyy"));
 
 
-        System.out.println(getStringTime(0L, "yyyy-MM-dd HH:mm:ss"));
+//        // System.out.println(getTimestamp("1970-01-01 08:00:00", "yyyy-MM-dd  HH:mm:ss"));
+        // System.out.println(getTimestamp("1900-01-01", "yyyy-MM-dd"));
+        // System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd")+getTimestamp("1900-01-01", "yyyy-MM-dd"));
+        // System.out.println(getTimestamp("2020-03-09", "yyyy-MM-dd"));
+
+
+        // System.out.println(getStringTime(0L, "yyyy-MM-dd HH:mm:ss"));
 
 
 
@@ -65,7 +65,7 @@ public class TestModel {
             return new SimpleDateFormat(type).parse(time).getTime();
         } catch (ParseException e) {
             e.printStackTrace();
-            System.out.println("报错了！" + time + type);
+            // System.out.println("报错了！" + time + type);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class TestModel {
             creat_table = creat_table.substring(creat_table.indexOf("CREATE TABLE"));
         }
 
-//        System.out.println(creat_table);
+//        // System.out.println(creat_table);
         String tableName = "";
         // todo 表名获取待优化
         String[] s1 = creat_table.split(" ");
@@ -95,10 +95,10 @@ public class TestModel {
                 }
                 tableName = s;
             }
-//            System.out.println(s);
+//            // System.out.println(s);
         }
         String[] strings = creat_table.substring(creat_table.indexOf("(") + 1, creat_table.lastIndexOf(")")).split(",");
-//        System.out.println(Arrays.toString(strings));
+//        // System.out.println(Arrays.toString(strings));
 
         String filedType;
         String field; // 字段
@@ -157,14 +157,14 @@ public class TestModel {
         if (insertSql.contains("IF NOT EXISTS") && insertSql.contains("ELSE")) {
             insertSql = insertSql.substring(insertSql.indexOf("INSERT INTO"), insertSql.indexOf("ELSE UPDATE"));
         }
-//        System.out.println(insertSql);
+//        // System.out.println(insertSql);
 
 
         HashMap<Object, Object> map = new HashMap<>();
         List<String> insert_columns = null;
         List<String> insert_values = null;
         try {
-//            System.out.println(insertSql);
+//            // System.out.println(insertSql);
             insert_columns = PrassingUtil.get_insert_column(insertSql);
             insert_values = PrassingUtil.get_insert_values(insertSql);
 
@@ -183,7 +183,7 @@ public class TestModel {
         if (dbType == 1l) {//  todo Oacle表名转大写的问题
             insert_table = insert_table.toUpperCase();
         }
-//        System.out.println(insert_table);
+//        // System.out.println(insert_table);
         Schema schema = schemas.get(insert_table);
         String column;
         String value;
@@ -217,7 +217,7 @@ public class TestModel {
                 if (value.contains("'") || value.contains("\"")) {
                     value = value.substring(1, value.length() - 1);
                 }
-//                System.out.println(value);
+//                // System.out.println(value);
 
                 List<Map> schemaFields = schema.getFields();
                 for (Map schemaField : schemaFields) {
@@ -225,7 +225,7 @@ public class TestModel {
                     if (field.equalsIgnoreCase(column)) {
 
                         // 首先她两必须相等
-//                        System.out.println(field);
+//                        // System.out.println(field);
                         String type = (String) schemaField.get("type");
 
                         String name = (String) schemaField.get("name");
@@ -268,12 +268,12 @@ public class TestModel {
 
         }
 
-//        System.out.println(insertSql);
+//        // System.out.println(insertSql);
 //        String[] insert = insertSql.split("VALUES");
 //        String[] fields = insert[0].substring(insert[0].indexOf("(") + 1, insert[0].lastIndexOf(")")).split(",");
 //        String[] values = insert[1].substring(insert[1].indexOf("(") + 1, insert[1].lastIndexOf(")")).split(",");
-//        System.out.println(fields.length);
-//        System.out.println(values.length);
+//        // System.out.println(fields.length);
+//        // System.out.println(values.length);
 //        for (int i = 0; i < fields.length; i++) {
 ////
 //            if (values[i].contains("'") || values[i].contains("\"")) {
@@ -282,7 +282,7 @@ public class TestModel {
 //            if (fields[i].contains("'") || fields[i].contains("\"")) {
 //                fields[i] = fields[i].substring(1, fields[i].length() - 1);
 //            }
-//            System.out.println(fields[i]+values[i]);
+//            // System.out.println(fields[i]+values[i]);
 //            map.put(fields[i], values[i]);
 ////            List<Map> schemaFields = schema.getFields();
 ////            for (Map map1 : schemaFields) {
@@ -321,9 +321,9 @@ public class TestModel {
         map2.put("schema", schema);
         map2.put("payload", map);
 
-        //        System.out.println(map2);
+        //        // System.out.println(map2);
         String s = JSONUtil.toJSONString(map2);
-//        System.out.println(s);
+//        // System.out.println(s);
         map.clear();
         map = null;
         map2.clear();

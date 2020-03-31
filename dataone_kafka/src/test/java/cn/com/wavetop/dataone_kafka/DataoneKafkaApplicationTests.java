@@ -19,9 +19,9 @@ class DataoneKafkaApplicationTests {
 //    void contextLoads() {
 //        String data = restTemplate.postForObject("http://192.168.1.156:8000/sys_dbinfo/check_dbinfo?id=12",null, String.class);
 //
-//        System.out.println(data);
+//        // System.out.println(data);
 //        SysDbinfo sysDbinfo = SysDbinfo.getSysDbinfo(data);
-//        System.out.println(sysDbinfo);
+//        // System.out.println(sysDbinfo);
 //    }
 
 //    @Bean

@@ -47,7 +47,7 @@ public class JobConsumerThread extends Thread {
         SysDbinfo source = (SysDbinfo) toBackClient.findDbinfoById(Long.valueOf(jodId));
 
         //        SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
-        System.out.println(source);
+        // System.out.println(source);
 
         JdbcTemplate jdbcTemplate = null;
         try {
@@ -67,13 +67,13 @@ public class JobConsumerThread extends Thread {
                         List destTables = (List) toBackClient.monitoringTable(jodId);
 
 //                        List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + jodId, List.class);
-//                        System.out.println(destTables + "consumer");
-//                        System.out.println(destTables.get(0).toString().split("\\.")[1]);
+//                        // System.out.println(destTables + "consumer");
+//                        // System.out.println(destTables.get(0).toString().split("\\.")[1]);
 //                        restTemplate.getForObject("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
 
                         toBackClient.updateWriteMonitoring(jodId,writeData,destTables.get(0).toString().split("\\.")[1]);
 
-                        //                        System.out.println("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
+                        //                        // System.out.println("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
 
                     }
                 }
@@ -85,7 +85,7 @@ public class JobConsumerThread extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("报错了" + e.getMessage());
+            // System.out.println("报错了" + e.getMessage());
         }
 
     }

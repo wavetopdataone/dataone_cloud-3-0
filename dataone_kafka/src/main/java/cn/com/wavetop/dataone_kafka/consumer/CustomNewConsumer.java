@@ -41,14 +41,14 @@ public class CustomNewConsumer {
 			}
 			//这里可以加一个records为空的情况
 		}
-		//System.out.println(records.count());
+		//// System.out.println(records.count());
 		Iterator<ConsumerRecord<String, String>> iterable = records.iterator();
 		int index = 0;
 		String value = null;
 		while(index<1 && iterable.hasNext()) {
-			//System.out.println("王成============================"+iterable.next().toString());
+			//// System.out.println("王成============================"+iterable.next().toString());
 			value = iterable.next().value();
-			//System.out.println("王成 =========================== " + value);
+			//// System.out.println("王成 =========================== " + value);
 			index++;
 		}
 		return value;

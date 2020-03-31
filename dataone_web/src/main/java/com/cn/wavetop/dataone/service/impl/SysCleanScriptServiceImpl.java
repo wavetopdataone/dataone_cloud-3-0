@@ -32,7 +32,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
      */
     @Override
     public Object saveAndExcues(SysCleanScript sysCleanScript, Map map) {
-        System.out.println(map + "-------传参");
+        // System.out.println(map + "-------传参");
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(sysCleanScript.getScriptContent());
         boolean compiler1 = compiler.compiler();
         Map invoke = null;
@@ -45,7 +45,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             Method test = cls.getMethod("test", Map.class);
             test.setAccessible(true);// 暴力反射
             invoke = (Map) test.invoke(o, map);
-            System.out.println("返回的map-------------" + invoke);
+            // System.out.println("返回的map-------------" + invoke);
             sysCleanScriptRepository.save(sysCleanScript);
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +90,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             try {
                 cls = compiler.getScriptClass();
             } catch (Exception e) {
-                System.out.println("获取class失败！");
+                // System.out.println("获取class失败！");
                 return ScriptMessage.builder()
                         .errorMessage(e.toString())
                         .message("获取class失败！请检查代码格式，工具类是否导包等问题。")
@@ -111,7 +111,7 @@ public class SysCleanScriptServiceImpl implements SysCleanScriptService {
             try {
                 test = cls.getMethod("process", Map.class);
             } catch (Exception e) {
-                System.out.println("获取脚本方法失败！请检查方法名和参数类型");
+                // System.out.println("获取脚本方法失败！请检查方法名和参数类型");
 
                 return ScriptMessage.builder()
                         .errorMessage(e.toString())

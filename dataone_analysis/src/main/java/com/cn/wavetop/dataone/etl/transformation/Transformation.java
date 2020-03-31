@@ -140,7 +140,7 @@ public class Transformation {
 
         payload.put("data", data);
         payload.put("before", before);
-        dataMap.clear();
+//        dataMap.clear();
 //         获取sql语句
         dataMap.put("payload", payload);
         dataMap.put("message", message);

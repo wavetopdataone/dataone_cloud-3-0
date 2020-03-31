@@ -59,7 +59,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectRestart(String ip, int port, String connectorName) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue() + HttpEnum.BACKSLASH.getValue() + connectorName + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_RESTART.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         return httpclientGetExecute(uri, HttpEnum.HTTP_POST.getValue(), null);
     }
 
@@ -84,7 +84,7 @@ public class HttpClientKafkaUtil {
      */
     public static String createConnector(String ip, int port, String data) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         Header header = new BasicHeader("Content-Type", "application/json");
         StringEntity stringEntity = new StringEntity(data, Charset.forName("UTF-8"));
         String detail = httpclientGetExecute(uri, stringEntity, header);
@@ -115,7 +115,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectPause(String ip, int port, String connectorName) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue() + HttpEnum.BACKSLASH.getValue() + connectorName + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_PAUSE.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         return httpclientGetExecute(uri, HttpEnum.HTTP_PUT.getValue(), null);
     }
 
@@ -129,7 +129,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectConfig(String ip, int port, String connectorName) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue() + HttpEnum.BACKSLASH.getValue() + connectorName + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_CONFIG.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         return httpclientGetExecute(uri, HttpEnum.HTTP_GET.getValue(), null);
     }
 
@@ -144,7 +144,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectStatus(String ip, int port, String connectorName) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue() + HttpEnum.BACKSLASH.getValue() + connectorName + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_STATUS.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         return httpclientGetExecute(uri, HttpEnum.HTTP_GET.getValue(), null);
     }
 
@@ -172,7 +172,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectWorkerDetails(String ip, int port) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port;
-        System.out.println(uri);
+        // System.out.println(uri);
         // 创建http GET请求
         return httpclientGetExecute(uri, HttpEnum.HTTP_GET.getValue(), null);
     }
@@ -187,7 +187,7 @@ public class HttpClientKafkaUtil {
      */
     public static String getConnectorsDetails(String ip, int port) {
         String uri = HttpEnum.HTTP.getValue() + ip + HttpEnum.COLON.getValue() + port + HttpEnum.BACKSLASH.getValue() + KafkaEnum.KAFKA_DEFAULTTERM.getValue();
-        System.out.println(uri);
+        // System.out.println(uri);
         //  Header header = new BasicHeader("Content-Type","application/json");
         // Header header1 = new BasicHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
       /*
@@ -316,7 +316,7 @@ public class HttpClientKafkaUtil {
      */
     public static String httpclientGetExecute1(String uri, StringEntity stringEntity, Header... header) {
         HttpPut httpPut = new HttpPut(uri);
-        System.out.println(uri);
+        // System.out.println(uri);
         httpPut.setURI(URI.create(uri));
         httpPut.setEntity(stringEntity);
         //HttpRequestBase httpRequestBase = ((HttpRequestBase) http);

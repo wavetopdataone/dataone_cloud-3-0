@@ -40,7 +40,7 @@ public class Test {
         JdbcTemplate jdbcTemplate = SpringJDBCUtils.register(source);
         jdbcTemplate.execute("select count(*) from FILE3");
 //        String test = new ConfigOracleSink(1, "TEST", source).toJsonConfig();
-//        System.out.println(test);
+//        // System.out.println(test);
     }
 
 //    public static void main(String[] args) throws IOException {
@@ -55,7 +55,7 @@ public class Test {
 //                .schema("TEST")
 //                .build();
 //        JdbcTemplate register = SpringJDBCUtils.register(source);
-//        System.out.println(register);
+//        // System.out.println(register);
 //        register.execute("DECLARE V_SQL LONG;BEGIN V_SQL:='CREATE TABLE \"TEST\".\"employees\" (\"id\" NUMBER(19),\"fname\" VARCHAR2(30),\"lname\" VARCHAR2(30),\"birth\" VARCHAR2(64),\"hired\" date,\"separated\" date,\"job_code\" NUMBER(19),\"store_id\" NUMBER(19) )';EXECUTE IMMEDIATE V_SQL;EXCEPTION WHEN OTHERS THEN IF SQLCODE = -955 THEN NULL; ELSE RAISE; END IF; END; ");
 //        Map<String, Object> name = new HashMap<>();
 //        Map<String, String> config = new HashMap<>();
@@ -69,17 +69,17 @@ public class Test {
 //        String data = JSONUtil.toJSONString(name);
 //
 //        String delete = HttpClientKafkaUtil.deleteConnectors("192.168.1.187", 8083, "file_source_test");
-//        System.out.println(delete);
+//        // System.out.println(delete);
 //
 //        String connector = HttpClientKafkaUtil.createConnector("192.168.1.187", 8083, data);
-//        System.out.println(connector);
+//        // System.out.println(connector);
 ////        String s1 = HttpClientKafkaUtil.getConnectStatus("192.168.1.187", 8083, "test-a-file-source_21");
-////        System.out.println(s1);
+////        // System.out.println(s1);
 //        String  s = HttpClientKafkaUtil.getConnectorsDetails("192.168.1.187", 8083);
-//        System.out.println(s);
+//        // System.out.println(s);
 //
 //        s = HttpClientKafkaUtil.getConnectorsDetails("192.168.1.187", 8083);
-//        System.out.println(s);
+//        // System.out.println(s);
 //
 //    }
 }

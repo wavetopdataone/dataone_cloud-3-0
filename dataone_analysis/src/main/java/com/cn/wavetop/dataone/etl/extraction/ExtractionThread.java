@@ -219,13 +219,13 @@ public class ExtractionThread extends Thread {
 //            for (int i = 0; i < tableNames.size(); i++) {
 //                String tableName = tableNames.get(i);//每张表
 //                List<String> bb = jobRelaServiceImpl.findFilterFiledByJobId(jobId, tableName);
-//                System.out.println("jobID:" + jobId + "tablename:" + tableName + "过滤的字段:" + bb);
+//                // System.out.println("jobID:" + jobId + "tablename:" + tableName + "过滤的字段:" + bb);
 //                List<String> cc = jobRelaServiceImpl.findFiledByJobId(jobId, tableName);
-//                System.out.println("jobID:" + jobId + "tablename:" + tableName + "同步的字段:" + cc);
+//                // System.out.println("jobID:" + jobId + "tablename:" + tableName + "同步的字段:" + cc);
 //
 //                oracleAnalysis = jobProducerThread.get("product_job_" + jobId + tableName);
-//                System.out.println("開始" + oracleAnalysis);
-//                System.out.println("開始" + jobProducerThread);
+//                // System.out.println("開始" + oracleAnalysis);
+//                // System.out.println("開始" + jobProducerThread);
 //                if (oracleAnalysis != null) {
 //                    oracleAnalysis.stopMe();
 //                    jobProducerThread.put("product_job_" + jobId + tableName, new OracleAnalysis(jobId, tableName));

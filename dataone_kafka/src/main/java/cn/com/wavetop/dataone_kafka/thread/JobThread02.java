@@ -44,7 +44,7 @@ public class JobThread02 extends Thread {
             fileNames = TestGetFiles.getAllFileName(sqlPath);
             if (fileNames.contains("offset")) {
                 String[] offsetContent = FileUtils.readTxtFile(file).split("----");
-                System.out.println(offsetContent[0]+"----"+offsetContent[1]);
+                // System.out.println(offsetContent[0]+"----"+offsetContent[1]);
 
                 BufferedReader br = null;
                 StringBuffer content = new StringBuffer(); // 记录文件内容
@@ -64,7 +64,7 @@ public class JobThread02 extends Thread {
                         if (str.equals("") || str.equals("WAVETOP_LINE_BREAK")) {
                             continue;
                         }
-                        System.out.println(str);
+                        // System.out.println(str);
                         kafkaTemplate.send("JodId_" + jodId, str); //发送消息
 
                         //
@@ -78,7 +78,7 @@ public class JobThread02 extends Thread {
                     new File(offsetContent[0]).delete(); // 删除掉
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println(e.getMessage());
+                    // System.out.println(e.getMessage());
                 }
 
             } else {
@@ -105,7 +105,7 @@ public class JobThread02 extends Thread {
                             if (str.equals("") || str.equals("WAVETOP_LINE_BREAK")) {
                                 continue;
                             }
-                            System.out.println(str);
+                            // System.out.println(str);
                             kafkaTemplate.send("JodId_" + jodId, str); //发送消息
 
                             //
@@ -123,7 +123,7 @@ public class JobThread02 extends Thread {
                         new File(sqlPath + "\\" + fileName).delete(); // 删除掉
                     } catch (Exception e) {
                         e.printStackTrace();
-                        System.out.println(e.getMessage());
+                        // System.out.println(e.getMessage());
                     }
                 }
             }
