@@ -22,8 +22,8 @@ public class SysCleanScriptImpl {
     private SysCleanScriptRepository sysCleanScriptRepository;
 
     public Map executeScript(Long jobId, String tableName, Map payload) {
-        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, tableName);
-        System.out.println("SysCleanScript:" + SysCleanScript);
+        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTableAndFlag(jobId, tableName,1);
+       // System.out.println("SysCleanScript:" + SysCleanScript);
         if (SysCleanScript != null && SysCleanScript.size() > 0) {
             return executeScript(SysCleanScript.get(0).getScriptContent(), payload).getResult();
         } else {
@@ -115,7 +115,7 @@ public class SysCleanScriptImpl {
     }
 
     public Class getScriptCls(Long jobId, String tableName) {
-        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTable(jobId, tableName);
+        List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTableAndFlag(jobId, tableName,1);
         if (SysCleanScript != null && SysCleanScript.size() > 0) {
             return getScriptCls(SysCleanScript.get(0).getScriptContent());
         } else {

@@ -306,6 +306,13 @@ public class TransformationThread extends Thread {
                 // 修改job状态
                 jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                 TopicsController.deleteTopic(tableName + "_" + jobId);
+
+                try {
+                    this.destConn.close();
+                    this.conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 stop();
             }
         }

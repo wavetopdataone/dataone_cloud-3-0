@@ -135,6 +135,7 @@ public class JobMonitoringThread extends Thread {
         }
         for (Object o : ExtractionThreads.keySet()) {
             ExtractionThreads.get(o).stop();//终止抓取进程
+            ExtractionThreads.get(o).closeConn();//释放抓取数据的连接
             ExtractionThreads.get(o).stopTrans();//终止清洗进程
         }
         ExtractionThreads.clear();

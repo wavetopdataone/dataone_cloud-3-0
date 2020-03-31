@@ -19,16 +19,18 @@ public class Test {
                 dbname("DMSERVER").
                 password("SYSDBA").host("192.168.1.156").schema("SYSDBA").port(5236L).build();
 
-        Connection conn = DBConns.getConn(build);
+      //  Connection conn = DBConns.getConn(build);
         int i = 0;
         while (true) {
-            PreparedStatement ps2 = conn.prepareStatement("insert into AA values (" + ++i + ", 'xzhdsb')");
-            ps2.executeUpdate();
-            conn.commit();
-            ps2.close();
-            ps2 = null;
-//            System.out.println(++i);
-//            Thread.sleep(200);
+            System.out.println(i++);
+            Connection conn = DBConns.getConn(build);
+//            PreparedStatement ps2 = conn.prepareStatement("insert into AA values (" + ++i + ", 'xzhdsb')");
+//            ps2.executeUpdate();
+//            conn.commit();
+//            ps2.close();
+//            ps2 = null;
+////            System.out.println(++i);
+////            Thread.sleep(200);
         }
     }
 }
