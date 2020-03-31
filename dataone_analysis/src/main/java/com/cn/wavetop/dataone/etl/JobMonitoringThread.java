@@ -122,6 +122,7 @@ public class JobMonitoringThread extends Thread {
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
+            System.out.println("--------");
             ExtractionThreads.get(o).suspend();//暂停抓取进程
             ExtractionThreads.get(o).pasueTrans();//暂停清洗进程
         }

@@ -23,7 +23,17 @@ public class Test {
         int i = 0;
         while (true) {
             System.out.println(i++);
-            Connection conn = DBConns.getConn(build);
+            try {
+                Connection conn = DBConns.getConn(build);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
 //            PreparedStatement ps2 = conn.prepareStatement("insert into AA values (" + ++i + ", 'xzhdsb')");
 //            ps2.executeUpdate();
 //            conn.commit();
