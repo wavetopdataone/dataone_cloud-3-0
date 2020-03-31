@@ -60,6 +60,7 @@ public class ETLAction {
     public boolean stop(Long jobId) {
 
         JobMonitoringThread jobMonitoringThread = jobMonitoringMap.get(jobId);
+        System.out.println(jobMonitoringThread+"-----------------------");
         if (jobMonitoringThread == null) {
             return false;
         }
