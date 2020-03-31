@@ -120,7 +120,7 @@ public class Transformation {
         message.put("destTable", jobRelaServiceImpl.getDestTable(jobId, TABLE_NAME));
 
 
-        //todo 页面动态调用的清洗
+        //todo 增量待优化
         if (data != null && data.size() > 0) {
             data = sysCleanScriptImpl.executeScript(jobId, TABLE_NAME, data);
         }

@@ -182,6 +182,8 @@ public class ExtractionOracle implements Extraction {
 //            System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
         }
 
+        conn.close();
+        destConn.close();
 
     }
 
@@ -248,21 +250,39 @@ public class ExtractionOracle implements Extraction {
 
     @Override
     public void resumeTrans() {
-        this.transformationThread.resume();
+        if (this.transformationThread != null)
+            this.transformationThread.resume();
     }
 
     @Override
     public void stopTrans() {
 //        producer.stop();
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
         // TODO 清空Topic
-        TopicsController.deleteTopic(tableName + "_" + jobId);
-        this.transformationThread.stop();
+        try {
+            TopicsController.deleteTopic(tableName + "_" + jobId);
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+
+        // 释放数据连接
+        try {
+            this.destConn.close();
+            this.conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (this.transformationThread != null) {
+            this.transformationThread.stop();
+        }
 
     }
 
     @Override
     public void pasueTrans() {
-        this.transformationThread.suspend();
+        if (this.transformationThread != null) {
+            this.transformationThread.suspend();
+        }
     }
 
     private Map getMessage() {

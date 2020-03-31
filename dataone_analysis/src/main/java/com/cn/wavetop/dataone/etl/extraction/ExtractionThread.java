@@ -26,7 +26,7 @@ import java.util.List;
 
 
 public class ExtractionThread extends Thread {
-    private JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
+    private static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     // 单表抓取线程
     private Long jobId;//jobid
     private String tableName;//表
@@ -35,6 +35,15 @@ public class ExtractionThread extends Thread {
     private Extraction extraction = null;
     private Connection conn;//源端连接
     private Connection destConn;//目的端连接
+
+    public void closeConn() {
+        try {
+            this.destConn.close();
+            this.conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -86,7 +95,6 @@ public class ExtractionThread extends Thread {
             e.printStackTrace();
         }
     }
-
 
 
     @SneakyThrows
@@ -182,17 +190,24 @@ public class ExtractionThread extends Thread {
     }
 
     public void resumeTrans() {
-        this.extraction.resumeTrans();
+        if (this.extraction!= null) {
+            this.extraction.resumeTrans();
+        }
     }
 
     public void stopTrans() {
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-"+jobId); //如果当前任务开启的connector 先删除connectorSource
-        TopicsController.deleteTopic(tableName+"_"+jobId);
-        this.extraction.stopTrans();
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        TopicsController.deleteTopic(tableName + "_" + jobId);
+        if (this.extraction != null) {
+            this.extraction.stopTrans();
+        }
     }
 
     public void pasueTrans() {
-        this.extraction.pasueTrans();
+        if (this.extraction != null) {
+            this.extraction.pasueTrans();
+        }
+
     }
 //    //全量
 //    public void AllOracleOrMysql(Long jobId, SysJobrela sysJobrela, JdbcTemplate jdbcTemplate, SysDbinfo sysDbinfo) {

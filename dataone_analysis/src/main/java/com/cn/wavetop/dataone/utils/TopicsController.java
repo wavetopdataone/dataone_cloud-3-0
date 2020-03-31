@@ -149,7 +149,7 @@ public class TopicsController {
                     30000, JaasUtils.isZkSecurityEnabled());
             AdminUtils.deleteTopic(zkUtils, topic);
         } catch (Exception e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         } finally {
             if (zkUtils != null) {
                 zkUtils.close();
