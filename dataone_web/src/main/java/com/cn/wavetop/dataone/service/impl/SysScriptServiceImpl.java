@@ -106,7 +106,7 @@ public class SysScriptServiceImpl implements SysScriptService {
     @Transactional
     @Override
     public Object update(SysScript sysScript) {
-        System.out.println("sysScript----" + sysScript);
+        // System.out.println("sysScript----" + sysScript);
         //aa   bb
         Optional<SysScript> sysScriptList = sysScriptRepository.findById(sysScript.getId());
         if (sysScriptList != null) {
@@ -131,7 +131,7 @@ public class SysScriptServiceImpl implements SysScriptService {
     public Object updateScriptName(Long id, String scriptName) {
         List<SysScript> sysScriptList = sysScriptRepository.findByScriptName(PermissionUtils.getSysUser().getId(), scriptName);
         if (sysScriptList != null && sysScriptList.size() > 0) {
-            System.out.println(sysScriptList.get(0).getId()+"----------"+id);
+            // System.out.println(sysScriptList.get(0).getId()+"----------"+id);
             if (!sysScriptList.get(0).getId().equals(id)) {
                 return ToDataMessage.builder().status("0").message("该用户下已存在此名称的脚本了").build();
             }
@@ -185,12 +185,12 @@ public class SysScriptServiceImpl implements SysScriptService {
                 "    return record;\n" +
                 "    }\n" +
                 "}";
-        System.out.println("这是啥" + StringUtils.getCharacterPosition(a));
+        // System.out.println("这是啥" + StringUtils.getCharacterPosition(a));
 
 //        String[] b = a.split("process(Map payload) \\{");
-        System.out.println(a.substring(StringUtils.getCharacterPosition(a) + 1, a.indexOf("return")));
+        // System.out.println(a.substring(StringUtils.getCharacterPosition(a) + 1, a.indexOf("return")));
 //        for(int i=0;i<b.length;i++){
-//            System.out.println(b[i]+"------------------");
+//            // System.out.println(b[i]+"------------------");
 //        }
 
     }

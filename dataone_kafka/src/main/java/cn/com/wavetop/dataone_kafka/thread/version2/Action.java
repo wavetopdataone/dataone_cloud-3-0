@@ -52,8 +52,8 @@ public class Action extends Thread {
     @Override
     public void run() {
 
-//        System.out.println(toBackClient);
-        System.out.println(actionDir);
+//        // System.out.println(toBackClient);
+        // System.out.println(actionDir);
         int index = 1;
         while (stopMe) try {
             {
@@ -72,7 +72,7 @@ public class Action extends Thread {
                         log.info(s.split("_")[1] + "-jobId：" + jobId);
                         System.err.println("zhengyong dashuaibi" + jobId);
                         //                    restTemplate.putForObject("http://DATAONE-WEB/toback/deleteMonitoring/" + jodId, SysDbinfo.class);
-                        System.out.println(toBackClient);
+                        // System.out.println(toBackClient);
                         try {
                             toBackClient.resetMonitoring((long) jobId);// 重置监听表数据
                         } catch (Exception e) {
@@ -98,12 +98,12 @@ public class Action extends Thread {
                             br.close();//别忘记，切记
                             JobProducerThread jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);
                             if (jobProducerThread == null) {
-                                System.out.println("第一次预开启任务！");
+                                // System.out.println("第一次预开启任务！");
                                 SysDbinfo source = restTemplate.getForObject("http://DATAONE-WEB/toback/findById/" + jobId, SysDbinfo.class);
                                 if (source.getType() != 4l) {
                                     Thread.sleep(60000);
                                 }
-                                System.out.println("第一次开启任务！");
+                                // System.out.println("第一次开启任务！");
                                 Action.jobProducerThread.put("producer_job_" + jobId, new JobProducerThread(jobId, sqlPath, 0, new HashMap()));
                                 Action.jobProducerThread.get("producer_job_" + jobId).start();
 
@@ -113,7 +113,7 @@ public class Action extends Thread {
 //                                List destTables = restTemplate.getForObject("http://DATAONE-WEB/toback/find_destTable/" + jobId, List.class);
 //                                if (s.split("_")[1].equals("stop")) {
 //                                    for (Object destTable : destTables) {
-//                                        System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
+//                                        // System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
 //                                        if (destTable.toString().contains("\\.")) {
 //                                            HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
 //                                        }else {
@@ -129,13 +129,13 @@ public class Action extends Thread {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-                            System.out.println(e.getMessage());
+                            // System.out.println(e.getMessage());
                         }
 
 
                     } else if (s.split("_")[1].equals("stop") || s.split("_")[1].equals("pause")) {
 
-                        //                    System.out.println("关闭任务线程，jobId：" + jobId);
+                        //                    // System.out.println("关闭任务线程，jobId：" + jobId);
                         log.info(s.split("_")[1] + "-jobId：" + jobId);
                         // 关闭任务线程
                         JobProducerThread jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);
@@ -155,7 +155,7 @@ public class Action extends Thread {
                         List destTables = restTemplate.getForObject("http://DATAONE-WEB/toback/find_destTable/" + jobId, List.class);
                         if (s.split("_")[1].equals("stop")) {
                             for (Object destTable : destTables) {
-                                System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
+                                // System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
                                 if (destTable.toString().contains("\\.")) {
                                     HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
                                     HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1].toUpperCase());
@@ -178,9 +178,9 @@ public class Action extends Thread {
                         if (jobProducerThread != null) {
                             sqlPath = jobProducerThread.getSqlPath();
                             if (sqlPath != null && !"".equals(sqlPath)) {
-                                //                            System.out.println("确实是重启任务线程，jobId：" + jobId);
+                                //                            // System.out.println("确实是重启任务线程，jobId：" + jobId);
                                 long readData = jobProducerThread.getReadData();
-                                System.out.println("sqlPath:" + sqlPath + "---readData:" + readData);
+                                // System.out.println("sqlPath:" + sqlPath + "---readData:" + readData);
                                 Action.jobProducerThread.put("producer_job_" + jobId, new JobProducerThread(jobId, sqlPath, readData, jobProducerThread.getSchemas()));
 
                                 jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);
@@ -208,7 +208,7 @@ public class Action extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("报错了!!!!!!!!!!!!!!!!!!");
+            // System.out.println("报错了!!!!!!!!!!!!!!!!!!");
         }
 
 

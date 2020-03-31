@@ -50,7 +50,7 @@ public class CustomConsumer3 extends Thread {
                 if (file.exists()) {
                     long last_offset = Long.parseLong(FileUtils.readTxtFile(file));
                     offset = last_offset;
-                    System.out.println(last_offset);
+                    // System.out.println(last_offset);
                     for (long i = 0; i < last_offset; i++) {
                         br.readLine();
                     }
@@ -135,7 +135,7 @@ public class CustomConsumer3 extends Thread {
                                             String sourceTable = toBackClient.selectTable(jobId, destTable, time, errorflag);
                                             message = CustomNewConsumer.topicPartion(topic, partition, offset);
                                             //message = "saf";
-                                            System.out.println("sourceTable = " + sourceTable);
+                                            // System.out.println("sourceTable = " + sourceTable);
                                             //远程调用插入错误日志信息
                                             if (message != null) {
                                                 toBackClient.insertError(jobId, sourceTable, destTable, time, errortype, message/*,offset*/);
@@ -235,9 +235,9 @@ public class CustomConsumer3 extends Thread {
                                     //这里的时间是一个虚假的值,为了后期扩展用
                                     //String time = "2019-12-16 10:23:32";
                                     Integer errorflag = 2;
-                                    System.out.println("jobId = " + jobId);
-                                    System.out.println("destTable = " + destTable);
-                                    System.out.println("time = " + time);
+                                    // System.out.println("jobId = " + jobId);
+                                    // System.out.println("destTable = " + destTable);
+                                    // System.out.println("time = " + time);
                                     if (jobId != null && destTable != null) {
                                         String sourceTable = toBackClient.selectTable(jobId, destTable, time, errorflag);
                                     }
@@ -310,7 +310,7 @@ public class CustomConsumer3 extends Thread {
                                                 String sourceTable = toBackClient.selectTable(jobId, destTable, time, errorflag);
                                                 message = CustomNewConsumer.topicPartion(topic, partition, offset);
                                                 //message = "saf";
-                                                System.out.println("sourceTable = " + sourceTable);
+                                                // System.out.println("sourceTable = " + sourceTable);
                                                 //远程调用插入错误日志信息
                                                 if (message != null) {
                                                     toBackClient.insertError(jobId, sourceTable, destTable, time, errortype, message);

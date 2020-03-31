@@ -559,7 +559,7 @@ public class JobRelaServiceImpl {
     public static void main(String[] args) {
         List<String> list = doLogAddress(16L);
         for (String a : list) {
-            System.out.println(a);
+            // System.out.println(a);
         }
     }
 

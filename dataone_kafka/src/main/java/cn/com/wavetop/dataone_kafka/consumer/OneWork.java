@@ -24,7 +24,7 @@ public class OneWork implements Runnable {
         try {
             //执行消费数据处理方法consumerRecord.value()--消费数据
             String value = consumerRecord.value();
-            System.out.println(value);
+            // System.out.println(value);
 
 
         } catch (Exception e) {

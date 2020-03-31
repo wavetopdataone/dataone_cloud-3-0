@@ -10,7 +10,7 @@ public class Test3 {
         String loop = "public class HelloWorld {\n" +
                 "    public static void main(String[] args) {\n" +
                 "        while(true){\n" +
-                "            System.out.println(\"Hello World!\");\n" +
+                "            // System.out.println(\"Hello World!\");\n" +
                 "        }\n" +
                 "       \n" +
                 "    }\n" +
@@ -23,16 +23,16 @@ public class Test3 {
                 "        } catch (InterruptedException e) {\n" +
                 "            e.printStackTrace();\n" +
                 "        }\n" +
-                "       System.out.println(\"Hello World!\");\n" +
+                "       // System.out.println(\"Hello World!\");\n" +
                 "        while(true){\n" +
-                //"            System.out.println(\"Hello World!\");\n" +
+                //"            // System.out.println(\"Hello World!\");\n" +
                 "        }\n" +
                 "    }\n" +
                 "}";
 
         String ok = "public class HelloWorld {\n" +
                 "    public static void main(String[] args) {\n" +
-                "       System.out.println(\"Hello World!\");\n" +
+                "       // System.out.println(\"Hello World!\");\n" +
                 "    }\n" +
                 "}";
 
@@ -61,7 +61,7 @@ class TestRun extends Thread {
 
     @Override
     public void run() {
-        System.out.println(CompilerUtil.getRunInfo(code));
+        // System.out.println(CompilerUtil.getRunInfo(code));
     }
 }
 

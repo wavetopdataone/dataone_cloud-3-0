@@ -12,10 +12,10 @@ public class DBConn {
        String USER = user; //用户名
        String PWD = password; //密码
        try {
-           System.out.println(SERVandDB+"\n"+user+"\n"+password);
+           // System.out.println(SERVandDB+"\n"+user+"\n"+password);
            Class.forName(ClassforName).newInstance();
            con = DriverManager.getConnection(SERVandDB, USER, PWD);
-           System.out.println("打开数据库连接");
+           // System.out.println("打开数据库连接");
            con.setAutoCommit(false);
            return con;
        } catch (Exception e) {
@@ -28,7 +28,7 @@ public class DBConn {
         try {
             if(con!=null) {
                 con.close();
-                System.out.println("数据库连接已关闭");
+                // System.out.println("数据库连接已关闭");
             }
         } catch (SQLException e) {
             e.printStackTrace();

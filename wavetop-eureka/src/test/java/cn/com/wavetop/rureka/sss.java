@@ -14,7 +14,7 @@ public void ss(){
 //    end:1579578620382
     long start=1579598627706l;
     long  end=1579598630414l;
-    System.out.println(end-start);
+    // System.out.println(end-start);
 //    start:1579578337545
 //    end:1579578344533
     int index=1;
@@ -28,13 +28,13 @@ public void ss(){
 //        stringBuffers.append(c);
 //        stringBuffers.append("int(11) NULL DEFAULT NULL,");
 //        stringBuffer.append(stringBuffers);
-////        System.out.println(stringBuffers);
-////        System.out.println(stringBuffer);
+////        // System.out.println(stringBuffers);
+////        // System.out.println(stringBuffer);
 //        new Date();
 //    }
 //    stringBuffer.append(" PRIMARY KEY (`id`) USING BTREE\n" +
 //            ") ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;");
-//    System.out.println(stringBuffer);
+//    // System.out.println(stringBuffer);
 }
     @Test
     public void show(){
@@ -54,11 +54,11 @@ public void ss(){
         int index1= sasas;
         int index2= sasas2;
 
-        System.out.println(index1);
-        System.out.println(index2);
+        // System.out.println(index1);
+        // System.out.println(index2);
 
         for(String a:set){
-            System.out.println(a);
+            // System.out.println(a);
         }
     }
 }

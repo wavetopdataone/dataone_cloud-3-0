@@ -75,7 +75,7 @@
 //            } else {
 //                consumer = new KafkaConsumer<>(props);
 //                consumer.subscribe(Arrays.asList(topic));
-//                System.out.println("hehe");
+//                // System.out.println("hehe");
 //                return;
 //            }
 //        }
@@ -94,20 +94,20 @@
 //        int errorLogIndex = 0;
 //        long startWriteData = writeData; //开始消费量
 //        long startTime = System.currentTimeMillis();   //获取开始读取时间
-////        System.out.println(consumer);
+////        // System.out.println(consumer);
 //        ConsumerRecords<String, String> records = consumer.poll(5000);
-////        System.out.println(records);
+////        // System.out.println(records);
 //        for (final ConsumerRecord record : records) {
 ////                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
 ////                String value = (String) record.value();
-////                System.out.println(value);
+////                // System.out.println(value);
 //            try {
 //                sql = (String) record.value();
 //                if (sql.contains("CREATE") || sql.contains("create")) {
 //                    writeData = 0; // 每写一条+1
 //                    startWriteData = 0;
 //                }
-////                System.out.println(sql);
+////                // System.out.println(sql);
 //                jdbcTemplate.update(sql);  //写入目标端  TODO
 ////                log.info("The consumer_job" + jobId + " Thread, message is :" + record.value());
 //
@@ -132,16 +132,16 @@
 //        long endTime = System.currentTimeMillis();
 //
 //        // 计算写入速率存入数据库
-////        System.out.println(writeData);
-////        System.out.println(startWriteData);
-////        System.out.println(endTime - startTime);
+////        // System.out.println(writeData);
+////        // System.out.println(startWriteData);
+////        // System.out.println(endTime - startTime);
 //        if ((endTime - startTime != 0) || (writeData - startWriteData) != 0) {
 //            double disposeRate = ((double) (writeData - startWriteData) / (endTime - startTime)) * 1000;
 //
 //            // todo 待测速率
-////            System.out.println("http://192.168.1.156:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate="+(long)disposeRate+"&errorData="+errorLogIndex);
+////            // System.out.println("http://192.168.1.156:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate="+(long)disposeRate+"&errorData="+errorLogIndex);
 //            if (disposeRate != 0 || errorLogIndex != 0) {
-//                System.out.println("当前写入速率：" + disposeRate);
+//                // System.out.println("当前写入速率：" + disposeRate);
 ////                restTemplate.getForObject("http://192.168.1.156:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate=" + (long) disposeRate + "&errorData=" + errorLogIndex, Object.class);
 //                toBackClient.updateDisposeRateAndError(jobId, disposeRate,errorLogIndex);
 //            }
@@ -165,10 +165,10 @@
 //        }
 //        try {
 //            if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
-//                System.out.println("Timeout.... Ignore for this case");
+//                // System.out.println("Timeout.... Ignore for this case");
 //            }
 //        } catch (InterruptedException ignored) {
-//            System.out.println("Other thread interrupted this shutdown, ignore for this case.");
+//            // System.out.println("Other thread interrupted this shutdown, ignore for this case.");
 //            Thread.currentThread().interrupt();
 //        }
 //    }

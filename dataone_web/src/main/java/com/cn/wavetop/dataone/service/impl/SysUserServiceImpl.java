@@ -109,7 +109,7 @@ public class SysUserServiceImpl implements SysUserService {
         }
 
 //        Session sessionss=subject.getSession();
-//        System.out.println(sessionss.getId()+"dsadsaxuezihao.................");
+//        // System.out.println(sessionss.getId()+"dsadsaxuezihao.................");
         //验证密码
         //生成的密文
 
@@ -160,7 +160,7 @@ public class SysUserServiceImpl implements SysUserService {
                     Serializable tokenId = subject.getSession().getId();
                     Session session = subject.getSession();
                     session.setAttribute("user", SecurityUtils.getSubject());
-                    System.out.println(tokenId);
+                    // System.out.println(tokenId);
                     //美其效果
 //                    subject.getSession().setTimeout(36000*60*1000);
                     //查的是用户角色权限三张表
@@ -1057,7 +1057,7 @@ public class SysUserServiceImpl implements SysUserService {
             logger.error("*redis服务未连接");
             e.printStackTrace();
         }
-        System.out.println(authCode+"-------------验证码+---"+opsForValue.get("jishuCodeNew" + email));
+        // System.out.println(authCode+"-------------验证码+---"+opsForValue.get("jishuCodeNew" + email));
         if (opsForValue.get("jishuCodeNew" + email) == null) {
             return ToDataMessage.builder().status("0").message("验证码无效或已过期，请重新发送验证码。").build();
         }

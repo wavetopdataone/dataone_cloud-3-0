@@ -40,7 +40,7 @@ public class Action extends Thread {
 
     @Override
     public void run() {
-        System.out.println(actionDir);
+        // System.out.println(actionDir);
         int index = 1;
         while (stopMe) {
             for (String s : TestGetFiles.getAllFileName(actionDir)) {
@@ -82,13 +82,13 @@ public class Action extends Thread {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        System.out.println(e.getMessage());
+                        // System.out.println(e.getMessage());
                     }
 
 
                 } else if (s.split("_")[1].equals("stop") || s.split("_")[1].equals("pause")) {
 
-//                    System.out.println("关闭任务线程，jobId：" + jobId);
+//                    // System.out.println("关闭任务线程，jobId：" + jobId);
 //                    log.info("关闭任务线程，jobId：" + jobId);
                     // 关闭任务线程
                     JobProducerThread jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);
@@ -100,16 +100,16 @@ public class Action extends Thread {
 
                 } else if (s.split("_")[1].equals("resume")) {
                     log.info("重启任务线程，jobId：" + jobId);
-                    System.out.println("重启任务线程，jobId：" + jobId);
+                    // System.out.println("重启任务线程，jobId：" + jobId);
                     // 重启任务线程
                     JobProducerThread jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);
 
                     if (jobProducerThread != null) {
                         sqlPath = jobProducerThread.getSqlPath();
                         if (sqlPath != null && !"".equals(sqlPath)) {
-//                            System.out.println("确实是重启任务线程，jobId：" + jobId);
+//                            // System.out.println("确实是重启任务线程，jobId：" + jobId);
                             long readData = jobProducerThread.getReadData();
-                            System.out.println("sqlPath:" + sqlPath + "---readData:" + readData);
+                            // System.out.println("sqlPath:" + sqlPath + "---readData:" + readData);
                             Action.jobProducerThread.put("producer_job_" + jobId, new JobProducerThread(jobId, sqlPath, readData));
 
                             jobProducerThread = Action.jobProducerThread.get("producer_job_" + jobId);

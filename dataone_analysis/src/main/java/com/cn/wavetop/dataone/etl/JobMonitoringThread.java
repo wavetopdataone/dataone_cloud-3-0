@@ -24,22 +24,7 @@ public class JobMonitoringThread extends Thread {
 
     private Map<Object, ExtractionThread> ExtractionThreads;
 
-    /**
-     * 保存每个任务的所有抓取线程
-     * <p>
-     * 外层Key为任务{jobid}
-     * 内存map的key为对应的任务的表名
-     */
-    // private static Map<Object, Map<Object, ExtractionThread>> jobExtractionThreads = new HashMap<Object, Map<Object, ExtractionThread>>();
 
-
-    //    /**
-//     * 保存每个任务的所有清洗线程
-//     * <p>
-//     * 外层Key为任务{jobid}
-//     * 内存map的key为对应的任务的表名
-//     */
-//    private Map<Object, Map<Object, ExtractionThread>> jobExtraction = new HashMap<Object, Map<Object, ExtractionThread>>();
     private Connection conn;
     private Connection destConn;
 
@@ -53,16 +38,11 @@ public class JobMonitoringThread extends Thread {
 
     //开始任务
     public boolean startJob() {
-        System.out.println("startJob"+ExtractionThreads);
-        System.out.println("startJob"+ExtractionThreads);
-        System.out.println("startJob"+ExtractionThreads);
-        System.out.println("startJob"+ExtractionThreads);
-//        // 任务暂停时需要把任务表状态改为暂停
-//        jobRunService.updateMonitor(jobId);
-        System.out.println(ExtractionThreads == null);
+        // System.out.println("startJob"+ExtractionThreads);
+
 
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
-        System.out.println(ExtractionThreads == null);
+
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
         try {
             conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
@@ -71,8 +51,6 @@ public class JobMonitoringThread extends Thread {
             e.printStackTrace();
         }
 
-        System.out.println(conn+""+destConn);
-        System.out.println(ExtractionThreads == null);
 
         if (ExtractionThreads == null) {
             // 开启时将任务表的所有状态改为运行中
@@ -83,10 +61,10 @@ public class JobMonitoringThread extends Thread {
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId, conn);
-            System.out.println(tableById);
-            System.out.println(tableById);
-            System.out.println(tableById);
-            System.out.println(tableById);
+            // System.out.println(tableById);
+            // System.out.println(tableById);
+            // System.out.println(tableById);
+            // System.out.println(tableById);
             sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
             switch (sync_range) {
                 //全量
@@ -114,7 +92,7 @@ public class JobMonitoringThread extends Thread {
 
             }
         } else {
-            System.out.println("???????????????");
+            // System.out.println("???????????????");
             // 重启时把暂停的状态改为运行中
             jobRunService.updateStatusStart(jobId);
             // 重启，resume
@@ -136,7 +114,7 @@ public class JobMonitoringThread extends Thread {
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
-            System.out.println("--------");
+            // System.out.println("--------");
             ExtractionThreads.get(o).suspend();//暂停抓取进程
             ExtractionThreads.get(o).pasueTrans();//暂停清洗进程
         }
@@ -184,10 +162,11 @@ public class JobMonitoringThread extends Thread {
                 case 1:
                     syncRangeFlag = true;
                     if (jobRunService.fullOverByjobId(jobId)) {
-                        ETLAction.jobMonitoringMap.put(jobId,null);
+                        ETLAction.jobMonitoringMap.put(jobId, null);
                         ETLAction.jobMonitoringMap.remove(jobId);
-                        stopJob();
                         jobRunService.updateJobStatusByJobId(jobId, "3");
+                        new ETLAction().stop(jobId);
+//                        stopJob();
                         return;
                     }
                     break;

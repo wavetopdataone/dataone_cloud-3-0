@@ -31,15 +31,15 @@ public class TopicsController {
 //        try {
 //            zkUtils = ZkUtils.apply(config.getZookeeper(),30000,
 //                    30000, JaasUtils.isZkSecurityEnabled());
-//            System.out.println(config);
+//            // System.out.println(config);
 //            if (!AdminUtils.topicExists(zkUtils,config.getTopicName())){
 //                AdminUtils.createTopic(zkUtils,config.getTopicName(),config.getPartitions(),
 //                        config.getReplication_factor(),config.getProperties(),
 //                        AdminUtils.createTopic$default$6());
-//                System.out.println("messages:successful create!");
+//                // System.out.println("messages:successful create!");
 //            }
 //            else {
-//                System.out.println(config.getTopicName()+" is exits!");
+//                // System.out.println(config.getTopicName()+" is exits!");
 //            }
 //
 //        }catch (Exception e){
@@ -61,7 +61,7 @@ public class TopicsController {
      */
     public static void createTopic(String config){
         String[] args = config.split(" ");
-        System.out.println(Arrays.toString(args));
+        // System.out.println(Arrays.toString(args));
         TopicCommand.main(args);
     }
  
@@ -137,7 +137,7 @@ public class TopicsController {
             zkUtils = ZkUtils.apply("localhost:2181",30000,30000,JaasUtils.isZkSecurityEnabled());
             Map<String,Properties> configs = JavaConversions.mapAsJavaMap(AdminUtils.fetchAllTopicConfigs(zkUtils));
             for (Map.Entry<String,Properties> entry :  configs.entrySet()){
-                System.out.println("key="+entry.getKey()+" ;value= "+entry.getValue());
+                // System.out.println("key="+entry.getKey()+" ;value= "+entry.getValue());
             }
         }catch (Exception e){
             e.printStackTrace();
