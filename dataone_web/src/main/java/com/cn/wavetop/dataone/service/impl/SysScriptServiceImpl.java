@@ -153,8 +153,9 @@ public class SysScriptServiceImpl implements SysScriptService {
         Map map = new HashMap<>();
 
         String copyScript = content.substring(StringUtils.getCharacterPosition(content)+1, content.indexOf("return"));
-        map.put("status", 1);
-        map.put("copyScript", copyScript);
+            map.put("status", 1);
+            map.put("copyScript", copyScript);
+
         return map;
     }
 
