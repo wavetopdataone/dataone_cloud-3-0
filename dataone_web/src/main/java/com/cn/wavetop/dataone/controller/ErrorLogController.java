@@ -80,7 +80,7 @@ public class ErrorLogController {
 
     @PostMapping("/reset_errorlog")
     public Object reset_errorlog(Long jobId,String ids) {
-        System.out.println(ids);
+        // System.out.println(ids);
         return service.resetErrorlog( jobId,ids);
     }
     @ApiOperation(value = "根据任务ID查询错误队列", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "根据任务ID查询错误队列，表名，错误量")

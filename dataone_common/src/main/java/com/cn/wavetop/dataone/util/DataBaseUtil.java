@@ -17,7 +17,7 @@ public  class DataBaseUtil extends Thread{
 //
 //    @Override
 //    public  void run() {
-//        System.out.println("mysql -h"+databaseVo.getUrl()+" -u"+databaseVo.getUser()+" -p"+databaseVo.getPassword()+" --default-character-set=utf8 "
+//        // System.out.println("mysql -h"+databaseVo.getUrl()+" -u"+databaseVo.getUser()+" -p"+databaseVo.getPassword()+" --default-character-set=utf8 "
 //                + databaseVo.getDatabaseName());
 //        try {
 //
@@ -128,7 +128,7 @@ public  class DataBaseUtil extends Thread{
 //////            e.printStackTrace();
 //////        }
 ////        //huifu
-//////        System.out.println(restore("localhost", "root", "admin", "shop", "C:\\Users\\admin\\Desktop\\dataone1.sql"));;
+//////        // System.out.println(restore("localhost", "root", "admin", "shop", "C:\\Users\\admin\\Desktop\\dataone1.sql"));;
 ////    }
 //
 //    /**

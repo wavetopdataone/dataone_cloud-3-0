@@ -42,6 +42,6 @@ public class TimestampProcess {
 //        HashMap<Object, Object> record = new HashMap<>();
 //        record.put("timestamp_type", "2019-07-24 17:06:54.000");
 //        Map process = process(record);
-//        System.out.println(process);
+//        // System.out.println(process);
 //    }
 }

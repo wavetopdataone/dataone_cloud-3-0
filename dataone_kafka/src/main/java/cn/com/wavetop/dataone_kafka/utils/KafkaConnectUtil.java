@@ -11,7 +11,7 @@ public class KafkaConnectUtil {
 
     public static void main(String[] args) {
         String s = ConfigSinkConnect();
-        System.out.println(s);
+        // System.out.println(s);
     }
 
     public static String ConfigSinkConnect(){

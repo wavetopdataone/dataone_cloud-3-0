@@ -670,7 +670,7 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
                     Long readData = sysMonitoring.getReadData();
 
                     /*Long errorData = readData - writeData;
-                    System.out.println("errorData = " + errorData);*/
+                    // System.out.println("errorData = " + errorData);*/
                     sysMonitoringRepository.updateWriteMonitoring(id, writeData, table);
                 } catch (Exception e) {
 

@@ -123,7 +123,7 @@ public class CustomConsumer extends Thread {
                                         String sourceTable = toBackClient.selectTable(jobId, destTable, time, errorflag);
                                         message = CustomNewConsumer.topicPartion(topic, partition, offset);
 
-                                        System.out.println("sourceTable = " + sourceTable);
+                                        // System.out.println("sourceTable = " + sourceTable);
                                         //远程调用插入错误日志信息
                                         if (message != null) {
                                             toBackClient.insertError(jobId, sourceTable, destTable, time, errortype, message);
@@ -224,9 +224,9 @@ public class CustomConsumer extends Thread {
                                 //这里的时间是一个虚假的值,为了后期扩展用
                                 //String time = "2019-12-16 10:23:32";
                                 Integer errorflag = 2;
-                                System.out.println("jobId = " + jobId);
-                                System.out.println("destTable = " + destTable);
-                                System.out.println("time = " + time);
+                                // System.out.println("jobId = " + jobId);
+                                // System.out.println("destTable = " + destTable);
+                                // System.out.println("time = " + time);
                                 if (jobId != null && destTable != null) {
                                     String sourceTable = toBackClient.selectTable(jobId, destTable, time, errorflag);
                                 }

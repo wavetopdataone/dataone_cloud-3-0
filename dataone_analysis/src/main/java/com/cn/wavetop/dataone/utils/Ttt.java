@@ -16,7 +16,7 @@ public class Ttt {
     //同步2.14地方审批事项批复文件附件信息表REGION_APPROVE_DOC_ATT_INFO
 //    public static void SyncdfspsxpffjToGJ(ResultMap rmpro, String tableName, Connection con_gzdata, Connection con_gjdatadm) {
     public static void main2(String[] args) throws Exception {
-        System.out.println("aaaxx");
+        // System.out.println("aaaxx");
         Connection con_gjdatadm = null;
 //            con_gzdata = DBConn.getGzDataConnection();
 //            //国家的连接  //正式的时候放开注释
@@ -33,7 +33,7 @@ public class Ttt {
         FileOutputStream outputStream = null;
 
         ResultSet resultSet = null;
-        System.out.println("start:" + new java.util.Date().getTime());
+        // System.out.println("start:" + new java.util.Date().getTime());
         String aa = "";
         for (int i = 0; i < 1; i++) {
             File file = new File("H:\\5dbfb93330d9f.mp4");
@@ -49,7 +49,7 @@ public class Ttt {
 
     public static void main(String[] args) {
         byte[] a= {1,1,1,1,1,0,1,1,1,1,1,1,1};
-        System.out.println(hexEncode(a));
+        // System.out.println(hexEncode(a));
     }
 
     static final char[] HEX = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',

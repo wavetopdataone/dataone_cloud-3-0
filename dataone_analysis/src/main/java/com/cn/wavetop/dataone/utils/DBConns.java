@@ -131,7 +131,7 @@ public class DBConns {
 //                }//显示数据
 //            } catch (SQLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
 //                e.printStackTrace();
-//                System.out.println("連接錯誤");
+//                // System.out.println("連接錯誤");
 //                return list;
 //
 //            }finally {
@@ -149,13 +149,13 @@ public class DBConns {
 //                }
 //            } catch (SQLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
 //                e.printStackTrace();
-//                System.out.println("連接錯誤");
+//                // System.out.println("連接錯誤");
 //                return list;
 //            }finally {
 //                DBConns.close(stmt,conn,rs);
 //            }
 //        } else {
-//            System.out.println("類型錯誤");
+//            // System.out.println("類型錯誤");
 //            return list;
 //        }
 //
@@ -240,7 +240,7 @@ public class DBConns {
 //              DBConns.close(stmt,conn,rs);
 //          }
 //      } else {
-//          System.out.println("類型錯誤");
+//          // System.out.println("類型錯誤");
 //          return stringList;
 //      }
 //      Iterator<SysFieldrule>  iterator=stringList.iterator();
@@ -340,13 +340,13 @@ public class DBConns {
 //    public static void main(String[] args) throws SQLException, IllegalAccessException, InstantiationException, ClassNotFoundException {
 ////        SysDbinfo mysql = SysDbinfo.builder().host("192.168.1.226").port(Long.valueOf(3306)).dbname("dataone").user("root").password("888888").build();
 ////        Connection mySQLConn = getMySQLConn(mysql);
-////        System.out.println(mySQLConn);
+////        // System.out.println(mySQLConn);
 //        SysDbinfo oracle = SysDbinfo.builder().host("192.168.103.238").port(Long.valueOf(1521)).dbname("ORCL").user("test").password("test").build();
 //        Connection oracleConn = getOracleConn(oracle);
-//        System.out.println(oracleConn);
+//        // System.out.println(oracleConn);
 //        SysDbinfo sqlserver = SysDbinfo.builder().host("192.168.10.176").port(Long.valueOf(1433)).dbname("TEST1").user("sa").password("wavetop_888888").build();
 //        Connection sqlserverConn = getSqlserverConn(sqlserver);
-//        System.out.println(sqlserverConn);
+//        // System.out.println(sqlserverConn);
 //
 //    }
 }

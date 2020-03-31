@@ -111,7 +111,7 @@ public class DMCreateSql implements SuperCreateTable {
         List primaryKey = null;//源端表的主键
         StringBuffer stringBuffer = new StringBuffer("CREATE TABLE");
         stringBuffer.append(" " + sysDbinfo.getSchema() + "." + jobRelaServiceImpl.destTableName(jobId, tableName) + "(");
-        System.out.println("该表一共多少个映射字段" + list.size());
+        // System.out.println("该表一共多少个映射字段" + list.size());
         for (int i = 0; i < list.size(); i++) {
 
             //查询映射目标端的字段信息

@@ -13,7 +13,7 @@ public class TestObjSerializeAndDeserialize {
     public static void main(String[] args) throws Exception {
         SerializePerson();//序列化Person对象
         MyThreadMap p = DeserializePerson();//反序列Perons对象
-        System.out.println();
+        // System.out.println();
          }
 
     /**
@@ -31,7 +31,7 @@ public class TestObjSerializeAndDeserialize {
         ObjectOutputStream oo = new ObjectOutputStream(new FileOutputStream(
                 new File("E:/MyThreadMap.txt")));
         oo.writeObject(jobsThread);
-        System.out.println("Person对象序列化成功！");
+        // System.out.println("Person对象序列化成功！");
         oo.close();
     }
 
@@ -42,7 +42,7 @@ public class TestObjSerializeAndDeserialize {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
                 new File("E:/MyThreadMap.txt")));
         MyThreadMap maps = (MyThreadMap) ois.readObject();
-        System.out.println("Person对象反序列化成功！");
+        // System.out.println("Person对象反序列化成功！");
         return maps;
     }
 

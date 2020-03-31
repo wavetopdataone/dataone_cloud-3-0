@@ -114,10 +114,10 @@ public class Md5Utils {
     }
 
     public static void main(String[] args) {
-        System.out.println(Md5Utils.md5password("123"));
-        System.out.println(Md5Utils.md5passwords("123"));
-//        System.out.println(Md5Utils.MD5("123"));
-//        System.out.println(Md5Utils.md5password(Md5Utils.md5password("123")));
-//        System.out.println(Md5Utils.JM("123"));
+        // System.out.println(Md5Utils.md5password("123"));
+        // System.out.println(Md5Utils.md5passwords("123"));
+//        // System.out.println(Md5Utils.MD5("123"));
+//        // System.out.println(Md5Utils.md5password(Md5Utils.md5password("123")));
+//        // System.out.println(Md5Utils.JM("123"));
     }
 }

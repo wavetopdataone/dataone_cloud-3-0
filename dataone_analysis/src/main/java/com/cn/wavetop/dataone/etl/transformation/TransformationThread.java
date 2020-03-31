@@ -71,7 +71,7 @@ public class TransformationThread extends Thread {
      * 增量清洗
      */
     private void incrementRangTran() {
-        System.out.println("开始增量抓取插入");
+        // System.out.println("开始增量抓取插入");
         Map dataMap = null;
         Loading loading = newInstanceLoading();
         // 获取连接
@@ -86,10 +86,12 @@ public class TransformationThread extends Thread {
                 Transformation transformation = new Transformation(jobId, null, conn);
                 try {
                     dataMap = transformation.TransformIn(value);
-                    System.out.println(dataMap+"------------------------");
+
+                    System.out.println(dataMap);
+                    // System.out.println(dataMap+"------------------------");
                     loading.excuteIncrementSQL(dataMap);
                     Map message = (Map) dataMap.get("message");
-                    System.out.println(message);
+                    // System.out.println(message);
                     // todo 待完善读写速率 以下为测试版本
                     jobRunService.updateReadIn(message, 1850L, 1L);
                     jobRunService.updateWriteIn(message, 1800L, 1L);
@@ -196,9 +198,9 @@ public class TransformationThread extends Thread {
 //
 //                    } catch (BatchUpdateException e2) {
 //                        int[] arrEx = e2.getUpdateCounts();
-//                        System.out.println(arrEx.length);
+//                        // System.out.println(arrEx.length);
 //                        for (int i = 0; i < arrEx.length; i++) {
-//                            System.out.println(arrEx[i]);
+//                            // System.out.println(arrEx[i]);
 //                        }
 //                    } catch (SQLException e) {
 //                        // todo 王成 错误队列这里还不是这样写的
@@ -211,7 +213,7 @@ public class TransformationThread extends Thread {
 //                        ps.close();
 //                        ps = null; //gc
 //                        jobRunService.updateWrite(message, writeRate, 100L);
-//                        System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
+//                        // System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + 100);
 //                        // 监控关闭当前，并修改表状态
 //                        if (jobRunService.fullOverByTableName(jobId, tableName)) {
 //                            // 修改job状态
@@ -220,9 +222,9 @@ public class TransformationThread extends Thread {
 //
 //                    } catch (BatchUpdateException e2) {
 //                        int[] arrEx = e2.getUpdateCounts();
-//                        System.out.println(arrEx.length);
+//                        // System.out.println(arrEx.length);
 //                        for (int i = 0; i < arrEx.length; i++) {
-//                            System.out.println(arrEx[i]);
+//                            // System.out.println(arrEx[i]);
 //                        }
 //                    } catch (SQLException e) {
 //
@@ -239,7 +241,7 @@ public class TransformationThread extends Thread {
 //                long end = System.currentTimeMillis();
 //                // 时间戳
 //                Long writeRate = (long) ((Double.valueOf(index) / (end - start)) * 2000);
-//                System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
+//                // System.out.println("当前表" + tableName + "的处理速率为：" + writeRate + "_____当前插入量：" + index);
 //
 //                jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
 //                try {
@@ -296,20 +298,21 @@ public class TransformationThread extends Thread {
 
             List<Map> datamaps = fullTrans(consumer, mappingField, transformation); // 清洗
 
-//            System.out.println(datamaps.size());
+//            // System.out.println(datamaps.size());
 
             Loading loading = newInstanceLoading();
             loading.fullLoading(datamaps);            // 导入
 
             //监控关闭当前，并修改表状态
             if (jobRunService.fullOverByTableName(jobId, tableName)) {
+
                 // 修改job状态
                 jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
                 TopicsController.deleteTopic(tableName + "_" + jobId);
 
                 try {
                     this.destConn.close();
-                    this.conn.close();
+                  //  this.conn.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

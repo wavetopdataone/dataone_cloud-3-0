@@ -50,13 +50,13 @@ public class test {
 //        map.put("arr", new String[] { "a", "b" });
 //        map.put("func", "function(i){ return this.arr[i]; }");
         String json =  JSON.toJSONString(list);
-        System.out.println(json);
+        // System.out.println(json);
     }
 
 @Test
 public  void ssa(){
     String a="NUBERE";
-    System.out.println(a.toUpperCase());
+    // System.out.println(a.toUpperCase());
 }
 @Test
 public void showww(){
@@ -69,7 +69,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
         stringBuffer.append(",");
     }
     stringBuffer.append("]");
-    System.out.println(stringBuffer);
+    // System.out.println(stringBuffer);
 
 }
 
@@ -103,7 +103,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
             }
         }
         for(SysFieldrule s:data){
-            System.out.println(s+"*------1");
+            // System.out.println(s+"*------1");
         }
     }
     @Test
@@ -127,7 +127,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
         map.put("status", "404");
         map.put("message", "系统找不到指定文件！");
         String vv = String.valueOf(JSON.toJSON(map));
-        System.out.println(vv);
+        // System.out.println(vv);
         List<String> list=new ArrayList<>();
         List<String> list2=new ArrayList<>();
         list.add("sys_dept");
@@ -139,7 +139,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
                 list2.add(a);
             }
         }
-        System.out.println(list2);
+        // System.out.println(list2);
 //        String d="dsadsadsa技术支持";
 //        if(d.contains("技术支持")){
 //
@@ -151,7 +151,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
 //        BigDecimal bg = new BigDecimal(c);
 //        double num1 = bg.setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
 //        if(0.5>c){
-//            System.out.println("hha");
+//            // System.out.println("hha");
 //        }
 //        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");// 设置日期格式
 //        SimpleDateFormat dfs = new SimpleDateFormat("yyyy-MM-dd");// 设置日期格式
@@ -171,11 +171,11 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
 //
 //        set.add("2019-12-10");
 //        Set<String> sest =getOrderByDate(set);
-//        System.out.println(sest);
+//        // System.out.println(sest);
 //////        String minue = nowDate.substring(3, 5);
 ////        String yesterDay = DateUtil.dateAdd(nowDate, -1);//昨天
-////        System.out.println(nowDate);
-////        System.out.println(yesterDay);
+////        // System.out.println(nowDate);
+////        // System.out.println(yesterDay);
 ////       Date a=new Date("1575529091543");
 //        List<SysJobrela> list=new ArrayList<>();
 //        SysJobrela sysUserJobrela=new SysJobrela();
@@ -195,8 +195,8 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
 //        sysUserJobrela2.setId(Long.valueOf(96));
 //        sysUserJobrela2.setJobName("test3");
 //        list1.add(sysUserJobrela2);
-//        System.out.println(list);
-//        System.out.println(list1);
+//        // System.out.println(list);
+//        // System.out.println(list1);
 //       for(SysJobrela sysJobrela:list1){
 //           for(int i =0;i<list.size();i++ ){
 //               if(sysJobrela.getId()==list.get(i).getId()){
@@ -204,8 +204,8 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
 //               }
 //           }
 //       }
-//        System.out.println(list);
-//        System.out.println(list1);
+//        // System.out.println(list);
+//        // System.out.println(list1);
     }
     @Test
 public void s(){
@@ -231,12 +231,12 @@ public void s(){
           if(list.get(i).getJobName().equals("test1")){
               list.remove(i);
               i--;
-//              System.out.println(list.get(i)+"-------1");
+//              // System.out.println(list.get(i)+"-------1");
           }
-//          System.out.println(list.get(i)+"--------2");
+//          // System.out.println(list.get(i)+"--------2");
       }
     for (SysJobrela s:list){
-        System.out.println(s+"----");
+        // System.out.println(s+"----");
     }
 }
     /**
@@ -273,7 +273,7 @@ public void s(){
 //         if(num.equals("7")) {
              DateUtil.dateAdd(ab, -6);
 //         }
-//         System.out.println(d-a);
+//         // System.out.println(d-a);
      }
 
      @Autowired
@@ -294,19 +294,19 @@ public void s(){
     //驗證密碼
 //        String ciphertext = new Md5Hash("88888","0ae975a6aeb859797f60e98c575ee12c",3).toString(); //生成的密文
 //       String password="a3be8ba9c44a062345e2a210661df3b8";
-//        System.out.println(ciphertext);
+//        // System.out.println(ciphertext);
 //                if(ciphertext.equals(password)){
-//                    System.out.println(true);
+//                    // System.out.println(true);
 //                }
 //        String splits = "id,id,NUMBER,22,$,name,name,VARCHAR2,255,$";
 //        String[]  splitss= splits.replace("$","@").split(",@,");
 //     for(String s:splitss){
-//         System.out.println(s);
+//         // System.out.println(s);
 //     }
 //        List<SysFieldrule> list = new ArrayList<>();
 ////        String[] a="aa,bb,cc,".split(",");
 ////        for(int b=0;b<a.length;b++){
-////            System.out.println(a[b]);
+////            // System.out.println(a[b]);
 ////        }
 //        SysFieldrule s=new SysFieldrule();
 //         s.setSourceName("123");
@@ -337,10 +337,10 @@ public void s(){
 //            }
 //        }
 //        for (SysFieldrule b : list) {
-//            System.out.println(b);
+//            // System.out.println(b);
 //        }
         //        Long a = Long.valueOf(5);
-//        System.out.println(a.longValue() + a);
+//        // System.out.println(a.longValue() + a);
 //        List<String> list = new ArrayList<>();
 //        list.add("aa");
 //        list.add("aa");
@@ -356,7 +356,7 @@ public void s(){
 //            }
 //        }
 //        for (String b : list) {
-//            System.out.println(b);
+//            // System.out.println(b);
 //        }
     @Test
     public void safd(){

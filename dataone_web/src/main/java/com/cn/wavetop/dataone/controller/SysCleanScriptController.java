@@ -51,7 +51,7 @@ public class SysCleanScriptController {
             "     *                       4表示获取脚本方法失败\n" +
             "     *                       5表示执行脚本方法失败")
     public Object saveScript(@RequestBody SysCleanScriptVo sysCleanScript) {
-        System.out.println(sysCleanScript+"--------------");
+        // System.out.println(sysCleanScript+"--------------");
         Map map = JSONUtil.parseObject(sysCleanScript.getPayload(), Map.class);
         ScriptMessage scriptMessage = sysCleanScriptService.executeScript(sysCleanScript.getScriptContent(), map);
         HashMap<Object, Object> message = new HashMap<>();

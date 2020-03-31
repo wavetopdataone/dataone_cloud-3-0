@@ -112,7 +112,7 @@ public class UserLogController {
 
             Connection conn = LinuxLogin.login(ip);
             try {
-                System.out.println("/opt/dataone/java/bin/kafkacontrolerror-" + date + ".0.log");
+                // System.out.println("/opt/dataone/java/bin/kafkacontrolerror-" + date + ".0.log");
                 LinuxLogin.copyFile(conn, "/opt/dataone/java/bin/kafkacontrolerror-" + date + ".0.log", out1);
             }
             catch (Exception e) {
@@ -265,7 +265,7 @@ public class UserLogController {
     @ApiOperation(value = "获取服务器Ip", httpMethod = "GET", protocols = "HTTP")
     @GetMapping("/getSysIp")
     public String getSysIp() {
-        System.out.println(environment.getProperty("system.kafka-servers"));
+        // System.out.println(environment.getProperty("system.kafka-servers"));
         return environment.getProperty("system.kafka-servers");
     }
 

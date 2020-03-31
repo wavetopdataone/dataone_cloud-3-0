@@ -53,7 +53,7 @@ public class MonitoringClient extends Thread {
             String now = "";
             String last="";
             if ("23".equals(hour)&&"59".equals(minue)) {
-//                System.out.println(new Date() + "起始时间：");
+//                // System.out.println(new Date() + "起始时间：");
                 last=df.format(new Date());
                 List<Long> jobIdList = sysMonitoringRepository.selJobId();//查询所有jobid
                 if (jobIdList != null && jobIdList.size() > 0) {

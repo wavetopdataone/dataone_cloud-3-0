@@ -33,7 +33,7 @@ public class CollectController {
     @GetMapping(value = "/feign")
     public Object testFeign() {
         Object dbinfoById = toBackClient.findDbinfoById(2L);
-        System.out.println(dbinfoById);
+        // System.out.println(dbinfoById);
         return  dbinfoById;
     }
 

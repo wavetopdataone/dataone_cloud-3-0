@@ -23,11 +23,11 @@ public class SysCleanScriptImpl {
 
     public Map executeScript(Long jobId, String tableName, Map payload) {
         List<SysCleanScript> SysCleanScript = sysCleanScriptRepository.findByJobIdAndSourceTableAndFlag(jobId, tableName,1);
-       // System.out.println("SysCleanScript:" + SysCleanScript);
+       // // System.out.println("SysCleanScript:" + SysCleanScript);
         if (SysCleanScript != null && SysCleanScript.size() > 0) {
             return executeScript(SysCleanScript.get(0).getScriptContent(), payload).getResult();
         } else {
-            return null;
+            return payload;
         }
     }
 
@@ -42,7 +42,7 @@ public class SysCleanScriptImpl {
             try {
                 cls = compiler.getScriptClass();
             } catch (Exception e) {
-                System.out.println("获取class失败！");
+                // System.out.println("获取class失败！");
                 return ScriptMessage.builder()
                         .errorMessage(e.toString())
                         .message("获取class失败！请检查代码格式，工具类是否导包等问题。")
@@ -63,7 +63,7 @@ public class SysCleanScriptImpl {
             try {
                 test = cls.getMethod("process", Map.class);
             } catch (Exception e) {
-                System.out.println("获取脚本方法失败！请检查方法名和参数类型");
+                // System.out.println("获取脚本方法失败！请检查方法名和参数类型");
 
                 return ScriptMessage.builder()
                         .errorMessage(e.toString())

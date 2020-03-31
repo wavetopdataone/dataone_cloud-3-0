@@ -32,12 +32,21 @@ public class ETLAction {
     //开始任务
     public boolean start(Long jobId) {
         if (jobMonitoringMap.get(jobId) == null) {
+
+            // System.out.println("开始！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("开始！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("开始！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("开始！！！"+jobMonitoringMap.get(jobId));
             // 第一次开启
             jobMonitoringMap.put(jobId, new JobMonitoringThread(jobId));
             jobMonitoringMap.get(jobId).start(); //启动监控线程
             jobMonitoringMap.get(jobId).startJob(); //启动任务
         } else {
             // 任务重启
+            // System.out.println("重启！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("重启！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("重启！！！"+jobMonitoringMap.get(jobId));
+            // System.out.println("重启！！！"+jobMonitoringMap.get(jobId));
             jobMonitoringMap.get(jobId).startJob();//重启任务
             jobMonitoringMap.get(jobId).resume(); //重启监控线程
         }
@@ -48,10 +57,10 @@ public class ETLAction {
     public boolean pause(Long jobId) {
         JobMonitoringThread jobMonitoringThread = jobMonitoringMap.get(jobId);
 //
-//        System.out.println("暂停！！！"+jobMonitoringThread);
-//        System.out.println("暂停！！！"+jobMonitoringThread);
-//        System.out.println("暂停！！！"+jobMonitoringThread);
-//        System.out.println("暂停！！！"+jobMonitoringThread);
+        // System.out.println("暂停！！！"+jobMonitoringThread);
+        // System.out.println("暂停！！！"+jobMonitoringThread);
+        // System.out.println("暂停！！！"+jobMonitoringThread);
+        // System.out.println("暂停！！！"+jobMonitoringThread);
         if (jobMonitoringThread == null) {
 
             return false;
@@ -66,20 +75,20 @@ public class ETLAction {
     public boolean stop(Long jobId) {
 
         JobMonitoringThread jobMonitoringThread = jobMonitoringMap.get(jobId);
-//        System.out.println("终止！！！"+jobMonitoringThread);
-//        System.out.println("终止！！！"+jobMonitoringThread);
-//        System.out.println("终止！！！"+jobMonitoringThread);
-//        System.out.println("终止！！！"+jobMonitoringThread);
-
-        if (jobMonitoringThread == null) {
-            return false;
+        System.out.println("终止！！！" + jobMonitoringThread);
+        System.out.println("终止！！！" + jobMonitoringThread);
+        System.out.println("终止！！！" + jobMonitoringThread);
+        System.out.println("终止！！！" + jobMonitoringThread);
+        try {
+            //jobMonitoringMap.remove(jobId);
+            jobRunService.updateJobStatusByJobId(jobId, "3");
+        } catch (Exception e) {
         }
 
-        jobRunService.updateJobStatusByJobId(jobId, "3");
-        jobMonitoringMap.put(jobId, null);
-        jobMonitoringMap.remove(jobId);
         jobMonitoringThread.stopJob(); // 关闭任务
         jobMonitoringThread.stop(); // 关闭监控线程
+        jobMonitoringMap.put(jobId, null);
+
         return true;
     }
 

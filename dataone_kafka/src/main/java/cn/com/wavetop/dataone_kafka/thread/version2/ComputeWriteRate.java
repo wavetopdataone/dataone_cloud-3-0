@@ -80,12 +80,12 @@ public class ComputeWriteRate extends Thread {
             Long realWriteAmount = endCount - lastEndCount;//往实时表中更新
             lastEndCount = endCount;
             if (writeAmount != 0) {
-//                System.out.println(flagXie);
+//                // System.out.println(flagXie);
                 if (flagXie) {
                     Object forObject = restTemplate.getForObject("http://DATAONE-WEB/toback/updateWriteRate/" + jobid + "?destTable=" + destTable + "&realWriteAmount=" + realWriteAmount + "&writeAmount=" + writeAmount + "&writeRate=" + writeRate, Object.class);
                 }
             }
-//            System.out.println(destTable+"--------"+writeRate+"--------------"+writeAmount+"---------------"+realWriteAmount+"------------"+fristCount);
+//            // System.out.println(destTable+"--------"+writeRate+"--------------"+writeAmount+"---------------"+realWriteAmount+"------------"+fristCount);
             if (!flagXie){
                 try {
                     Thread.sleep(60000);

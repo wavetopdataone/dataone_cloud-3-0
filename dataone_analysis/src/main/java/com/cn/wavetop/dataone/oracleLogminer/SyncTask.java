@@ -21,7 +21,7 @@ public class SyncTask {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
 //        DriverManager.setLoginTimeout(10);
-        System.out.println("22211111111");
+        // System.out.println("22211111111");
         return  DriverManager.getConnection(url, "test2", "test2");
 
     }
@@ -66,7 +66,7 @@ public class SyncTask {
         String createDictSql = "BEGIN dbms_logmnr_d.build(dictionary_filename => 'dictionary.ora', dictionary_location =>'"+Constants.DATA_DICTIONARY+"'); END;";
         CallableStatement callableStatement = sourceConn.prepareCall(createDictSql);
         callableStatement.execute();
-        System.out.println("生成字典成功");
+        // System.out.println("生成字典成功");
     }
 
     /**
@@ -90,7 +90,7 @@ public class SyncTask {
                 }
             }
             sbSQL.append(" END;");
-            System.out.println(sbSQL);
+            // System.out.println(sbSQL);
             executeCallable(sbSQL.toString(),callableStatement,conn);
 
 //             callableStatement = conn.prepareCall(sbSQL + "");
@@ -99,9 +99,9 @@ public class SyncTask {
 // 打印获分析日志文件信息
 //            ResultMap resultMap = DBUtil.query2("SELECT db_name, thread_sqn, filename FROM v$logmnr_logs",conn);
 //            for (int i = 0; i < resultMap.size(); i++) {
-//                System.out.println("已添加日志文件==>" + resultMap.get(i,"filename"));
+//                // System.out.println("已添加日志文件==>" + resultMap.get(i,"filename"));
 //            }
-            System.out.println("开始分析日志文件,起始scn号:" + Constants.LAST_SCN);
+            // System.out.println("开始分析日志文件,起始scn号:" + Constants.LAST_SCN);
 //            callableStatement = conn.prepareCall("BEGIN dbms_logmnr.start_logmnr(startScn=>'" + Constants.LAST_SCN + "',dictfilename=>'" + Constants.DATA_DICTIONARY + "\\dictionary.ora',OPTIONS =>DBMS_LOGMNR.COMMITTED_DATA_ONLY+dbms_logmnr.NO_ROWID_IN_STMT);END;");
 //            callableStatement = conn.prepareCall(" BEGIN dbms_logmnr.start_logmnr(startScn=>'" + Constants.LAST_SCN + "',OPTIONS=>DBMS_LOGMNR.DICT_FROM_ONLINE_CATALOG);END;");
 
@@ -111,9 +111,9 @@ public class SyncTask {
                 callableStatement = conn.prepareCall(" BEGIN dbms_logmnr.start_logmnr(startScn=>'" + Constants.LAST_SCN + "',OPTIONS=>DBMS_LOGMNR.DICT_FROM_ONLINE_CATALOG);END;");
             }
             callableStatement.execute();
-            System.out.println("完成分析日志文件");
+            // System.out.println("完成分析日志文件");
              // 查询获取分析结果
-            System.out.println("查询分析结果");
+            // System.out.println("查询分析结果");
 //            resultSet = statement.executeQuery("SELECT scn,operation,timestamp,status,sql_redo FROM v$logmnr_contents WHERE  seg_type_name='TABLE' AND operation !='SELECT_FOR_UPDATE' and seg_owner='SCOTT'");
             ResultMap resultMap =DBUtil.query2("SELECT scn,operation,timestamp,status,sql_redo FROM v$logmnr_contents where seg_owner='TEST2'",conn);
             String lastScn = Constants.LAST_SCN;
@@ -132,7 +132,7 @@ public class SyncTask {
                 sql = resultMap.get(i,"sql_redo") + "";
 // 替换用户
                 sql = sql.replace("\"" + Constants.SOURCE_CLIENT_USERNAME + "\".", "");
-                System.out.println("scn=" + lastScn +"日期的time："+resultMap.get(i,"timestamp") + ""+",自动执行sql==" + sql + "");
+                // System.out.println("scn=" + lastScn +"日期的time："+resultMap.get(i,"timestamp") + ""+",自动执行sql==" + sql + "");
             }
 
 // 更新scn
@@ -140,13 +140,13 @@ public class SyncTask {
 
 // DDL发生变化，更新数据字典
 //            if (isCreateDictionary) {
-//                System.out.println("DDL发生变化，更新数据字典");
+//                // System.out.println("DDL发生变化，更新数据字典");
 //                createDictionary(sourceConn);
-//                System.out.println("完成更新数据字典");
+//                // System.out.println("完成更新数据字典");
 //                isCreateDictionary = false;
 //            }
 
-            System.out.println("完成一个工作单元");
+            // System.out.println("完成一个工作单元");
 // 分析完成后,释放内存
             String endLogSQL = "BEGIN dbms_logmnr.end_logmnr;END;";
             executeCallable(endLogSQL, callableStatement, conn);

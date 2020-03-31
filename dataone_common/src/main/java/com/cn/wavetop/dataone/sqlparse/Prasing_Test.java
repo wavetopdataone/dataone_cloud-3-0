@@ -48,13 +48,13 @@ public class Prasing_Test {
 	public static void test_insert(String sql) throws JSQLParserException {
 		// ****insert table
 		String string_tablename = Prasing_Test.test_insert_table(sql);
-		System.out.println(string_tablename);
+		// System.out.println(string_tablename);
 		// ********* insert table column
 		List<String> str_column = test_insert_column(sql);
-		System.out.println(str_column);
+		// System.out.println(str_column);
 		// ********Insert values ExpressionList强制转换，参见InsertTest.java
 		List<String> str_values = test_insert_values(sql);
-		System.out.println(str_values);
+		// System.out.println(str_values);
 	}
 //	public static void test_update(String sql) throws JSQLParserException {
 //

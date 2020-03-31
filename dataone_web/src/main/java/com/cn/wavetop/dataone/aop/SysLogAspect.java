@@ -162,7 +162,7 @@ public class SysLogAspect {
             sysLog.setModifiers(joinPoint.getSignature().getModifiers());
 
             sysErrorRepository.save(sysLog);
-            System.out.println("【" + className + "】:" + methodName + "执行时出现异常：" + ex + "。");
+            // System.out.println("【" + className + "】:" + methodName + "执行时出现异常：" + ex + "。");
 
     }
 }

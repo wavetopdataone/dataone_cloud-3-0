@@ -54,8 +54,8 @@ public class Tas {
 
     public static void main(String[] args) {
         byte[] a= {0110,0111,0001,0111};
-        System.out.println(bin2HexStr(a));
-        System.out.println(Ttt.hexEncode(a));
+        // System.out.println(bin2HexStr(a));
+        // System.out.println(Ttt.hexEncode(a));
     }
 
 

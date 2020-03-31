@@ -184,7 +184,7 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 //     设置主键就穿字段名称，没有就穿空就行
 // 新增日期字段，没有就穿空就行
     public Object editFieldrule(String list_data, String source_name, String dest_name, Long job_id, String primaryKey, String addFile) {
-        System.out.println(list_data + "-----------");
+        // System.out.println(list_data + "-----------");
         Map<Object, Object> map = new HashMap();
         Integer key = 0;
         SysFieldrule sysFieldrule1 = new SysFieldrule();
@@ -712,8 +712,8 @@ public class SysFieldruleServiceImpl implements SysFieldruleService {
 
 
                             //todo varchar类型和number类型 在oracle到dm的要加
-                            System.out.println("长度" + data.get(i).getScale());
-                            System.out.println("长度" + data.get(i).getScale());
+                            // System.out.println("长度" + data.get(i).getScale());
+                            // System.out.println("长度" + data.get(i).getScale());
                             try {
                                 if (MappingFieldUtil.VarcharOrNumber(data.get(i).getType(), Integer.parseInt(data.get(i).getScale()))) {
                                     //长度加10

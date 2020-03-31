@@ -24,8 +24,8 @@ public class Test {
                 " */\n" +
                 "public class Test {\n" +
                 "    public static Map test(String args, String a, Map map) throws IOException {\n" +
-                "        System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
-                "        System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
+                "        // System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
+                "        // System.out.println(args+\"-------\"+a+\"------\"+map);\n" +
                 "        map.put(\"xuezihao2\", \"909\");\n" +
                 "        map.put(\"xuezihao\", map.get(\"xuezihao\")+\"xiugai489564\");\n" +
                 "        return map;\n" +
@@ -36,7 +36,7 @@ public class Test {
                 "        map.put(\"xuezihao\", \"18\");\n" +
                 "        try {\n" +
                 "            Map xuezihao = test(\"xuezihao\", \"28\", map);\n" +
-                "            System.out.println(xuezihao);\n" +
+                "            // System.out.println(xuezihao);\n" +
                 "        } catch (IOException e) {\n" +
                 "            e.printStackTrace();\n" +
                 "        }\n" +
@@ -46,10 +46,10 @@ public class Test {
         String a=" ";
         CustomStringJavaCompiler compiler = new CustomStringJavaCompiler(code);
         boolean compiler1 = compiler.compiler();
-        System.out.println(compiler1);
+        // System.out.println(compiler1);
         Class cls = compiler.getScriptClass();
         String fullClassName = compiler.getFullClassName();
-        System.out.println(fullClassName);
+        // System.out.println(fullClassName);
 
 
         // 反射的基础
@@ -60,6 +60,6 @@ public class Test {
         map.put("xuezihao", "18");
         Map invoke = (Map) test.invoke(o, "xuezihao", "28", map);
 
-        System.out.println(invoke);
+        // System.out.println(invoke);
     }
 }

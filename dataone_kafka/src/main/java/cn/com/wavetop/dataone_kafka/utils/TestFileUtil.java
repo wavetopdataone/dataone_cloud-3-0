@@ -14,7 +14,7 @@ public class TestFileUtil {
 
     public static void main(String[] args) {
 
-        System.out.println("\n");
+        // System.out.println("\n");
 //        File dir = new File("e:/test/");
 //        File[] files = FileUtils.convertFileCollectionToFileArray(FileUtils
 //                .listFiles(dir, new IOFileFilter() {
@@ -34,6 +34,6 @@ public class TestFileUtil {
 //                        return true;
 //                    }
 //                }));
-//        System.out.println(files.length);
+//        // System.out.println(files.length);
     }
 }

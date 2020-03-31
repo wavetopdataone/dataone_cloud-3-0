@@ -55,7 +55,7 @@ public class ConfigSource {
     public String toJsonConfig() {
         Map<String, Object> configSource = new HashMap<>();
         configSource.put("name", this.name);
-        System.out.println();
+        // System.out.println();
         configSource.put("config", this.config);
         String data = JSONUtil.toJSONString(configSource);
         config.clear();

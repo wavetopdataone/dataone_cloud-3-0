@@ -14,7 +14,7 @@ public class Start {
 
         Class.forName("oracle.jdbc.driver.OracleDriver");
         DriverManager.setLoginTimeout(10);
-        System.out.println("22211111111");
+        // System.out.println("22211111111");
         return  DriverManager.getConnection(url, "scott", "oracle");
 
     }

@@ -17,9 +17,9 @@ public class Base64 {
         final byte[] textByte = text.getBytes("UTF-8");
 //编码
         final String encodedText = encoder.encode(textByte);
-        System.out.println(encodedText);
+        // System.out.println(encodedText);
 //解码
-        System.out.println(new String(decoder.decodeBuffer(encodedText), "gbk"));
+        // System.out.println(new String(decoder.decodeBuffer(encodedText), "gbk"));
 
     }
 }

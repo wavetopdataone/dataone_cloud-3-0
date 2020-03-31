@@ -181,8 +181,8 @@ public class ToBackController {
         //todo 后面要分表
         Map<String, Object> tableMonito = Monito.get("tableMonito");
         Map<String, Object> tableTotal = Monito.get("tableTotal");
-        System.out.println(Monito);
-        System.out.println(tableTotal);
+        // System.out.println(Monito);
+        // System.out.println(tableTotal);
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findByJobId(jobId);
 
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
@@ -196,7 +196,7 @@ public class ToBackController {
                     }
                     if (table.equalsIgnoreCase(destTable)) {
                         Double readRate = Double.parseDouble(tableMonito.get(table).toString());
-//                        System.out.println(tableTotal.get(table));
+//                        // System.out.println(tableTotal.get(table));
                         long readData = Long.parseLong(tableTotal.get(table).toString());
                         sysMonitoringRepository.updateReadMonitoring2(sysMonitoring.getId(),sysMonitoring.getReadData() + readData,new Date(),new Double(readRate).longValue(), sysMonitoring.getDestTable());
                         // 更新实时表
@@ -218,7 +218,7 @@ public class ToBackController {
 //                }
 //
 //                Double readRate = tableMonito.get(destTable);
-//                System.out.println(destTable);
+//                // System.out.println(destTable);
 //                long readData = tableTotal.get(destTable);
 //                if ((readData == 0L) ) {
 //                    readRate = tableMonito.get(destTable.toUpperCase());
@@ -261,7 +261,7 @@ public class ToBackController {
     public void monitoringWriteRate(@PathVariable Long jobId, String destTable, Long writeAmount, Double writeRate, Long realWriteAmount) {
 
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findByJobId(jobId);
-        System.out.println(sysMonitoringList);
+        // System.out.println(sysMonitoringList);
         for (SysMonitoring sysMonitoring : sysMonitoringList) {
             if (sysMonitoring.getDestTable() == null || "".equals(sysMonitoring.getDestTable())) {
                 if (destTable.equalsIgnoreCase(sysMonitoring.getSourceTable())) {

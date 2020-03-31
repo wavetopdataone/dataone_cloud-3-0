@@ -1,29 +1,19 @@
 package com.cn.wavetop.dataone.etl.loading.impl;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
-import com.cn.wavetop.dataone.db.DBUtil;
-import com.cn.wavetop.dataone.db.ResultMap;
 import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.etl.loading.Loading;
-
-import com.alibaba.fastjson.JSONObject;
-import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
-import com.cn.wavetop.dataone.utils.TopicsController;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-import com.sun.xml.fastinfoset.util.ValueArray;
 import lombok.Data;
-import oracle.sql.BLOB;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -162,8 +152,10 @@ public class LoadingDM implements Loading {
                 // 一批数据处理
                 long end = System.currentTimeMillis();
                 // 时间戳
-                Long writeRate = (long) ((Double.valueOf(list.size()) / (end - start)) * 1000);
-
+                //Long writeRate = (long) ((Double.valueOf(list.size()) / (end - start)) * 1000);
+                Long writeRate = (end != start)
+                        ? (long) ((Double.valueOf(list.size()) / (end - start)) * 1000)
+                        : (long) ((Double.valueOf(list.size()) / (1)) * 1000);
                 jobRunService.updateWrite(message, writeRate, Long.valueOf(index));
 
             } catch (Exception e) {
@@ -171,6 +163,8 @@ public class LoadingDM implements Loading {
             }
 
         }
+
+        list.clear();
     }
 
     @Override
@@ -186,18 +180,18 @@ public class LoadingDM implements Loading {
      */
     @Override
     public String getFullSQL(Map dataMap) {
-        System.out.println(dataMap);
+      //  // System.out.println(dataMap);
         Map message = (Map) dataMap.get("message");
         //大字段
         List bigdatas = (List) message.get("big_data");
 
         if (bigdatas == null || bigdatas.size() == 0) {
             //不含blob
-            System.out.println("不含blob");
+            //// System.out.println("不含blob");
             return noBlodToInsert(dataMap);
         } else {
             //含blob
-            System.out.println("含blob");
+          //  // System.out.println("含blob");
             return hasBlobToInsert(dataMap);
         }
     }
@@ -311,7 +305,7 @@ public class LoadingDM implements Loading {
         int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
-            System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
             int i = 1;
             for (Object field : dataMap.keySet()) {
                 if (bigData.contains(field)) {
@@ -405,10 +399,10 @@ public class LoadingDM implements Loading {
         int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
-            System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
             int i = 1;
             for (Object field : dataMap.keySet()) {
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
 
                 if (bigData.contains(field)) {
                     continue;
@@ -535,6 +529,10 @@ public class LoadingDM implements Loading {
      */
     private int excuteIncrementInsert(Map payload, String destTable) {
         String dest_name = destTable;
+
+        System.out.println(payload);
+
+
         Map dataMap = (Map) payload.get("data");
         StringBuffer fields = new StringBuffer("");
         StringBuffer value = new StringBuffer("");
@@ -564,19 +562,19 @@ public class LoadingDM implements Loading {
         int count = 0;
         try {
             pstm = destConn.prepareStatement(preSql.toString());
-            System.out.println("sql------" + preSql.toString());
-            System.out.println("sql------" + preSql.toString());
-            System.out.println("sql------" + preSql.toString());
-            System.out.println("sql------" + preSql.toString());
-            System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
+            // System.out.println("sql------" + preSql.toString());
 
             int i = 1;
             for (Object field : dataMap.keySet()) {
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
-                System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
+                // System.out.println(field + "-------------+++++" + dataMap.get(field));
 
                 pstm.setObject(i, dataMap.get(field));
                 i++;
@@ -822,6 +820,7 @@ public class LoadingDM implements Loading {
         for (int i = 0; i < payload.size() - 1; i++) {
             preSql.append("?,");
         }
+
         preSql.append("?");
         int index = 1;
         for (Object field : payload.keySet()) {
@@ -1105,7 +1104,7 @@ public class LoadingDM implements Loading {
 //        List<String> bigData = (List) message.get("big_data");
 //        ps = destConn.prepareStatement(insertSql);
         List key = (List) payload.get("key");
-        System.out.println("打印查入大字段sql" + insertSql);
+        // System.out.println("打印查入大字段sql" + insertSql);
         if (key != null && key.size() > 0) {
             for (int i = 0; i < key.size(); i++) {
                 ps.setObject(i + 1, key.get(i));
@@ -1116,7 +1115,7 @@ public class LoadingDM implements Loading {
                 ps.setObject(i, payload.get(field));
                 i++;
             }
-            System.out.println("大字段的size-----" + list.size());
+            // System.out.println("大字段的size-----" + list.size());
             //todo
             for (Object blob : list) {
                 ps.setObject(i, blob);
@@ -1141,7 +1140,7 @@ public class LoadingDM implements Loading {
 
     public void excuteHasBlodByInsert(String insertSql, Map dataMap, Connection destConn2) throws Exception {
 
-        System.out.println(insertSql);
+        // System.out.println(insertSql);
         PreparedStatement ps = destConn2.prepareStatement(insertSql);
         Map payload = (Map) dataMap.get("payload");
         int i = 1;

@@ -13,7 +13,7 @@ public class FileUtils {
             String s = null;
 //            while ((s = br.readLine()) != null) {
 //                result.append(s);
-//                System.out.println(s);
+//                // System.out.println(s);
 //            }
 
             while (true) {
@@ -22,7 +22,7 @@ public class FileUtils {
                     Thread.sleep(6000);
                     continue;
                 }
-                System.out.println(s);
+                // System.out.println(s);
             }
 
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class FileUtils {
             String s = null;
             while ((s = br.readLine()) != null) {
                 result.append(s);
-//                System.out.println(s);
+//                // System.out.println(s);
             }
             br.close();
             reader.close();
@@ -110,7 +110,7 @@ public class FileUtils {
             fw.write(content);
             fw.close();
         } catch (IOException e) {
-            System.out.println("文件写入失败！" + e);
+            // System.out.println("文件写入失败！" + e);
         }
     }
 

@@ -43,7 +43,7 @@ public class JobConsumerThread extends Thread {
 
         SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
 //        SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
-        System.out.println(source);
+        // System.out.println(source);
 
         JdbcTemplate jdbcTemplate = null;
         try {
@@ -61,10 +61,10 @@ public class JobConsumerThread extends Thread {
                     if (writeData != 0) {
                         // todo 写入量  待测
                         List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + jodId, List.class);
-//                        System.out.println(destTables + "consumer");
-//                        System.out.println(destTables.get(0).toString().split("\\.")[1]);
+//                        // System.out.println(destTables + "consumer");
+//                        // System.out.println(destTables.get(0).toString().split("\\.")[1]);
                         restTemplate.getForObject("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
-//                        System.out.println("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
+//                        // System.out.println("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
 
                     }
                 }
@@ -76,7 +76,7 @@ public class JobConsumerThread extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("报错了" + e.getMessage());
+            // System.out.println("报错了" + e.getMessage());
         }
 
     }

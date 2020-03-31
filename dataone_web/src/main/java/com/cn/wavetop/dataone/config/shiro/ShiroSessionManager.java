@@ -26,10 +26,10 @@ public class ShiroSessionManager  extends DefaultWebSessionManager {
     @Override
     protected Serializable getSessionId(ServletRequest request, ServletResponse response){
         String id = WebUtils.toHttp(request).getHeader(AUTHORIZATION);
-        System.out.println("id："+id);
+        // System.out.println("id："+id);
         if(id==null||id.equals(null)||id.equals("")){
             //如果没有携带id参数则按照父类的方式在cookie进行获取
-            System.out.println("super："+super.getSessionId(request, response));
+            // System.out.println("super："+super.getSessionId(request, response));
             return super.getSessionId(request, response);
         }else{
             //如果请求头中有 authToken 则其值为sessionId

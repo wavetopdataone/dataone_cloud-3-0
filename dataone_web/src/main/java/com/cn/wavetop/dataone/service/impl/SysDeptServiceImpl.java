@@ -141,7 +141,7 @@ public class SysDeptServiceImpl implements SysDeptService {
             boolean flag = false;
             for (SysUser sysUser : sysUserList) {
                 flag = sysUserJobrelaRepository.existsAllByUserId(sysUser.getId());
-                System.out.println(flag);
+                // System.out.println(flag);
                 if (flag) {
                     return ToDataMessage.builder().status("2").message("抱歉！您无法删除小组！请先将小组内所有任务删除后才能删除小组").build();
                 }

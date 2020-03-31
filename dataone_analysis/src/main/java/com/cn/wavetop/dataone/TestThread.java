@@ -10,7 +10,7 @@ public class TestThread  extends  Thread{
     public void run() {
         int i =0;
         while (true){
-            System.out.println(i++);
+            // System.out.println(i++);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
