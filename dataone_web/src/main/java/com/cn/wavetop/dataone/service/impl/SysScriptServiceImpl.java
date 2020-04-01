@@ -9,8 +9,6 @@ import com.cn.wavetop.dataone.entity.vo.ToDataMessage;
 import com.cn.wavetop.dataone.service.SysScriptService;
 import com.cn.wavetop.dataone.util.PermissionUtils;
 import com.cn.wavetop.dataone.util.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
