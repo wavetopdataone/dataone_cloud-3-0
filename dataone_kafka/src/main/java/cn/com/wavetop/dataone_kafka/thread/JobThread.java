@@ -60,7 +60,7 @@ public class JobThread extends Thread {
     public void run() {
 //        ArrayList<String> fileNames;
         // sync_range::1是全量，2是增量，3是增量+全量，4是存量
-        int sync_range = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_range/" + jodId, Integer.class);
+        int sync_range = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_range/" + jodId, Integer.class);
 
         while (stopMe) {
 
@@ -108,7 +108,7 @@ public class JobThread extends Thread {
             //  不一样的时候 需要更新
             if (lastReadData != readData) {
                 lastReadData = readData;
-                restTemplate.getForObject("http://192.168.1.156:8000/toback/readmonitoring/" + jodId + "?readData=" + readData, Object.class);
+                restTemplate.getForObject("http://192.168.1.153:8000/toback/readmonitoring/" + jodId + "?readData=" + readData, Object.class);
 
             }
         }

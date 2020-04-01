@@ -43,10 +43,10 @@ public class JobConsumerThread extends Thread {
 
 //        restTemplate.getForObject("192.168.1.1");
 
-//        SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
+//        SysDbinfo source = restTemplate.getForObject("http://192.168.1.153:8000/toback/findById/" + jodId, SysDbinfo.class);
         SysDbinfo source = (SysDbinfo) toBackClient.findDbinfoById(Long.valueOf(jodId));
 
-        //        SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
+        //        SysDbinfo source = restTemplate.getForObject("http://192.168.1.153:8000/toback/findById/" + jodId, SysDbinfo.class);
         // System.out.println(source);
 
         JdbcTemplate jdbcTemplate = null;
@@ -55,7 +55,7 @@ public class JobConsumerThread extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        consumers = new ConsumerHandler("192.168.1.156:9092", "true", "60", "-1", "JobId-" + jodId, "JobId-" + jodId);
+        consumers = new ConsumerHandler("192.168.1.153:9092", "true", "60", "-1", "JobId-" + jodId, "JobId-" + jodId);
         try {
             while (stopMe) {
                 writeData = consumers.execute(jdbcTemplate, "JodId_" + jodId, (int) jodId, writeData, toBackClient);
@@ -66,14 +66,14 @@ public class JobConsumerThread extends Thread {
                         // todo 写入量  待测
                         List destTables = (List) toBackClient.monitoringTable(jodId);
 
-//                        List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + jodId, List.class);
+//                        List destTables = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_destTable/" + jodId, List.class);
 //                        // System.out.println(destTables + "consumer");
 //                        // System.out.println(destTables.get(0).toString().split("\\.")[1]);
-//                        restTemplate.getForObject("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
+//                        restTemplate.getForObject("http://192.168.1.153:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
 
                         toBackClient.updateWriteMonitoring(jodId,writeData,destTables.get(0).toString().split("\\.")[1]);
 
-                        //                        // System.out.println("http://192.168.1.156:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
+                        //                        // System.out.println("http://192.168.1.153:8000/toback/writemonitoring/" + jodId + "?writeData=" + writeData + "&table=" + destTables.get(0).toString().split(".")[1]);
 
                     }
                 }

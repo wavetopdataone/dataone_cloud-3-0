@@ -17,7 +17,7 @@ public class Test {
 
         SysDbinfo build = SysDbinfo.builder().type(4l).
                 dbname("DMSERVER").
-                password("SYSDBA").host("192.168.1.156").schema("SYSDBA").port(5236L).build();
+                password("SYSDBA").host("192.168.1.153").schema("SYSDBA").port(5236L).build();
 
       //  Connection conn = DBConns.getConn(build);
         int i = 0;
