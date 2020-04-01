@@ -17,7 +17,7 @@ import java.util.List;
 public interface SysMonitoringRepository extends JpaRepository<SysMonitoring,Long>, JpaSpecificationExecutor<SysMonitoring> {
 
      //根據日期模糊查詢jobId
-    @Query("SELECT distinct s.jobId from SysRealTimeMonitoring s where s.optTime like CONCAT(:date,'%')")
+    @Query("SELECT distinct s.jobId from SysMonitoring s where s.optTime like CONCAT(:date,'%')")
     List<Long> selJobId(String date);
 
     List<SysMonitoring> findByJobId(long job_id);

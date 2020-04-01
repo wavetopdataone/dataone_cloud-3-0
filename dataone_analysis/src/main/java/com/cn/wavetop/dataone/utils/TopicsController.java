@@ -145,7 +145,7 @@ public class TopicsController {
     public static void deleteTopic(String topic) {
         ZkUtils zkUtils = null;
         try {
-            zkUtils = ZkUtils.apply("192.168.1.156:2181", 30000,
+            zkUtils = ZkUtils.apply("192.168.1.153:2181", 30000,
                     30000, JaasUtils.isZkSecurityEnabled());
             AdminUtils.deleteTopic(zkUtils, topic);
         } catch (Exception e) {
@@ -164,7 +164,7 @@ public class TopicsController {
     public static void listTopicAllConfig() {
         ZkUtils zkUtils = null;
         try {
-            zkUtils = ZkUtils.apply("192.168.1.156:2181", 30000, 30000, JaasUtils.isZkSecurityEnabled());
+            zkUtils = ZkUtils.apply("192.168.1.153:2181", 30000, 30000, JaasUtils.isZkSecurityEnabled());
             Map<String, Properties> configs = JavaConversions.mapAsJavaMap(AdminUtils.fetchAllTopicConfigs(zkUtils));
             for (Map.Entry<String, Properties> entry : configs.entrySet()) {
                 // System.out.println("key=" + entry.getKey() + " ;value= " + entry.getValue());
@@ -180,7 +180,7 @@ public class TopicsController {
 
 
     public static void main(String[] args) {
-        ZkUtils zkUtils = ZkUtils.apply("192.168.1.156:2181", 30000,
+        ZkUtils zkUtils = ZkUtils.apply("192.168.1.153:2181", 30000,
                 30000, JaasUtils.isZkSecurityEnabled());
         AdminUtils.deleteTopic(zkUtils, "DEPT_39");
 //        deleteTopic("DEPT_39");

@@ -196,7 +196,7 @@ public class ExtractionThread extends Thread {
     }
 
     public void stopTrans() {
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
         TopicsController.deleteTopic(tableName + "_" + jobId);
         if (this.extraction != null) {
             this.extraction.stopTrans();

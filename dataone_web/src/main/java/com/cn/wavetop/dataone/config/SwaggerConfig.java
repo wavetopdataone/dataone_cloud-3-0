@@ -45,7 +45,7 @@ public class SwaggerConfig {
                 //页面标题
                 .title("大数据平台--DataOne后端API")
                 //创建人
-                .contact(new Contact("后端项目组", "http://192.168.1.156:8000", ""))
+                .contact(new Contact("后端项目组", "http://192.168.1.153:8000", ""))
                 //版本号
                 .version("1.0")
                 //描述

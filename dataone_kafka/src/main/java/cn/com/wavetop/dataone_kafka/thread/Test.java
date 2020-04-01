@@ -13,8 +13,8 @@ import java.util.List;
 public class Test {
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
-        List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + 1, List.class); // todo 待测
-        restTemplate.getForObject("http://192.168.1.156:8000/toback/readmonitoring/" + 1 + "?readData=" + 10 + "&table=" + destTables.get(0), Object.class);
+        List destTables = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_destTable/" + 1, List.class); // todo 待测
+        restTemplate.getForObject("http://192.168.1.153:8000/toback/readmonitoring/" + 1 + "?readData=" + 10 + "&table=" + destTables.get(0), Object.class);
         // System.out.println(destTables);
         String o = (String) destTables.get(0);
         // System.out.println(o);
