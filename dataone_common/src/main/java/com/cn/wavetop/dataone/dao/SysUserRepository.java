@@ -34,9 +34,9 @@ public interface SysUserRepository extends JpaRepository<SysUser,Long> {
     @Query("select u from SysUser u where u.deptId=:deptId")
     List<SysUser> findUser(Long deptId);
 
-    @Query("select new com.cn.wavetop.dataone.entity.vo.SysUserDept(u.id,u.deptId,u.loginName,u.password,u.email,d.deptName,r.roleName,u.status) from SysUser u,SysRole r,SysUserRole ur,SysDept d where u.id=ur.userId and ur.roleId=r.id and u.deptId=d.id and r.roleKey=:perms order by u.id")
+    @Query("select distinct new com.cn.wavetop.dataone.entity.vo.SysUserDept(u.id,u.deptId,u.loginName,u.password,u.email,d.deptName,r.roleName,u.status) from SysUser u,SysRole r,SysUserRole ur,SysDept d where u.id=ur.userId and ur.roleId=r.id and u.deptId=d.id and r.roleKey=:perms order by u.id")
     List<SysUserDept>   findUserByUserPerms(String perms);
-    @Query("select new com.cn.wavetop.dataone.entity.vo.SysUserDept(u.id,u.deptId,u.loginName,u.password,u.email,d.deptName,r.roleName,u.status) from SysUser u,SysRole r,SysUserRole ur,SysDept d where u.id=ur.userId and ur.roleId=r.id and u.deptId=d.id and u.deptId=(select su.deptId from SysUser su where su.id=:userId) and r.roleKey<>:perms order by u.id")
+    @Query("select distinct new com.cn.wavetop.dataone.entity.vo.SysUserDept(u.id,u.deptId,u.loginName,u.password,u.email,d.deptName,r.roleName,u.status) from SysUser u,SysRole r,SysUserRole ur,SysDept d where u.id=ur.userId and ur.roleId=r.id and u.deptId=d.id and u.deptId=(select su.deptId from SysUser su where su.id=:userId) and r.roleKey<>:perms order by u.id")
     List<SysUserDept> findUserByPerms(Long userId, String perms);
 
 //根据超级管理员模糊查询用户名显示管理员

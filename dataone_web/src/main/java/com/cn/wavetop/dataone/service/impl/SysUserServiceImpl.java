@@ -284,6 +284,7 @@ public class SysUserServiceImpl implements SysUserService {
         String perms = null;
         if (PermissionUtils.isPermitted("1")) {
             list = sysUserRepository.findUserByUserPerms("2");
+            System.out.println(list);
             SysUserDept sysUserDept = new SysUserDept(PermissionUtils.getSysUser().getId(), PermissionUtils.getSysUser().getDeptId(), PermissionUtils.getSysUser().getLoginName(), PermissionUtils.getSysUser().getPassword(), PermissionUtils.getSysUser().getEmail(), "", "超级管理员", PermissionUtils.getSysUser().getStatus());
             list.add(0, sysUserDept);
             map.put("status", "1");
