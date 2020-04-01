@@ -24,6 +24,8 @@
             <groupId>com.cn.wavetop.dataone</groupId>
             <artifactId>dataone_common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/dataone_common-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <!-- 导入Eureka服务的依赖 -->
         <dependency>
