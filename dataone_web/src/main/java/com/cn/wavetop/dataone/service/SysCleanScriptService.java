@@ -21,4 +21,12 @@ public interface SysCleanScriptService {
      * @param payload
      */
     ScriptMessage executeScript(String scriptContent, Map payload);
+
+    /**
+     * 判断是否可用
+     * @param jobId
+     * @param sourceTable
+     * @return
+     */
+    Object equalFlag(Long jobId, String sourceTable);
 }

@@ -271,6 +271,7 @@ public class SysMonitoringController {
     @Transactional
     @Scheduled(cron = "0 0 0 * * ?")
     public void saveDataChange() {
+        System.out.println("---------------------------------------");
         SysDataChange dataChange = null;
         HashMap<Object, Double> map = new HashMap<>();
         List<SysMonitoring> list = new ArrayList<>();

@@ -34,24 +34,27 @@ public class CleanOutServiceImpl implements CleanOutService {
         while (conn == null) {
             try {
                 conn = DBConns.getConn(sysDbinfo);
-                Thread.sleep(4000);
+                if (conn == null) {
+                    Thread.sleep(4000);
+                }
             } catch (Exception e) {
-                logger.error("数据库连接失效"+e.getMessage());
+                e.printStackTrace();
+                logger.error("数据库连接失效" + e.getMessage());
             }
         }
 
         ResultMap resultMap = null;
         Map map = null;
-        Map map2=new HashMap();
+        Map map2 = new HashMap();
         try {
             if (sysDbinfo.getType() == 1) {
-                String sql = "select * from ( select * from "+tableName+" order by dbms_random.value) where rownum=1";
+                String sql = "select * from ( select * from " + tableName + " order by dbms_random.value) where rownum=1";
                 resultMap = DBUtil.query2(sql, conn);
             } else if (sysDbinfo.getType() == 2) {
-                String sql="select * from "+tableName+" order by rand() LIMIT 1";
+                String sql = "select * from " + tableName + " order by rand() LIMIT 1";
                 resultMap = DBUtil.query2(sql, conn);
             } else {
-               logger.error("源端不支持数据类型");
+                logger.error("源端不支持数据类型");
             }
             if (resultMap != null && resultMap.size() > 0) {
                 map = resultMap.get(0);

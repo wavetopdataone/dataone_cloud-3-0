@@ -81,5 +81,9 @@ public class SysCleanScriptController {
     public Object saveScriptFlag(Long jobId, String sourceTable,Integer flag) {
         return sysCleanScriptService.saveScriptFlag(jobId, sourceTable,flag);
     }
-
+    @PostMapping("/equalFlag")
+    @ApiOperation(value = "判断脚本是否绑定任务", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "判断脚本是否绑定任务")
+    public Object equalFlag(Long jobId, String sourceTable) {
+        return sysCleanScriptService.equalFlag(jobId, sourceTable);
+    }
 }
