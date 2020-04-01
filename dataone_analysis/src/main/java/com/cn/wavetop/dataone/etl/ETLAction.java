@@ -85,8 +85,12 @@ public class ETLAction {
         } catch (Exception e) {
         }
 
-        jobMonitoringThread.stopJob(); // 关闭任务
-        jobMonitoringThread.stop(); // 关闭监控线程
+        try {
+            jobMonitoringThread.stopJob(); // 关闭任务
+            jobMonitoringThread.stop(); // 关闭监控线程
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         jobMonitoringMap.put(jobId, null);
 
         return true;

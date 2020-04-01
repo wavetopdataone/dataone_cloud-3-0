@@ -6,7 +6,6 @@
   "/layouts__UserLayout.css": "/layouts__UserLayout.chunk.css",
   "/layouts__UserLayout.js": "/layouts__UserLayout.async.js",
   "/p__User__Login.js": "/p__User__Login.async.js",
-  "/p__User__personal.css": "/p__User__personal.chunk.css",
   "/p__User__personal.js": "/p__User__personal.async.js",
   "/p__User__register.css": "/p__User__register.chunk.css",
   "/p__User__register.js": "/p__User__register.async.js",
