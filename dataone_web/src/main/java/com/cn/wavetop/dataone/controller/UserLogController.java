@@ -44,6 +44,7 @@ public class UserLogController {
     public Object selByJobIdAndDate(Long job_id, String date, Integer current, Integer size) {
         return userLogService.selByJobIdAndDate(job_id, date, current, size);
     }
+
     @ApiOperation(value = "查询技术支持邮箱", httpMethod = "POST", protocols = "HTTP", produces = "application/json", notes = "查询技术支持邮箱")
     @PostMapping("/SelEmail")
     public Object Selemail() {
@@ -70,62 +71,19 @@ public class UserLogController {
             e.printStackTrace();
         }
 //        ServletOutputStream out = null;
+        File file = null;
+        FileInputStream in = null;
+        BufferedReader bufferedReader = null;
         if (type == 1) {
-            FileInputStream in = null;
-            File file = new File("dataoneerror-" + date + ".log");
-            BufferedReader bufferedReader = null;
-            try {
-                if (!file.exists()) {
-                    out1.println("{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}");
-//                    }
-                } else {
-                    response.setContentType("text/plain");
-                    bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
-                    String str ;//把一行的值赋值给str
-                    Integer index = 0;
-                    while ((str = bufferedReader.readLine()) != null) {
-                        if (index > 10000) {
-                            break;
-                        }
-                        out1.println(new StringBuffer(str).append("|").toString());
-                        index++;
-                    }
-                    bufferedReader.close();
-                }
-                out1.flush();
-            } catch (IOException e) {
-                logger.error("*IO错误", e);
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (out1 != null) {
-                    out1.close();
-                }
-            }
+            file = new File("dataoneerror-" + date + ".log");
+        } else if (type == 3) {
+            file = new File("dataoneanalysiSerror-" + date + ".log");
         } else if (type == 2) {
 
             Connection conn = LinuxLogin.login(ip);
             try {
                 // System.out.println("/opt/dataone/java/bin/kafkacontrolerror-" + date + ".0.log");
                 LinuxLogin.copyFile(conn, "/opt/dataone/java/bin/kafkacontrolerror-" + date + ".0.log", out1);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                out1.println("{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}");
-                out1.flush();
-                out1.close();
-            }
-        } else if (type == 3) {
-
-            Connection conn = LinuxLogin.login(ip);
-            try {
-                LinuxLogin.copyFile(conn, "/opt/kafka/connect-logs/"+date+"/kafka-connect-error.log", out1);
             } catch (Exception e) {
                 e.printStackTrace();
                 out1.println("{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}");
@@ -134,7 +92,57 @@ public class UserLogController {
             }
         }
 
+        try {
+            if (!file.exists()) {
+                out1.println("{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}");
+//                    }
+            } else {
+                response.setContentType("text/plain");
+                bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+                String str;//把一行的值赋值给str
+                Integer index = 0;
+                while ((str = bufferedReader.readLine()) != null) {
+                    if (index > 10000) {
+                        break;
+                    }
+                    out1.println(new StringBuffer(str).append("|").toString());
+                    index++;
+                }
+                bufferedReader.close();
+            }
+            out1.flush();
+        } catch (IOException e) {
+            logger.error("*IO错误", e);
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out1 != null) {
+                out1.close();
+            }
+        }
     }
+
+
+// else if (type == 3) {
+//
+//            Connection conn = LinuxLogin.login(ip);
+//            try {
+//                LinuxLogin.copyFile(conn, "/opt/kafka/connect-logs/"+date+"/kafka-connect-error.log", out1);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                out1.println("{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}");
+//                out1.flush();
+//                out1.close();
+//            }
+//        }
+
+//}
 
     @ApiOperation(value = "系统错误日志下载", httpMethod = "GET", protocols = "HTTP", produces = "application/json", notes = "系统错误日志下载")
     @GetMapping("/OutputError")
@@ -238,7 +246,7 @@ public class UserLogController {
                 e.printStackTrace();
             }
             try {
-                LinuxLogin.copyFile(conn,"/opt/kafka/connect-logs/"+date+"/kafka-connect-error.log", out);
+                LinuxLogin.copyFile(conn, "/opt/kafka/connect-logs/" + date + "/kafka-connect-error.log", out);
             } catch (Exception e) {
                 response.setContentType("application/json; charset=utf-8");
                 byte[] b = "{\"message\": \"系统找不到指定文件！\", \"status\": \"404\"}".getBytes();

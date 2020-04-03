@@ -7,6 +7,8 @@ import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import java.util.Map;
  */
 public class JobMonitoringThread extends Thread {
     private Long jobId;
+    private static final Logger logger = LoggerFactory.getLogger(JobMonitoringThread.class);
 
     private Map<Object, ExtractionThread> ExtractionThreads;
 
@@ -40,6 +43,25 @@ public class JobMonitoringThread extends Thread {
     //开始任务
     public boolean startJob() {
         // System.out.println("startJob"+ExtractionThreads);
+
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+        logger.info("我曾踏足山巅");
+
+
+
+
+
+
+
 
 
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端

@@ -149,6 +149,11 @@ public class SysJobrelaServiceImpl implements SysJobrelaService {
         //只有管理员能添加
         try {
             if (PermissionUtils.isPermitted("2")) {
+                //todo 最多只能有128个人任务限制
+                List<SysJobrela> count= repository.findAll();
+                if(count.size()>=128){
+                    return ToData.builder().status("0").message("最多只能存在128个任务，请先删除其他任务").build();
+                }
                 //判断任务是否存在
                 List<SysJobrela> list = repository.findByUserIdJobName(PermissionUtils.getSysUser().getId(), sysJobrela.getJobName());
                 if (list != null && list.size() > 0) {

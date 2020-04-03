@@ -86,5 +86,7 @@
         <appender-ref ref="error_file"/>
 <!--        <appender-ref ref="db_classic_mysql_pool" />-->
     </root>
-
+    <logger name="com.netflix.*">
+        <level value="WARN"></level>
+    </logger>
 </configuration>
