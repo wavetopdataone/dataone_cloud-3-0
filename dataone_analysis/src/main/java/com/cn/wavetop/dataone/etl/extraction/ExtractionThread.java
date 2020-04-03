@@ -36,16 +36,9 @@ public class ExtractionThread extends Thread {
     private Connection conn;//源端连接
     private Connection destConn;//目的端连接
 
-    public void closeConn() {
-        try {
-            this.destConn.close();
-            this.conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final Logger logger = LoggerFactory.getLogger(ExtractionThread.class);
 
     private SysJobrelaRespository sysJobrelaRespository = (SysJobrelaRespository) SpringContextUtil.getBean("sysJobrelaRespository");
 
@@ -200,6 +193,18 @@ public class ExtractionThread extends Thread {
         TopicsController.deleteTopic(tableName + "_" + jobId);
         if (this.extraction != null) {
             this.extraction.stopTrans();
+
+            extraction=null;
+        }
+    }
+
+    public void closeSource() {
+        try {
+            this.destConn.close();
+            this.conn.close();
+            //extraction.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

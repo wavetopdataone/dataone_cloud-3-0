@@ -51,4 +51,6 @@ public interface Extraction {
     public void pasueTrans();
 
 
+    void close();
+
 }

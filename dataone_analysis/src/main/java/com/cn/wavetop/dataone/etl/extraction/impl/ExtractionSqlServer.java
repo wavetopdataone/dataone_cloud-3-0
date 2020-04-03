@@ -51,4 +51,9 @@ public class ExtractionSqlServer implements Extraction {
     public void pasueTrans() {
 
     }
+
+    @Override
+    public void close() {
+
+    }
 }

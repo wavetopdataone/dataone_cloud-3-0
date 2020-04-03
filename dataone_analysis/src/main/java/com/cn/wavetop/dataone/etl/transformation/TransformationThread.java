@@ -2,28 +2,24 @@ package com.cn.wavetop.dataone.etl.transformation;
 
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.consumer.Consumer;
-import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.etl.loading.impl.LoadingDM;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.service.SysCleanScriptImpl;
 import com.cn.wavetop.dataone.util.DBConns;
-import com.cn.wavetop.dataone.util.ThreadLocalUtli;
 import com.cn.wavetop.dataone.utils.TopicsController;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.sql.BatchUpdateException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author yongz
@@ -308,7 +304,6 @@ public class TransformationThread extends Thread {
 
                 // 修改job状态
                 jobRunService.updateTableStatusByJobIdAndSourceTable(jobId, tableName, 3);
-                TopicsController.deleteTopic(tableName + "_" + jobId);
 
                 try {
                     this.destConn.close();
@@ -316,7 +311,13 @@ public class TransformationThread extends Thread {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                stop();
+                try {
+                    consumer.close();
+                } catch (Exception e) {
+                }
+                consumer = null;
+                TopicsController.deleteTopic(tableName + "_" + jobId);
+                return;
             }
         }
 
@@ -377,4 +378,7 @@ public class TransformationThread extends Thread {
     public void resumeMe() {
         resume();
     }
+
+
+
 }
