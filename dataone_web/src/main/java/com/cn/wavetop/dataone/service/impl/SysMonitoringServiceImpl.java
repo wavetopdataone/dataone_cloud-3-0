@@ -245,22 +245,22 @@ public class SysMonitoringServiceImpl implements SysMonitoringService {
                 sysMonitoring3.setJobStatus(sysMonitoring.getJobStatus());
                 sysMonitoringList3.add(sysMonitoring3);
             }
-            //按照首字符排序
-            Collections.sort(sysMonitoringList2, new Comparator<SysMonitoring>() {
-                @Override
-                public int compare(SysMonitoring o1, SysMonitoring o2) {
-                    //升序
-                    return o1.getSourceTable().compareTo(o2.getSourceTable());
-                }
-            });
-            //按照首字符排序
-            Collections.sort(sysMonitoringList3, new Comparator<SysMonitoring>() {
-                @Override
-                public int compare(SysMonitoring o1, SysMonitoring o2) {
-                    //升序
-                    return o1.getDestTable().compareTo(o2.getDestTable());
-                }
-            });
+//            //按照首字符排序
+//            Collections.sort(sysMonitoringList2, new Comparator<SysMonitoring>() {
+//                @Override
+//                public int compare(SysMonitoring o1, SysMonitoring o2) {
+//                    //升序
+//                    return o1.getSourceTable().compareTo(o2.getSourceTable());
+//                }
+//            });
+//            //按照首字符排序
+//            Collections.sort(sysMonitoringList3, new Comparator<SysMonitoring>() {
+//                @Override
+//                public int compare(SysMonitoring o1, SysMonitoring o2) {
+//                    //升序
+//                    return o1.getDestTable().compareTo(o2.getDestTable());
+//                }
+//            });
             map.put("status", "1");
             map.put("data1", sysMonitoringList2);
             map.put("data2", sysMonitoringList3);
