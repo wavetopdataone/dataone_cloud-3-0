@@ -24,7 +24,7 @@
     <appender name="application_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>dataoneinfo-%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>dataoneanalysisInfo-%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxHistory>30</MaxHistory>
 <!--            <maxFileSize>500MB</maxFileSize>-->
@@ -43,7 +43,7 @@
     <appender name="error_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>dataoneerror-%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>dataoneanalysiSerror-%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxHistory>30</MaxHistory>
 <!--            <maxFileSize>500MB</maxFileSize>-->
@@ -86,5 +86,8 @@
         <appender-ref ref="error_file"/>
 <!--        <appender-ref ref="db_classic_mysql_pool" />-->
     </root>
+    <logger name="org.springframework">
+        <level value="WARN"></level>
+    </logger>
 
 </configuration>
