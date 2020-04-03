@@ -353,6 +353,16 @@ public class JobRunService {
         return true;
     }
 
+    public Boolean threadOverByjobId(Long jobId,List tableNames) {
+        for (Object tableName : tableNames) {
+            SysMonitoring sysMonitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, tableName.toString());
+            if (sysMonitoring == null || sysMonitoring.getJobStatus() != 3){
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 修改表的变为已终止，
      */

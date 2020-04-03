@@ -62,11 +62,11 @@ public class LoadingDM implements Loading {
     public void fullLoading(List<Map> list) {
 
         int index = list.size();
-        System.out.println(list.size());
-        System.out.println(list.size());
-        System.out.println(list.size());
-        System.out.println(list.size());
-        System.out.println(list.size());
+//        System.out.println(list.size());
+//        System.out.println(list.size());
+//        System.out.println(list.size());
+//        System.out.println(list.size());
+//        System.out.println(list.size());
 
 
         long start = System.currentTimeMillis();
@@ -530,7 +530,7 @@ public class LoadingDM implements Loading {
     private int excuteIncrementInsert(Map payload, String destTable) {
         String dest_name = destTable;
 
-        System.out.println(payload);
+        //System.out.println(payload);
 
 
         Map dataMap = (Map) payload.get("data");
