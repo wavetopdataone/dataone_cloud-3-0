@@ -21,27 +21,25 @@ public class TimestampProcess {
 
 
     public Map process(Map record) {
-        // timestamp_type 类型为字符串，格式为：2019-07-24 17:06:54.000
-        final String timestampStr = (String) record.get("timestamp_type");
+
+        // 修改需要时间转换的字段名
+        String field = "TIMESTAMP_TYPE";
+
+        //例如： TIMESTAMP_TYPE 类型为字符串，格式为：2019-07-24 17:06:54.000
+        final String timestampStr = (String) record.get(field);
         if (timestampStr != null && "".equals(timestampStr)) {
             try {
+
                 // 将字符串转换为日期对象
                 final LocalDateTime localDateTime = LocalDateTime.parse(timestampStr, TIMESTAMP_FORMATTER);
 
                 // 将时间对象转换为 DATE_FORMATTER 格式的字符串，转化之后的字符串为：2019-07-24
-                record.put("timestamp_type", DATE_FORMATTER.format(localDateTime));
+                record.put(field, DATE_FORMATTER.format(localDateTime));
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return record;
     }
-
-
-//    public static void main(String[] args) {
-//        HashMap<Object, Object> record = new HashMap<>();
-//        record.put("timestamp_type", "2019-07-24 17:06:54.000");
-//        Map process = process(record);
-//        // System.out.println(process);
-//    }
 }
