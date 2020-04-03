@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,15 @@ public class JobMonitoringThread extends Thread {
         SysDbinfo sysDbinfo2 = JobRelaServiceImpl.findDestDbinfoById(jobId);//端
         try {
             conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
+        } catch (Exception e) {
+            // 数据源连接获取失败
+            e.printStackTrace();
+        }
+
+        try {
             destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
         } catch (Exception e) {
+            // 数据源连接获取失败
             e.printStackTrace();
         }
 
@@ -177,6 +185,8 @@ public class JobMonitoringThread extends Thread {
                 //增量+全量
                 case 3:
                     syncRangeFlag = true;
+
+                    // TODO 全量结束的判断
                     if (jobRunService.fullOverByjobId(jobId)) {
                         ExtractionThreads.get("incrementRang-" + jobId).start();
                         syncRangeFlag = false;
