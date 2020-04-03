@@ -376,8 +376,8 @@ public class JobProducerThread extends Thread {
                         ConfigSink configSink = new ConfigSink(jodId, schema.getName(), source, timestamp); // 加上时间戳
                         log.info("createConnector:" + configSink.getName());
                         if (source.getType() != 4l) {
-                            HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jodId + "-" + schema.getName()); //创建connector
-                            HttpClientKafkaUtil.createConnector("192.168.1.153", 8083, configSink.toJsonConfig()); //创建connector
+                            HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jodId + "-" + schema.getName()); //创建connector
+                            HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSink.toJsonConfig()); //创建connector
                         }
                         configSink = null;
                         // 创建线程计算写入量和写入速率

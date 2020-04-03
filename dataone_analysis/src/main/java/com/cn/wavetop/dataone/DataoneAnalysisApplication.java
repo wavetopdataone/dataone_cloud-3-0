@@ -36,7 +36,7 @@ public class DataoneAnalysisApplication {
         jobRunService.updateJobStatus();
 
         // 清除topic
-        List<String> topics = TopicsController.GetListAllTopic("192.168.1.153:2181");
+        List<String> topics = TopicsController.GetListAllTopic("192.168.1.156:2181");
         for (String topic : topics) {
             TopicsController.deleteTopic(topic);
         }

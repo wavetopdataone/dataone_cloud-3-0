@@ -108,7 +108,7 @@ String a="'IMAGE','TEXT','UNIQUEIDENTIFIER','DATE','TIME','DATETIME2','DATETIMEO
     }
     @Test
     public void shows() throws FileNotFoundException {
-        Connection conn = LinuxLogin.login("192.168.1.153");
+        Connection conn = LinuxLogin.login("192.168.1.156");
         FileOutputStream out = new FileOutputStream("H:\\aa.txt");
         SCPClient sc = new SCPClient(conn);
         try {

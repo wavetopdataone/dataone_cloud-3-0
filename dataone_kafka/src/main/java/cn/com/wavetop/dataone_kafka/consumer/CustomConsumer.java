@@ -19,7 +19,7 @@ public class CustomConsumer extends Thread {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ToBackClient toBackClient = SpringContextUtil.getBean(ToBackClient.class);
         Properties props = new Properties();
-        props.put("bootstrap.servers", "192.168.1.153:9092");
+        props.put("bootstrap.servers", "192.168.1.156:9092");
         props.put("group.id", "test17");
         props.put("enable.auto.commit", "false");
         props.put("auto.commit.interval.ms", "1000");

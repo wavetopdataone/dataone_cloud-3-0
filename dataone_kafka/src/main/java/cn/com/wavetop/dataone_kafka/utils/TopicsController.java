@@ -115,7 +115,7 @@ public class TopicsController {
     public static void deleteTopic(String topic){
         ZkUtils zkUtils = null;
         try {
-            zkUtils = ZkUtils.apply("192.168.1.153:2181",30000,
+            zkUtils = ZkUtils.apply("192.168.1.156:2181",30000,
                     30000,JaasUtils.isZkSecurityEnabled());
             AdminUtils.deleteTopic(zkUtils,topic);
         }catch (Exception e){

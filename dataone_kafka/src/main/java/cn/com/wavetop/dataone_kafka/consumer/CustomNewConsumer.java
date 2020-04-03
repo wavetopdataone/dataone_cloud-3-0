@@ -15,7 +15,7 @@ public class CustomNewConsumer {
 	//获取异常消息队列的信息
 	public static String topicPartion(String topic,int partition,Long offset) {
 		Properties props = new Properties();
-		props.put("bootstrap.servers", "192.168.1.153:9092");
+		props.put("bootstrap.servers", "192.168.1.156:9092");
 		props.put("group.id", "test99");
 		props.put("enable.auto.commit", "false");
 		props.put("auto.commit.interval.ms", "1000");

@@ -115,9 +115,9 @@ public class Action extends Thread {
 //                                    for (Object destTable : destTables) {
 //                                        // System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
 //                                        if (destTable.toString().contains("\\.")) {
-//                                            HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
+//                                            HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
 //                                        }else {
-//                                            HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable);
+//                                            HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable);
 //                                        }
 //                                    }
 //                                }
@@ -157,13 +157,13 @@ public class Action extends Thread {
                             for (Object destTable : destTables) {
                                 // System.out.println("deleteConnectors      -----    connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
                                 if (destTable.toString().contains("\\.")) {
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1].toUpperCase());
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1].toLowerCase());
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1].toUpperCase());
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1].toLowerCase());
                                 } else {
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable);
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().toUpperCase());
-                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().toLowerCase());
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable);
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().toUpperCase());
+                                    HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().toLowerCase());
                                 }
                             }
                         }
@@ -197,7 +197,7 @@ public class Action extends Thread {
                     // todo 重启kafka connector sink
 //                    List destTables = restTemplate.getForObject("http://DATAONE-WEB/toback/find_destTable/" + jobId, List.class);
 //                    for (Object destTable : destTables) {
-//                        HttpClientKafkaUtil.getConnectResume("192.168.1.153", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
+//                        HttpClientKafkaUtil.getConnectResume("192.168.1.156", 8083, "connect-sink-" + jobId + "-" + destTable.toString().split("\\.")[1]);
 //                    }
                 }
                 try {

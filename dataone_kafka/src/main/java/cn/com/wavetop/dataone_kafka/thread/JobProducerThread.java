@@ -64,7 +64,7 @@ public class JobProducerThread extends Thread {
     public void run() {
 //        ArrayList<String> fileNames;
         // sync_range::1是全量，2是增量，3是增量+全量，4是存量
-        int sync_range = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_range/" + jodId, Integer.class);
+        int sync_range = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_range/" + jodId, Integer.class);
 
         while (stopMe) {
 
@@ -105,11 +105,11 @@ public class JobProducerThread extends Thread {
             //  不一样的时候 需要更新
             if (lastReadData != readData) {
                 lastReadData = readData;
-                List destTables = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_destTable/" + jodId, List.class); // todo 待测
-                restTemplate.getForObject("http://192.168.1.153:8000/toback/readmonitoring/" + jodId + "?readData=" + readData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
+                List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + jodId, List.class); // todo 待测
+                restTemplate.getForObject("http://192.168.1.156:8000/toback/readmonitoring/" + jodId + "?readData=" + readData + "&table=" + destTables.get(0).toString().split("\\.")[1], Object.class);
 //                // System.out.println(destTables);
 //                // System.out.println(Arrays.toString(((String)destTables.get(0)).split(".")));
-//                // System.out.println("http://192.168.1.153:8000/toback/readmonitoring/" + jodId + "?readData=" + readData + "&table=" + destTables.get(0).toString().split(".")[1]);
+//                // System.out.println("http://192.168.1.156:8000/toback/readmonitoring/" + jodId + "?readData=" + readData + "&table=" + destTables.get(0).toString().split(".")[1]);
 
             }
             try {
@@ -329,9 +329,9 @@ public class JobProducerThread extends Thread {
                 double readRate = (double) (((index - startIndex) / 3) / (endTime - startTime)) * 1000;
                 // TODO 存入数据库
                 if (readRate != 0) {
-                    restTemplate.getForObject("http://192.168.1.153:8000/toback/updateReadRate/" + (long) readRate + "?jobId=" + jodId, Object.class);
+                    restTemplate.getForObject("http://192.168.1.156:8000/toback/updateReadRate/" + (long) readRate + "?jobId=" + jodId, Object.class);
                 }
-//                // System.out.println(" http://192.168.1.153:8000/toback/updateReadRate/" + (long) readRate + "?jobId=" + jodId);
+//                // System.out.println(" http://192.168.1.156:8000/toback/updateReadRate/" + (long) readRate + "?jobId=" + jodId);
             }
 
 
@@ -409,8 +409,8 @@ public class JobProducerThread extends Thread {
                     // _0.sql一旦生成则开始清空目标端数据
                     // 删除目标端表
 
-                    SysDbinfo source = restTemplate.getForObject("http://192.168.1.153:8000/toback/findById/" + jodId, SysDbinfo.class);
-//        SysDbinfo source = restTemplate.getForObject("http://192.168.1.153:8000/toback/findById/" + jodId, SysDbinfo.class);
+                    SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
+//        SysDbinfo source = restTemplate.getForObject("http://192.168.1.156:8000/toback/findById/" + jodId, SysDbinfo.class);
                     // System.out.println(source);
 
                     JdbcTemplate jdbcTemplate = null;
@@ -420,7 +420,7 @@ public class JobProducerThread extends Thread {
                         e.printStackTrace();
                     }
 
-                    List destTables = restTemplate.getForObject("http://192.168.1.153:8000/toback/find_destTable/" + jodId, List.class);
+                    List destTables = restTemplate.getForObject("http://192.168.1.156:8000/toback/find_destTable/" + jodId, List.class);
                     String DROPTABLE;
                     for (Object destTable : destTables) {
                         DROPTABLE = "DROP TABLE IF EXISTS " + destTable;

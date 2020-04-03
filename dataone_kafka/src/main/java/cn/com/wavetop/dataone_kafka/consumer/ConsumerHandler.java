@@ -124,7 +124,7 @@ public class ConsumerHandler {
             } catch (Exception e) {
                 // todo 将错误队列写入数据库,将错误记录写入数据库
                 log.error(e.getMessage() + "::" + record.value());
-//                restTemplate.getForObject("http://192.168.1.153:8000/toback/InsertLogError/" + jobId + "?optContext=" + record.value() + "&content=" + record.value(), Object.class);
+//                restTemplate.getForObject("http://192.168.1.156:8000/toback/InsertLogError/" + jobId + "?optContext=" + record.value() + "&content=" + record.value(), Object.class);
                 toBackClient.InsertLogError(jobId,record.value(),record.value());
                 errorLogIndex++;
             }
@@ -146,10 +146,10 @@ public class ConsumerHandler {
             double disposeRate = ((double) (writeData - startWriteData) / (endTime - startTime)) * 1000;
 
             // todo 待测速率
-//            // System.out.println("http://192.168.1.153:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate="+(long)disposeRate+"&errorData="+errorLogIndex);
+//            // System.out.println("http://192.168.1.156:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate="+(long)disposeRate+"&errorData="+errorLogIndex);
             if (disposeRate != 0 || errorLogIndex != 0) {
                 // System.out.println("当前写入速率：" + disposeRate);
-//                restTemplate.getForObject("http://192.168.1.153:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate=" + (long) disposeRate + "&errorData=" + errorLogIndex, Object.class);
+//                restTemplate.getForObject("http://192.168.1.156:8000/toback/updateDisposeRateAndError/" + jobId + "?disposeRate=" + (long) disposeRate + "&errorData=" + errorLogIndex, Object.class);
                 toBackClient.updateDisposeRateAndError(jobId, disposeRate,errorLogIndex);
             }
         }

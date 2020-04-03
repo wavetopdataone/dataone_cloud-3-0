@@ -225,7 +225,7 @@ public class SysUserServiceImpl implements SysUserService {
             opsForValue.set("logintime" + name + index, String.valueOf(new Date().getTime()), 300, TimeUnit.SECONDS);
             map.put("date", opsForValue.get("logintime" + name + "1"));
         } catch (Exception e) {
-            if(opsForValue.get("lefttime" + name)!=null) {
+            if (opsForValue.get("lefttime" + name) != null) {
                 lefttime = Integer.parseInt(opsForValue.get("lefttime" + name));
                 lefttime--;
             }
@@ -280,7 +280,7 @@ public class SysUserServiceImpl implements SysUserService {
     @Override
     public Object findAll() {
         Map<Object, Object> map = new HashMap<>();
-        List<SysUserDept> list =null;
+        List<SysUserDept> list = null;
         String perms = null;
         if (PermissionUtils.isPermitted("1")) {
             list = sysUserRepository.findUserByUserPerms("2");
@@ -290,20 +290,20 @@ public class SysUserServiceImpl implements SysUserService {
             map.put("status", "1");
             map.put("data", list);
         } else if (PermissionUtils.isPermitted("2")) {
-             list= sysUserRepository.findUserByPerms(PermissionUtils.getSysUser().getId(), "1");
-            List<SysUserDept> lists=new ArrayList<>();
-             if(list!=null&&list.size()>0){
-                 for(SysUserDept sysUserDept:list){
-                     if(sysUserDept.getRoleName().equals("管理员")){
-                         lists.add(0,sysUserDept);
-                     }else{
-                         lists.add(sysUserDept);
-                     }
-                 }
-                for(int i=0;i<lists.size();i++){
-                    if(lists.get(i).getRoleName().equals("管理员")){
-                        lists.add(0,lists.get(i));
-                        lists.remove(lists.get(i+1));
+            list = sysUserRepository.findUserByPerms(PermissionUtils.getSysUser().getId(), "1");
+            List<SysUserDept> lists = new ArrayList<>();
+            if (list != null && list.size() > 0) {
+                for (SysUserDept sysUserDept : list) {
+                    if (sysUserDept.getRoleName().equals("管理员")) {
+                        lists.add(0, sysUserDept);
+                    } else {
+                        lists.add(sysUserDept);
+                    }
+                }
+                for (int i = 0; i < lists.size(); i++) {
+                    if (lists.get(i).getRoleName().equals("管理员")) {
+                        lists.add(0, lists.get(i));
+                        lists.remove(lists.get(i + 1));
                     }
                 }
             }
@@ -396,57 +396,56 @@ public class SysUserServiceImpl implements SysUserService {
             sysUser.setStatus("1");
             sysUser.setCreateTime(new Date());
             sysUser.setCreateUser(PermissionUtils.getSysUser().getLoginName());
-//            map.put("status","1");
-//            map.put("message","添加成功");
-        }
-        List<SysUser> sysUser1 = new ArrayList<>();
-        //用户权限不能是编辑者
+            //todo  用戶角色应该放在这里
+            List<SysUser> sysUser1 = new ArrayList<>();
+            //用户权限不能是编辑者
 
-        if (PermissionUtils.isPermitted("1")) {
-            //判断超级管理员创建的是否是管理员 2是管理员角色的id
-            if (ids == 2) {
+            if (PermissionUtils.isPermitted("1")) {
+                //判断超级管理员创建的是否是管理员 2是管理员角色的id
+                if (ids == 2) {
 
-                SysUser suser = sysUserRepository.save(sysUser);
-                if (suser != null) {
-                    logUtil.saveUserlog(sysUser, null, "com.cn.wavetop.dataone.service.impl.SysUserServiceImpl.addSysUser", "添加用户");
-                }
-                sysUser1 = sysUserRepository.findAllByLoginName(sysUser.getLoginName());
-                sysUserRole.setUserId(sysUser1.get(0).getId());
-                sysUserRole.setRoleId(ids);
-                sysUserRoleRepository.save(sysUserRole);
+                    SysUser suser = sysUserRepository.save(sysUser);
+                    if (suser != null) {
+                        logUtil.saveUserlog(sysUser, null, "com.cn.wavetop.dataone.service.impl.SysUserServiceImpl.addSysUser", "添加用户");
+                    }
+                    sysUser1 = sysUserRepository.findAllByLoginName(sysUser.getLoginName());
+                    sysUserRole.setUserId(sysUser1.get(0).getId());
+                    sysUserRole.setRoleId(ids);
+                    sysUserRoleRepository.save(sysUserRole);
 //                     sysRoleMenu.setMenuId(ids);
 //                     sysRoleMenu.setRoleId(ids);
 //                     sysRoleMenuRepository.save(sysRoleMenu);
-                map.put("status", "1");
-                map.put("perms", "1");
-                map.put("id", suser.getId());
-                map.put("message", "添加成功");
-            } else {
-                return ToDataMessage.builder().status("0").message("超级管理员不能创建编辑者角色").build();
-            }
-        } else if (PermissionUtils.isPermitted("2")) {
-            if (ids == 3) {
-                SysUser suser = sysUserRepository.save(sysUser);
-                if (suser != null) {
-                    logUtil.saveUserlog(sysUser, null, "com.cn.wavetop.dataone.service.impl.SysUserServiceImpl.addSysUser", "添加用户");
+                    map.put("status", "1");
+                    map.put("perms", "1");
+                    map.put("id", suser.getId());
+                    map.put("message", "添加成功");
+                } else {
+                    return ToDataMessage.builder().status("0").message("超级管理员不能创建编辑者角色").build();
                 }
-                suser.setDeptId(PermissionUtils.getSysUser().getDeptId());
-                sysUserRepository.save(suser);
-                sysUser1 = sysUserRepository.findAllByLoginName(sysUser.getLoginName());
-                sysUserRole.setUserId(sysUser1.get(0).getId());
-                sysUserRole.setRoleId(ids);
-                sysUserRoleRepository.save(sysUserRole);
-                map.put("status", "1");
-                map.put("perms", "2");
-                map.put("id", suser.getId());
-                map.put("message", "添加成功");
+            } else if (PermissionUtils.isPermitted("2")) {
+                if (ids == 3) {
+                    SysUser suser = sysUserRepository.save(sysUser);
+                    if (suser != null) {
+                        logUtil.saveUserlog(sysUser, null, "com.cn.wavetop.dataone.service.impl.SysUserServiceImpl.addSysUser", "添加用户");
+                    }
+                    suser.setDeptId(PermissionUtils.getSysUser().getDeptId());
+                    sysUserRepository.save(suser);
+                    sysUser1 = sysUserRepository.findAllByLoginName(sysUser.getLoginName());
+                    sysUserRole.setUserId(sysUser1.get(0).getId());
+                    sysUserRole.setRoleId(ids);
+                    sysUserRoleRepository.save(sysUserRole);
+                    map.put("status", "1");
+                    map.put("perms", "2");
+                    map.put("id", suser.getId());
+                    map.put("message", "添加成功");
+                } else {
+                    return ToDataMessage.builder().status("0").message("管理员不能创建超级管理员角色").build();
+                }
             } else {
-                return ToDataMessage.builder().status("0").message("管理员不能创建超级管理员角色").build();
+                return ToDataMessage.builder().status("0").message("用户没有角色和权限").build();
             }
-        } else {
-            return ToDataMessage.builder().status("0").message("用户没有角色和权限").build();
-        }
 
+        }
         return map;
     }
 
@@ -486,10 +485,10 @@ public class SysUserServiceImpl implements SysUserService {
                     List<SysUserDbinfo> sysUserDbinfos = sysUserDbinfoRepository.findByUserId(list.get(0).getId());
                     sysUserDbinfoRepository.deleteByUserId(list.get(0).getId());
                     if (sysUserDbinfos != null && sysUserDbinfos.size() > 0) {
-                        SysDbinfo sysDbinfo=null;
+                        SysDbinfo sysDbinfo = null;
                         for (SysUserDbinfo sysUserDbinfo : sysUserDbinfos) {
-                            sysDbinfo=sysDbinfoRespository.findById(sysUserDbinfo.getDbinfoId().longValue());
-                            if(sysDbinfo!=null) {
+                            sysDbinfo = sysDbinfoRespository.findById(sysUserDbinfo.getDbinfoId().longValue());
+                            if (sysDbinfo != null) {
                                 stringRedisTemplate.delete(sysDbinfo.getHost() + sysDbinfo.getDbname() + sysDbinfo.getName());
                             }
                             sysDbinfoRespository.deleteById(sysUserDbinfo.getDbinfoId());
@@ -555,8 +554,8 @@ public class SysUserServiceImpl implements SysUserService {
             } else {
                 list = sysUserRepository.findUserByPerms(PermissionUtils.getSysUser().getId(), "1");
             }
-            List<SysUserDept> lists=new ArrayList<>();
-            if(list!=null&&list.size()>0) {
+            List<SysUserDept> lists = new ArrayList<>();
+            if (list != null && list.size() > 0) {
                 for (SysUserDept sysUserDept : list) {
                     if (sysUserDept.getRoleName().equals("管理员")) {
                         lists.add(0, sysUserDept);
@@ -699,10 +698,10 @@ public class SysUserServiceImpl implements SysUserService {
                 List<SysUserDbinfo> sysUserDbinfos = sysUserDbinfoRepository.findByUserId(userId);
                 sysUserDbinfoRepository.deleteByUserId(userId);
                 if (sysUserDbinfos != null && sysUserDbinfos.size() > 0) {
-                    SysDbinfo sysDbinfo=null;
+                    SysDbinfo sysDbinfo = null;
                     for (SysUserDbinfo sysUserDbinfo : sysUserDbinfos) {
-                        sysDbinfo=sysDbinfoRespository.findById(sysUserDbinfo.getDbinfoId().longValue());
-                        if(sysDbinfo!=null) {
+                        sysDbinfo = sysDbinfoRespository.findById(sysUserDbinfo.getDbinfoId().longValue());
+                        if (sysDbinfo != null) {
                             stringRedisTemplate.delete(sysDbinfo.getHost() + sysDbinfo.getDbname() + sysDbinfo.getName());
                         }
                         sysDbinfoRespository.deleteById(userId);
@@ -920,13 +919,13 @@ public class SysUserServiceImpl implements SysUserService {
             if (sysDept.get() != null) {
                 sysDeptUsers.setDeptId(sysDept.get().getId());
                 sysDeptUsers.setDeptName(sysDept.get().getDeptName());
-                List<SysUserByDeptVo> sysUserList= sysUserRepository.findUserRoleByDeptId(sysDept.get().getId());
-               //todo 管理员放第一位
-                if(sysUserList!=null&&sysUserList.size()>0){
-                    for(int i=0;i<sysUserList.size();i++){
-                        if(sysUserList.get(i).getRoleName().equals("管理员")){
-                            sysUserList.add(0,sysUserList.get(i));
-                            sysUserList.remove(sysUserList.get(i+1));
+                List<SysUserByDeptVo> sysUserList = sysUserRepository.findUserRoleByDeptId(sysDept.get().getId());
+                //todo 管理员放第一位
+                if (sysUserList != null && sysUserList.size() > 0) {
+                    for (int i = 0; i < sysUserList.size(); i++) {
+                        if (sysUserList.get(i).getRoleName().equals("管理员")) {
+                            sysUserList.add(0, sysUserList.get(i));
+                            sysUserList.remove(sysUserList.get(i + 1));
                         }
                     }
                 }
@@ -994,10 +993,10 @@ public class SysUserServiceImpl implements SysUserService {
         if (sysUser1.get().getPassword().equals(ciphertext)) {
 //                String emailType="smtp."+newEmail.split("@")[1];
 //                sysUser1.get().setEmailType(emailType);
-            SysUser sysUser=sysUserRepository.findByEmail(newEmail);
-            if(sysUser!=null&&userId!=sysUser.getId()){
+            SysUser sysUser = sysUserRepository.findByEmail(newEmail);
+            if (sysUser != null && userId != sysUser.getId()) {
                 return ToDataMessage.builder().status("0").message("该邮箱其他用户已使用").build();
-            }else {
+            } else {
                 sysUser1.get().setEmail(newEmail);
                 sysUserRepository.save(sysUser1.get());
                 return ToDataMessage.builder().status("1").message("邮箱修改成功").build();
@@ -1028,11 +1027,11 @@ public class SysUserServiceImpl implements SysUserService {
             }
             //todo  查询超管的东西  超管的id必须时1
             Optional<SysUser> sysUserOptional = sysUserRepository.findById(Long.valueOf(1));
-            List<SysUser> sysUsers=new ArrayList<>();
-            SysUser sysUser=new SysUser();
+            List<SysUser> sysUsers = new ArrayList<>();
+            SysUser sysUser = new SysUser();
             sysUser.setEmail(email);
             sysUsers.add(sysUser);
-            EmailPropert emailPropert=new EmailPropert();
+            EmailPropert emailPropert = new EmailPropert();
             emailPropert.setForm("上海浪擎科技技术有限公司");
             emailPropert.setSubject("浪擎dataone验证码：");
             emailPropert.setSag("尊敬的用户:你好!\n 浪擎dataOne验证码为:" + code + "\n" + "(有效期为一分钟)");

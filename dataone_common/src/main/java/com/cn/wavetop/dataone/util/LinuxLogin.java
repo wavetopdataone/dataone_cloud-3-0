@@ -27,7 +27,7 @@ public class LinuxLogin {
 			conn.authenticateWithPassword("root", "wavetop_888888");
 
 		} catch (IOException e) {
-			System.err.printf("用户%s密码%s登录服务器%s失败！", "root", "wavetop_888888", "192.168.1.153");
+			System.err.printf("用户%s密码%s登录服务器%s失败！", "root", "wavetop_888888", "192.168.1.156");
 			e.printStackTrace();
 		}
 		return conn;
@@ -95,7 +95,7 @@ public class LinuxLogin {
 		URL resource = LinuxLogin.class.getClassLoader().getResource("dataoneinfo-2019-12-26.0.log");
 
 
-		Connection conn = login("192.168.1.153");
+		Connection conn = login("192.168.1.156");
 		copyFile( conn, "/opt/kafka/connect-logs/kafka-connect.log.2019-12-01","F:");
 	}
 
