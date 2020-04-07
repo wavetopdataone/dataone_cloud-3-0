@@ -972,6 +972,7 @@ public class LoadingDM implements Loading {
             }
         }
         List key = (List) message.get("key");
+        logger.error("查詢逐漸++++"+key);
         if (key != null && key.size() > 0) {
             for (int i = 0; i < key.size(); i++) {
                 if (i == key.size() - 1) {
@@ -979,7 +980,12 @@ public class LoadingDM implements Loading {
                 } else {
                     value.append(key.get(i) + "=? and ");
                 }
+                logger.error("走了逐漸2+"+key.get(i));
+                logger.error("走了逐漸2+"+key.get(i));
+                logger.error("走了逐漸2+"+key.get(i));
             }
+
+
         } else {
             Integer count = 0;
 
@@ -1039,13 +1045,14 @@ public class LoadingDM implements Loading {
         Map payload = (Map) dataMap.get("source_payload");
         List big_data = (List) message.get("big_data");
         List key = (List) message.get("key");
-   logger.error("清洗之前的map+"+payload);
+        logger.error("zhujian++++++"+ key);
         try {
             ppst = conn.prepareStatement(sql);
             int index = 1;
             if (key != null && key.size() > 0) {
-                for (int i = 0; i < list.size(); i++) {
-                    ppst.setObject(index++, payload.get(list.get(i)));
+
+                for (int i = 0; i < key.size(); i++) {
+                    ppst.setObject(index++, payload.get(key.get(i)));
                 }
             } else {
                 for (Object keys : payload.keySet()) {
@@ -1056,7 +1063,11 @@ public class LoadingDM implements Loading {
             }
             resultSet = ppst.executeQuery();
             if (resultSet.next()) {
+                int aa=0;
                 for (Object blob : big_data) {
+
+                    logger.error("大字段的值"+ aa++);
+
                     list.add(resultSet.getObject(blob.toString()));
                 }
             } else {
@@ -1127,11 +1138,21 @@ public class LoadingDM implements Loading {
 //        ps = destConn.prepareStatement(insertSql);
         List key = (List) message.get("key");
         // System.out.println("打印查入大字段sql" + insertSql);
-        if (key != null && key.size() > 0) {
-            for (int i = 0; i < key.size(); i++) {
-                ps.setObject(i + 1, key.get(i));
-            }
-        } else {
+        logger.error("list"+list.size());
+        logger.error("key"+key.size());
+        logger.error("key"+key.get(0));
+        logger.error("message"+message);
+        logger.error("payload"+payload);
+        logger.error("insert"+insertSql);
+
+        logger.error("dataMap"+dataMap);
+
+
+//        if (key != null && key.size() > 0) {
+//            for (int i = 0; i < key.size(); i++) {
+//                ps.setObject(i + 1, key.get(i));
+//            }
+//        } else {
             int i = 1;
             for (Object field : payload.keySet()) {
                 ps.setObject(i, payload.get(field));
@@ -1143,7 +1164,7 @@ public class LoadingDM implements Loading {
                 ps.setObject(i, blob);
                 i++;
             }
-        }
+//        }
 //        ps.addBatch();
         payload.clear(); // gc
         payload = null; //gc
