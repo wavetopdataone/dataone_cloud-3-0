@@ -7,8 +7,6 @@ import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,30 +36,17 @@ public class JobMonitoringThread extends Thread {
 
     private static final JobRelaServiceImpl JobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
+    private static final ErrorManageServerImpl errorManageServerImpl = (ErrorManageServerImpl) SpringContextUtil.getBean("errorManageServerImpl");
+
+
+    private static final Logger logger = LoggerFactory.getLogger(JobMonitoringThread.class);
+
+
     private int sync_range;
 
     //开始任务
     public boolean startJob() {
         // System.out.println("startJob"+ExtractionThreads);
-
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");  logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-        logger.info("我曾踏足山巅");
-
-
-
-
-
-
-
 
 
         SysDbinfo sysDbinfo = JobRelaServiceImpl.findSourcesDbinfoById(jobId);//源端
@@ -70,65 +55,97 @@ public class JobMonitoringThread extends Thread {
         try {
             conn = DBConns.getOracleConn(sysDbinfo); // 数据库源端连接
         } catch (Exception e) {
+            logger.error("任务标号：" + jobId + "任务出现异常：源端数据库连接失败，请检查源端数据库连接配置，修改源端数据库配置");
             // 数据源连接获取失败
-            e.printStackTrace();
+            errorManageServerImpl.taskStatusAndUserLog(jobId, "源端数据库连接失败，请检查源端数据库连接配置，修改源端数据库配置", "4");
+            // e.printStackTrace();
+            return false;
         }
 
         try {
             destConn = DBConns.getConn(sysDbinfo2); // 数据库目标端端连接
         } catch (Exception e) {
+            logger.error("任务标号：" + jobId + "任务出现异常：目的端数据库连接失败，请检查源端数据库连接配置，修改源端数据库配置");
             // 数据源连接获取失败
-            e.printStackTrace();
+            errorManageServerImpl.taskStatusAndUserLog(jobId, "目的端数据库连接失败，请检查源端数据库连接配置，修改源端数据库配置", "4");
+            //e.printStackTrace();
+            return false;
         }
 
 
         if (ExtractionThreads == null) {
             // 开启时将任务表的所有状态改为运行中
             jobRunService.updateStatusFristStart(jobId);
-
             // 第一次开启，激活
+            jobRunService.deleteMonitoring(jobId); //删除监控表中数据
             // 存放所有表的子线程
             ExtractionThreads = new HashMap<>();
             // 查任务要同步的表名,分发任务
             List tableById = JobRelaServiceImpl.findTableById(jobId, conn);
-            // System.out.println(tableById);
-            // System.out.println(tableById);
-            // System.out.println(tableById);
-            // System.out.println(tableById);
+
             sync_range = JobRelaServiceImpl.findById(jobId).getSyncRange().intValue();
+
             switch (sync_range) {
                 //全量
                 case 1:
+                    logger.info("jobId:" + jobId + "全量任务--数据流通道开启");
+                    errorManageServerImpl.taskUserLog(jobId, "全量任务--数据流通道开启");
                     for (Object tableName : tableById) {
                         ExtractionThreads.put(tableName, new ExtractionThread(jobId, (String) tableName, conn, destConn, sync_range));
-                        ExtractionThreads.get(tableName).start();
+                        // ExtractionThreads.get(tableName).start();.
+//                        try {
+//                            StringBuffer sqlCount = new StringBuffer(); // 之前的全查
+//                            sqlCount.append("SELECT ").append(" count(*) ").append(" FROM ").append(tableName);
+//                            Long sqlCount1 = DBUtil.queryCount(sqlCount.toString(), conn);
+//                            sqlCount = null;
+//                            // 监控表更新
+//                            jobRunService.insertSqlCount(jobId,tableName.toString(),sqlCount1);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+
+
                     }
+
+                    this.start();
                     break;
                 //增量
                 case 2:
+                    logger.info("jobId:" + jobId + "增量任务--数据流通道开启");
+                    errorManageServerImpl.taskUserLog(jobId, "增量任务--数据流通道开启");
                     ExtractionThreads.put("incrementRang-" + jobId, new ExtractionThread(jobId, tableById, conn, destConn, sync_range));
-                    ExtractionThreads.get("incrementRang-" + jobId).start();
+                    // ExtractionThreads.get("incrementRang-" + jobId).start();
+                    this.start();
                     break;
                 //增量+全量
                 case 3:
+                    logger.info("jobId:" + jobId + "全量+增量任务--数据流通道开启");
+                    errorManageServerImpl.taskUserLog(jobId, "全量+增量任务--数据流通道开启");
                     for (Object tableName : tableById) {
                         ExtractionThreads.put(tableName, new ExtractionThread(jobId, (String) tableName, conn, destConn, sync_range));
-                        ExtractionThreads.get(tableName).start();
+                        //ExtractionThreads.get(tableName).start();
                     }
+                    this.start();
                     ExtractionThreads.put("incrementRang-" + jobId, new ExtractionThread(jobId, tableById, conn, destConn, sync_range));
-                    //ExtractionThreads.get("incrementRang-" + jobId).start();
+                    //ExtractionThreads.get("incrementRang-" + jobId).start(); 这个不用了
                     break;
                 default:
 
             }
         } else {
+            jobRunService.updateStatusStart(jobId);
+            logger.info("任务jobId:" + jobId + "数据流通道重启");
+            errorManageServerImpl.taskUserLog(jobId, "任务--数据流通道开启");
             // System.out.println("???????????????");
             // 重启时把暂停的状态改为运行中
-            jobRunService.updateStatusStart(jobId);
             // 重启，resume
             for (Object o : ExtractionThreads.keySet()) {
-                ExtractionThreads.get(o).resume(); //重启抓取线程
-                ExtractionThreads.get(o).resumeTrans();//重启清洗线程
+                try {
+                    ExtractionThreads.get(o).resume(); //重启抓取线程
+                    ExtractionThreads.get(o).resumeTrans();//重启清洗线程
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return true;
@@ -136,33 +153,49 @@ public class JobMonitoringThread extends Thread {
 
     //暂停任务
     public boolean pauseJob() {
-        // todo 优化数据库连接（释放）
+
+        logger.info("任务jobId:" + jobId + "数据流通道暂停");
+        errorManageServerImpl.taskUserLog(jobId, "任务--数据流通道暂停");
 
         // 任务暂停时需要把任务表状态改为暂停
         jobRunService.updateStatusPause(jobId);
+
         if (ExtractionThreads == null) {
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
             // System.out.println("--------");
-            ExtractionThreads.get(o).suspend();//暂停抓取进程
-            ExtractionThreads.get(o).pasueTrans();//暂停清洗进程
+            try {
+                ExtractionThreads.get(o).suspend();//暂停抓取进程
+                ExtractionThreads.get(o).pasueTrans();//暂停清洗进程
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return true;
     }
 
     //终止任务
     public boolean stopJob() {
+
+        logger.info("任务jobId:" + jobId + "数据流通道停止");
+        errorManageServerImpl.taskUserLog(jobId, "任务--数据流通道停止");
+
         if (ExtractionThreads == null) {
             return false;
         }
         for (Object o : ExtractionThreads.keySet()) {
-            ExtractionThreads.get(o).stop();//终止抓取进程
-            ExtractionThreads.get(o).closeConn();//释放抓取数据的连接
-            ExtractionThreads.get(o).stopTrans();//终止清洗进程
+            try {
+                ExtractionThreads.get(o).stop();//终止抓取进程
+                ExtractionThreads.get(o).closeSource();//释放抓取数据的连接
+                ExtractionThreads.get(o).stopTrans();//终止清洗进程
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         ExtractionThreads.clear();
         ExtractionThreads = null;
+        System.gc();
         return true;
     }
 
@@ -172,6 +205,7 @@ public class JobMonitoringThread extends Thread {
      */
     @Override
     public void run() {
+        int erupt=jobRunService.getConcurrentNum(jobId); // 读写并发数量
         // 更新任务监控表
 //        jobRunService.setMonitor(jobId);
 
@@ -181,24 +215,77 @@ public class JobMonitoringThread extends Thread {
         boolean emaliFlag = true;
         boolean syncRangeFlag = true;
 
+        // 全量算法相关变量
+        ArrayList<Object> tableNames = new ArrayList<>();
+        int size = ExtractionThreads.size();
+        int index = 0;
+        int _index = index;
+        int i = 0; //
+        int j = 0; // 记录开启的线程数
+
+
+        // 全量+增量的时候
+
+
         while (emaliFlag || syncRangeFlag) {
-            System.out.println("监控！");
+            //System.out.println("监控！"+_index);
             // 邮件监控
-            emaliFlag = jobRunService.emailReminder(jobId,this);
+            emaliFlag = jobRunService.emailReminder(jobId, this);
 
             // 任务状态监控
             switch (sync_range) {
                 //全量
                 case 1:
+
+
                     syncRangeFlag = true;
-                    if (jobRunService.fullOverByjobId(jobId)) {
+
+                    // 第一次启动erupt并发个线程
+                    if (_index == 0) {
+                        i = 0;
+                        j = 0;
+                        for (Object o : ExtractionThreads.keySet()) {
+                            i++;
+                            if (i > _index && i <= _index + erupt) {
+                                ExtractionThreads.get(o).start();
+                                tableNames.add(j, o);
+                                j++;
+                                index++;
+                            }
+                        }
+                        _index = index;
+                    }
+                    //System.out.println(tableNames);
+                    System.out.println("当前开启状态:" + jobRunService.threadOverByjobId(jobId, tableNames));
+
+                    if (index < size && index > 0 && jobRunService.threadOverByjobId(jobId, tableNames)) {
+                        i = 0;
+                        j = 0;
+                        // 第二次启动下个erupt个线程
+                        for (Object o : ExtractionThreads.keySet()) {
+                            i++;
+                            if (i > _index && i <= _index + erupt) {
+                                ExtractionThreads.get(o).start();
+                                tableNames.add(j, o);
+                                j++;
+                                index++;
+                            }
+                        }
+                        _index = index;
+                    }
+
+                    if (index == size && jobRunService.fullOverByjobId(jobId)) {
                         ETLAction.jobMonitoringMap.put(jobId, null);
                         ETLAction.jobMonitoringMap.remove(jobId);
                         jobRunService.updateJobStatusByJobId(jobId, "3");
+
+                        logger.info("jobId:" + jobId + "全量任务--数据同步完成");
+                        errorManageServerImpl.taskUserLog(jobId, "全量任务--数据同步完成");
                         new ETLAction().stop(jobId);
 //                        stopJob();
                         return;
                     }
+
                     break;
                 //增量
                 case 2:
@@ -208,8 +295,54 @@ public class JobMonitoringThread extends Thread {
                 case 3:
                     syncRangeFlag = true;
 
+
+                    syncRangeFlag = true;
+
+                    // 第一次启动erupt个线程
+                    if (_index == 0) {
+                        i = 0;
+                        j = 0;
+                        for (Object o : ExtractionThreads.keySet()) {
+                            if (o.toString().equalsIgnoreCase("incrementRang-" + jobId)) {
+                                continue;
+                            }
+                            i++;
+                            if (i > _index && i <= _index + erupt) {
+                                ExtractionThreads.get(o).start();
+                                tableNames.add(j, o);
+                                j++;
+                                index++;
+                            }
+                        }
+                        _index = index;
+                    }
+                    System.out.println(tableNames);
+                    System.out.println("当前开启状态:" + jobRunService.threadOverByjobId(jobId, tableNames));
+
+                    if (index < size && index > 0 && jobRunService.threadOverByjobId(jobId, tableNames)) {
+                        i = 0;
+                        j = 0;
+                        // 第二次启动下个erupt个线程
+                        for (Object o : ExtractionThreads.keySet()) {
+                            if (o.toString().equalsIgnoreCase("incrementRang-" + jobId)) {
+                                continue;
+                            }
+                            i++;
+                            if (i > _index && i <= _index + erupt) {
+                                ExtractionThreads.get(o).start();
+                                tableNames.add(j, o);
+                                j++;
+                                index++;
+                            }
+                        }
+                        _index = index;
+                    }
+
                     // TODO 全量结束的判断
-                    if (jobRunService.fullOverByjobId(jobId)) {
+                    if (index == size && jobRunService.fullOverByjobId(jobId)) {
+                        logger.info("jobId:" + jobId + "全量+增量任务--全量数据同步完成，开始增量数据同步");
+                        errorManageServerImpl.taskUserLog(jobId, "全量+增量任务--全量数据同步完成，开始增量数据同步");
+
                         ExtractionThreads.get("incrementRang-" + jobId).start();
                         syncRangeFlag = false;
                     }

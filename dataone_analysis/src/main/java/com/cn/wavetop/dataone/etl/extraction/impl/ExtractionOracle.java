@@ -44,59 +44,9 @@ public class ExtractionOracle implements Extraction {
     private Connection conn;//源端连接
     private Connection destConn;//目标端连接
 
-//    private Producer producer ;
+    private static final ErrorManageServerImpl errorManageServerImpl = (ErrorManageServerImpl) SpringContextUtil.getBean("errorManageServerImpl");
+    private static final Logger logger = LoggerFactory.getLogger(JobMonitoringThread.class);
 
-    /**
-     * 全量抓取
-     * 未优化的全查
-     * 已弃用
-     *
-     * @throws Exception
-     */
-    @Deprecated
-    public void fullRangALL() throws Exception {
-        // System.out.println("Oracle 全量开始");
-        // System.out.println(jobId);
-        Producer producer = new Producer(null);
-        Map message;
-        message = getMessage(); //传输的消息
-        producer = new Producer(null);
-        StringBuffer select_sql = new StringBuffer(); // 之前的全查
-
-
-        List filedsList = jobRelaServiceImpl.findFiledNoBlob(jobId, tableName, conn);
-        String _fileds = filedsList.toString().substring(1, filedsList.toString().length() - 1);
-
-        //拼接查询语句
-        select_sql.append(SELECT).append(_fileds).append(FROM).append(tableName);
-
-
-        ResultMap resultMap;
-        resultMap = DBUtil.query2(select_sql.toString(), conn);
-        message.put("creatTable", jobRelaServiceImpl.createTable(jobId, tableName, conn));
-        synchronized (blok) {
-            try {
-                creatTable((String) message.get("creatTable"), destConn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        startTrans(resultMap.size(), 1);   //判断创建清洗线程并开启线程
-        // System.out.println(tableName + "____" + resultMap.size());
-        for (int i = 0; i < resultMap.size(); i++) {
-
-            DataMap data = DataMap.builder()
-                    .payload(resultMap.get(i))
-                    .message(message)
-                    .build();
-//            // System.out.println(data);
-            producer.sendMsg(tableName + "_" + jobId, JSONUtil.toJSONString(data));
-        }
-        destConn.close();
-//todo
-//        conn.close();
-
-    }
 
     /**
      * 全量抓取
@@ -119,7 +69,9 @@ public class ExtractionOracle implements Extraction {
             try {
                 creatTable((String) message.get("creatTable"), destConn);
             } catch (SQLException e) {
-                e.printStackTrace();
+                logger.error("任务：" + jobId + "目的端存在"+message.get("destTable"));
+                // 数据源连接获取失败
+                errorManageServerImpl.taskUserLog(jobId, "任务：" + jobId + "目的端存在"+message.get("destTable"));
             }
         }
 
@@ -172,7 +124,14 @@ public class ExtractionOracle implements Extraction {
                     ? Double.valueOf(resultMap.size()) / (end - start) * 1000
                     : Double.valueOf(resultMap.size()) / (1) * 1000;
 
-            jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
+            try {
+                jobRunService.updateRead(message, (long) readRate, (long) resultMap.size());//更新读取速率/量
+            } catch (Exception e) {
+                logger.error(tableName+"更新读取速率、读取量出现问题。"+message+"/n"+readRate+"/t--"+(long) resultMap.size());
+                logger.error(tableName+"更新读取速率、读取量出现问题。");
+                logger.error(tableName+"更新读取速率、读取量出现问题。");
+                e.printStackTrace();
+            }
 
             index = index + size;
             pageSelectSql = getPageSelectSql(index, size, _fileds, tableName);
@@ -182,7 +141,8 @@ public class ExtractionOracle implements Extraction {
 
 //            // System.out.println(message + "--message--" + readRate + "---" + (long) resultMap.size());
         }
-
+        producer.stop();
+        producer=null;
     }
 
     private void creatTable(String creatTable, Connection destConn) throws SQLException {
@@ -220,8 +180,8 @@ public class ExtractionOracle implements Extraction {
         String table_whitelist = br.toString().substring(0, br.toString().length() - 1);
         String configSource = new ConfigSource(jobId, sysDbinfo, scn, table_whitelist.toString()).toJsonConfig();
 
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
-        HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSource); //创建connectorSource
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        HttpClientKafkaUtil.createConnector("192.168.1.153", 8083, configSource); //创建connectorSource
         startTrans(1, 2);   //判断创建清洗线程并开启线程
     }
 
@@ -255,7 +215,11 @@ public class ExtractionOracle implements Extraction {
     @Override
     public void stopTrans() {
 //        producer.stop();
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        try {
+            HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        } catch (Exception e) {
+
+        }
         // TODO 清空Topic
         try {
             TopicsController.deleteTopic(tableName + "_" + jobId);
@@ -263,15 +227,9 @@ public class ExtractionOracle implements Extraction {
             //e.printStackTrace();
         }
 
-        // 释放数据连接
-//        try {
-//            this.destConn.close();
-//            this.conn.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
         if (this.transformationThread != null) {
             this.transformationThread.stop();
+            this.transformationThread = null;
         }
 
     }
@@ -281,6 +239,11 @@ public class ExtractionOracle implements Extraction {
         if (this.transformationThread != null) {
             this.transformationThread.suspend();
         }
+    }
+
+    @Override
+    public void close() {
+        //transformationThread=null;
     }
 
     private Map getMessage() {

@@ -52,4 +52,9 @@ public class ExtractionDM implements Extraction {
     public void pasueTrans() {
         transformationThread.suspend();
     }
+
+    @Override
+    public void close() {
+
+    }
 }

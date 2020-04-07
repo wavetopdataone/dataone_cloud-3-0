@@ -1,11 +1,9 @@
 package com.cn.wavetop.dataone.service;
 
-import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.dao.*;
 import com.cn.wavetop.dataone.entity.*;
 import com.cn.wavetop.dataone.entity.vo.EmailJobrelaVo;
 import com.cn.wavetop.dataone.entity.vo.EmailPropert;
-import com.cn.wavetop.dataone.etl.ETLAction;
 import com.cn.wavetop.dataone.etl.JobMonitoringThread;
 import com.cn.wavetop.dataone.util.EmailUtils;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -56,7 +53,6 @@ public class JobRunService {
     @Transactional
     public void insertSqlCount(Map message) {
 
-
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             sysMonitoringRepository.updateSqlCount(sysMonitoringList.get(0).getId(), (Long) message.get("sqlCount"), message.get("destTable").toString(), new Date());
@@ -79,6 +75,27 @@ public class JobRunService {
         }
     }
 
+    public void deleteMonitoring(Long jobId) {
+        sysMonitoringRepository.deleteByJobId(jobId);
+    }
+
+    public void insertSqlCount(Long jobId, String sourceTable, Long sqlCount) {
+        SysMonitoring sysMonitoring = SysMonitoring.builder().
+                jobId(jobId).
+                sourceTable(sourceTable).
+                sqlCount(sqlCount).
+                optTime(new Date()).
+                jobStatus(1).
+                readData(0l).
+                readRate(0l).
+                writeData(0l).
+                disposeRate(0l).
+                errorData(0l).
+                build();//插入时间
+
+        sysMonitoringRepository.save(sysMonitoring);
+    }
+
     /**
      * 读取速率、读取量
      * <p>
@@ -87,6 +104,8 @@ public class JobRunService {
      */
     @Transactional
     public void updateRead(Map message, Long readRate, Long readData) {
+        logger.error("更新读取速率、读取量出现问题。上面"+message+"/n"+readRate+"/t--"+readData);
+
         List<SysMonitoring> sysMonitoringList = sysMonitoringRepository.findBySourceTableAndJobId(message.get("sourceTable").toString(), (Long) message.get("jobId"));
         if (sysMonitoringList != null && sysMonitoringList.size() > 0) {
             //为了页面图展示用的历史读取量
@@ -106,6 +125,7 @@ public class JobRunService {
                 readData += sysMonitoringList.get(0).getReadData();
             }
             sysMonitoringRepository.updateReadData(sysMonitoringList.get(0).getId(), readData, new Date(), readRate, message.get("destTable").toString(), dayReadData, dayReadRate);
+            logger.error("更新读取速率、读取量出现问题。下面"+message+"/n"+readRate+"/t--"+readData);
         } else {
             logger.error("该表不存在");
         }
@@ -114,6 +134,7 @@ public class JobRunService {
 
     /**
      * 用于增量
+     *
      * @param message
      * @param readRate
      * @param readData
@@ -141,16 +162,16 @@ public class JobRunService {
             sysMonitoringRepository.updateReadDataIn(sysMonitoringList.get(0).getId(), readData, new Date(), readRate, message.get("destTable").toString(), dayReadData, dayReadRate);
         } else {
             sysMonitoringRepository.save(
-                        SysMonitoring.builder().
-                                jobId((Long) message.get("jobId")).
-                                sourceTable(message.get("sourceTable").toString()).
-                                destTable(message.get("destTable").toString()).
-                                sqlCount(1l).
-                                optTime(new Date()).
-                                readData(readData).
-                                readRate(readRate).
-                                build()
-                );
+                    SysMonitoring.builder().
+                            jobId((Long) message.get("jobId")).
+                            sourceTable(message.get("sourceTable").toString()).
+                            destTable(message.get("destTable").toString()).
+                            sqlCount(1l).
+                            optTime(new Date()).
+                            readData(readData).
+                            readRate(readRate).
+                            build()
+            );
 
 
         }
@@ -353,6 +374,16 @@ public class JobRunService {
         return true;
     }
 
+    public Boolean threadOverByjobId(Long jobId, List tableNames) {
+        for (Object tableName : tableNames) {
+            SysMonitoring sysMonitoring = sysMonitoringRepository.findByJobIdAndSourceTable(jobId, tableName.toString());
+            if (sysMonitoring == null || sysMonitoring.getJobStatus() != 3) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * 修改表的变为已终止，
      */
@@ -479,28 +510,28 @@ public class JobRunService {
                                 //预警邮件
                                 ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
                                 //暂停邮件
-                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result, jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 0) {
                                 //预警+暂停  不带邮件
                                 //预警不带邮件
                                 ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
                                 //暂停不带邮件
-                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result, jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 1 && emailJobrelaVo.getErrorQueuePause() == 0) {
                                 //预警邮件+暂停不带邮件
                                 //预警邮件
                                 ErrorQueueAlertEmail(sysMonitoring, sysUserOptional.get(), emailJobrelaVo, WarnSetup, result, opsForValue);
                                 //暂停不带邮件
-                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
+                                vflag = ErrorQueuePause(sysJobrela.get(), emailJobrelaVo, ErrorSetup, result, jobMonitoringThread);
                                 return vflag;
                             } else if (emailJobrelaVo.getErrorQueueAlert() == 0 && emailJobrelaVo.getErrorQueuePause() == 1) {
                                 //预警不带邮件+暂停带邮件
                                 //预警不带邮件
                                 ErrorQueueAlert(emailJobrelaVo, WarnSetup, result);
                                 //暂停邮件
-                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result,jobMonitoringThread);
+                                vflag = ErrorQueuePauseEmail(sysJobrela.get(), sysMonitoring, sysUserOptional.get(), emailJobrelaVo, ErrorSetup, result, jobMonitoringThread);
                                 return vflag;
                             } else {
                                 logger.error("暂时没有的方式");
@@ -614,7 +645,7 @@ public class JobRunService {
      * @param result         结果
      * @return 暂停后 告诉监控线程
      */
-    public boolean ErrorQueuePauseEmail(SysJobrela sysJobrela, SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result,JobMonitoringThread jobMonitoringThread) {
+    public boolean ErrorQueuePauseEmail(SysJobrela sysJobrela, SysMonitoring sysMonitoring, SysUser sysUser, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result, JobMonitoringThread jobMonitoringThread) {
         if (ErrorSetup <= result) {
             EmailUtils emailUtils = new EmailUtils();
             if (jobMonitoringThread.pauseJob()) {
@@ -660,7 +691,7 @@ public class JobRunService {
      * @param result         结果
      * @return 暂停后 告诉监控线程
      */
-    public boolean ErrorQueuePause(SysJobrela sysJobrela, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result,JobMonitoringThread jobMonitoringThread) {
+    public boolean ErrorQueuePause(SysJobrela sysJobrela, EmailJobrelaVo emailJobrelaVo, double ErrorSetup, double result, JobMonitoringThread jobMonitoringThread) {
         //暂停
         if (ErrorSetup <= result && emailJobrelaVo.getErrorQueuePause() != 1) {
             if ("1".equals(sysJobrela.getJobStatus())) {
@@ -699,5 +730,16 @@ public class JobRunService {
     }
 
 
+    public int getConcurrentNum(long jobId){
+        SysJobinfo sysJobinfo = sysJobinfoRespository.findByJobId(jobId).get(0);
+
+        if (sysJobinfo == null){
+            return 1;
+        }else {
+            return Math.toIntExact(sysJobinfo.getSourceReadConcurrentNum());
+        }
+
+
+    }
 
 }

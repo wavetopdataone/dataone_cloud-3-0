@@ -39,7 +39,7 @@ public class ETLAction {
             // System.out.println("开始！！！"+jobMonitoringMap.get(jobId));
             // 第一次开启
             jobMonitoringMap.put(jobId, new JobMonitoringThread(jobId));
-            jobMonitoringMap.get(jobId).start(); //启动监控线程
+//            jobMonitoringMap.get(jobId).start(); //启动监控线程
             jobMonitoringMap.get(jobId).startJob(); //启动任务
         } else {
             // 任务重启
