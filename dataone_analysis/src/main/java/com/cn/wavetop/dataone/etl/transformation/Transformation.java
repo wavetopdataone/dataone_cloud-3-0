@@ -84,6 +84,7 @@ public class Transformation {
 
         dataMap.putAll(JSONObject.parseObject(value));
         payload = (Map) dataMap.get("payload");
+        dataMap.put("source_payload",(Map) dataMap.get("payload"));
         message = (Map) dataMap.get("message");
 
         // 高级清洗
@@ -145,25 +146,6 @@ public class Transformation {
         dataMap.put("payload", payload);
         dataMap.put("message", message);
         return dataMap;
-    }
-
-    private static String getDmlSql(Map payload) {
-        String dmlsql = payload.get("SQL_REDO").toString();
-        String operation = payload.get("OPERATION").toString();
-
-        if (operation.equalsIgnoreCase("insert")) {
-
-
-        } else if (operation.equalsIgnoreCase("update")) {
-
-
-            dmlsql = "update";
-        } else if (operation.equalsIgnoreCase("delete")) {
-
-
-            dmlsql = "delete";
-        }
-        return dmlsql;
     }
 
 
