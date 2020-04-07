@@ -336,6 +336,7 @@ public class TransformationThread extends Thread {
             try {
 //                dataMap = transformation2.Transform(value, mappingField);
                 dataMap = transformation.Transform(value, mappingField);
+                System.out.println("清洗後的"+dataMap.get("source_payload"));
             } catch (IOException e) {
                 // todo 转换
                 e.printStackTrace();

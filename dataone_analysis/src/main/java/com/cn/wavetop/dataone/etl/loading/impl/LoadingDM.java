@@ -3,11 +3,14 @@ package com.cn.wavetop.dataone.etl.loading.impl;
 import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.ErrorLog;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
+import com.cn.wavetop.dataone.etl.JobMonitoringThread;
 import com.cn.wavetop.dataone.etl.loading.Loading;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Map;
 public class LoadingDM implements Loading {
     public static final JobRelaServiceImpl jobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
+    private static final Logger logger = LoggerFactory.getLogger(LoadingDM.class);
 
     private Long jobId;//jobid
     private String tableName;//源端表
@@ -84,6 +88,12 @@ public class LoadingDM implements Loading {
             }
 
             try {
+                System.out.println("執行"+dataMap.get("source_payload"));
+                System.out.println("執行"+dataMap.get("source_payload"));
+                System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));
+                System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));
+                System.out.println("執行"+dataMap.get("source_payload"));
+
                 excuteInsert(insertSql, dataMap, ps);
             } catch (Exception e) {
                 index--;
@@ -800,6 +810,15 @@ public class LoadingDM implements Loading {
             //不含blob
             excuteNoBlodByInsert(insertSql, dataMap, ps);
         } else {
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+            System.out.println("插入"+dataMap.get("source_payload"));
+
             String a = Selblobs(dataMap);
             List<Object> list = selBlobResult(dataMap, a, conn);
             //含blob
@@ -938,8 +957,8 @@ public class LoadingDM implements Loading {
      */
     public String Selblobs(Map dataMap) {
         Map message = (Map) dataMap.get("message");
-        String destTable = (String) message.get("destTable");
-        Map payload = (Map) dataMap.get("payload");
+        String sourceTable = (String) message.get("sourceTable");
+        Map payload = (Map) dataMap.get("source_payload");
         StringBuffer stringBuffer = new StringBuffer("select ");
         StringBuffer fields = new StringBuffer("");
         StringBuffer value = new StringBuffer("");
@@ -952,7 +971,7 @@ public class LoadingDM implements Loading {
                 fields.append(list.get(i) + ",");
             }
         }
-        List key = (List) payload.get("key");
+        List key = (List) message.get("key");
         if (key != null && key.size() > 0) {
             for (int i = 0; i < key.size(); i++) {
                 if (i == key.size() - 1) {
@@ -982,7 +1001,8 @@ public class LoadingDM implements Loading {
                 }
             }
         }
-        stringBuffer.append(fields + " from " + destTable + " where " + value);
+        stringBuffer.append(fields + " from " + sourceTable + " where " + value);
+        logger.error("大字段查询的sql"+stringBuffer.toString());
         return stringBuffer.toString();
     }
 
@@ -991,7 +1011,7 @@ public class LoadingDM implements Loading {
      */
     public String selBlobInRowId(Map dataMap) {
         Map message = (Map) dataMap.get("message");
-        String destTable = (String) message.get("destTable");
+        String sourceTable = (String) message.get("sourceTable");
         StringBuffer stringBuffer = new StringBuffer("select ");
         StringBuffer fields = new StringBuffer("");
         StringBuffer value = new StringBuffer("");
@@ -1004,7 +1024,9 @@ public class LoadingDM implements Loading {
             }
         }
         value.append(" ROWID='" + message.get("ROWID_DATAONE_YONGYUBLOB_HAHA") + "'");
-        stringBuffer.append(fields + " from " + destTable + " where " + value);
+        stringBuffer.append(fields + " from " + sourceTable + " where " + value);
+        logger.error("大字段查询ROWID的sql"+stringBuffer.toString());
+
         return stringBuffer.toString();
     }
 
@@ -1014,16 +1036,16 @@ public class LoadingDM implements Loading {
         PreparedStatement ppst = null;
         List<Object> list = new ArrayList<>();
         Map message = (Map) dataMap.get("message");
-        Map payload = (Map) dataMap.get("payload");
+        Map payload = (Map) dataMap.get("source_payload");
         List big_data = (List) message.get("big_data");
-        List key = (List) payload.get("key");
-
+        List key = (List) message.get("key");
+   logger.error("清洗之前的map+"+payload);
         try {
             ppst = conn.prepareStatement(sql);
             int index = 1;
             if (key != null && key.size() > 0) {
                 for (int i = 0; i < list.size(); i++) {
-                    ppst.setObject(index++, list.get(i));
+                    ppst.setObject(index++, payload.get(list.get(i)));
                 }
             } else {
                 for (Object keys : payload.keySet()) {
@@ -1103,7 +1125,7 @@ public class LoadingDM implements Loading {
         Integer result = 0;
 //        List<String> bigData = (List) message.get("big_data");
 //        ps = destConn.prepareStatement(insertSql);
-        List key = (List) payload.get("key");
+        List key = (List) message.get("key");
         // System.out.println("打印查入大字段sql" + insertSql);
         if (key != null && key.size() > 0) {
             for (int i = 0; i < key.size(); i++) {

@@ -83,7 +83,9 @@ public class Transformation {
 
 
         dataMap.putAll(JSONObject.parseObject(value));
+
         payload = (Map) dataMap.get("payload");
+        dataMap.put("source_payload",payload);
         message = (Map) dataMap.get("message");
 
         // 高级清洗
@@ -200,7 +202,7 @@ public class Transformation {
         for (Object filed : payload.keySet()) {
             returnPayload.put(mappingField.get(filed), payload.get(filed));
         }
-        payload.clear();
+//        payload.clear();
         return returnPayload;
     }
 
