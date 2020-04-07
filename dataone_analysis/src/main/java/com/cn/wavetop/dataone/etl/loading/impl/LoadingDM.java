@@ -88,11 +88,6 @@ public class LoadingDM implements Loading {
             }
 
             try {
-                System.out.println("執行"+dataMap.get("source_payload"));
-                System.out.println("執行"+dataMap.get("source_payload"));
-                System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));
-                System.out.println("執行"+dataMap.get("source_payload"));System.out.println("執行"+dataMap.get("source_payload"));
-                System.out.println("執行"+dataMap.get("source_payload"));
 
                 excuteInsert(insertSql, dataMap, ps);
             } catch (Exception e) {
@@ -810,15 +805,6 @@ public class LoadingDM implements Loading {
             //不含blob
             excuteNoBlodByInsert(insertSql, dataMap, ps);
         } else {
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-            System.out.println("插入"+dataMap.get("source_payload"));
-
             String a = Selblobs(dataMap);
             List<Object> list = selBlobResult(dataMap, a, conn);
             //含blob
@@ -1131,6 +1117,8 @@ public class LoadingDM implements Loading {
      */
     public void excuteHasBlodByInsert(String insertSql, List list, Map dataMap, PreparedStatement ps2) throws Exception {
         PreparedStatement ps = destConn.prepareStatement(insertSql);
+
+
         Map message = (Map) dataMap.get("message");
         Map payload = (Map) dataMap.get("payload");
         Integer result = 0;
@@ -1159,18 +1147,29 @@ public class LoadingDM implements Loading {
             }
 //        }
 //        ps.addBatch();
-        payload.clear(); // gc
-        payload = null; //gc
-        destConn.commit();
+//
         try {
+
             result = ps.executeUpdate();
+
         } catch (SQLException e) {
             // todo
+            ErrorLog errorLog = ErrorLog.builder().content(dataMap.get("payload").toString()).
+                    optContext(e.toString()).
+                    destName(jobRelaServiceImpl.destTableName(jobId, this.tableName)).
+                    optTime(new Date()).
+                    optType("fullLoading").
+                    jobId(jobId).
+                    sourceName(tableName).build();
+//                if (!"null".equals(content) && content != null) {
+            jobRelaServiceImpl.insertError(errorLog);
         }
         destConn.commit();
         ps.close();
         ps = null;
 //        ps.close();
+        payload.clear(); // gc
+        payload = null; //gc
     }
 
 
