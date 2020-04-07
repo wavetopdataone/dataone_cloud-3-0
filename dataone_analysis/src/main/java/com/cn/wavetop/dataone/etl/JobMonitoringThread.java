@@ -4,14 +4,18 @@ import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
 import com.cn.wavetop.dataone.entity.SysMonitoring;
 import com.cn.wavetop.dataone.etl.extraction.ExtractionThread;
+import com.cn.wavetop.dataone.service.ErrorManageServerImpl;
 import com.cn.wavetop.dataone.service.JobRelaServiceImpl;
 import com.cn.wavetop.dataone.service.JobRunService;
 import com.cn.wavetop.dataone.util.DBConns;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +41,6 @@ public class JobMonitoringThread extends Thread {
     private static final JobRelaServiceImpl JobRelaServiceImpl = (JobRelaServiceImpl) SpringContextUtil.getBean("jobRelaServiceImpl");
     private static final JobRunService jobRunService = (JobRunService) SpringContextUtil.getBean("jobRunService");
     private static final ErrorManageServerImpl errorManageServerImpl = (ErrorManageServerImpl) SpringContextUtil.getBean("errorManageServerImpl");
-
-
-    private static final Logger logger = LoggerFactory.getLogger(JobMonitoringThread.class);
-
 
     private int sync_range;
 
