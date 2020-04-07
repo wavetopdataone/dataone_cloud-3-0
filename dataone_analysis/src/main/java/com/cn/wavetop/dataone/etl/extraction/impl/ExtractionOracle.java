@@ -185,8 +185,8 @@ public class ExtractionOracle implements Extraction {
         String table_whitelist = br.toString().substring(0, br.toString().length() - 1);
         String configSource = new ConfigSource(jobId, sysDbinfo, scn, table_whitelist.toString()).toJsonConfig();
 
-        HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
-        HttpClientKafkaUtil.createConnector("192.168.1.153", 8083, configSource); //创建connectorSource
+        HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+        HttpClientKafkaUtil.createConnector("192.168.1.156", 8083, configSource); //创建connectorSource
         startTrans(1, 2);   //判断创建清洗线程并开启线程
     }
 
@@ -221,7 +221,7 @@ public class ExtractionOracle implements Extraction {
     public void stopTrans() {
 //        producer.stop();
         try {
-            HttpClientKafkaUtil.deleteConnectors("192.168.1.153", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
+            HttpClientKafkaUtil.deleteConnectors("192.168.1.156", 8083, "Increment-Source-" + jobId); //如果当前任务开启的connector 先删除connectorSource
         } catch (Exception e) {
 
         }

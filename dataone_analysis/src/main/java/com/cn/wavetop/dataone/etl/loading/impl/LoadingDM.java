@@ -1136,16 +1136,9 @@ public class LoadingDM implements Loading {
         Integer result = 0;
 //        List<String> bigData = (List) message.get("big_data");
 //        ps = destConn.prepareStatement(insertSql);
-        List key = (List) message.get("key");
+//        List key = (List) message.get("key");
         // System.out.println("打印查入大字段sql" + insertSql);
-        logger.error("list"+list.size());
-        logger.error("key"+key.size());
-        logger.error("key"+key.get(0));
-        logger.error("message"+message);
-        logger.error("payload"+payload);
-        logger.error("insert"+insertSql);
 
-        logger.error("dataMap"+dataMap);
 
 
 //        if (key != null && key.size() > 0) {
