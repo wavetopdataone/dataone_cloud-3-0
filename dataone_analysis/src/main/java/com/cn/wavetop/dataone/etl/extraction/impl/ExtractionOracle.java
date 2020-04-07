@@ -2,20 +2,25 @@ package com.cn.wavetop.dataone.etl.extraction.impl;
 
 
 import com.cn.wavetop.dataone.config.ConfigSource;
+import com.cn.wavetop.dataone.config.SpringContextUtil;
 import com.cn.wavetop.dataone.db.DBUtil;
 import com.cn.wavetop.dataone.db.ResultMap;
 import com.cn.wavetop.dataone.entity.SysDbinfo;
+import com.cn.wavetop.dataone.etl.JobMonitoringThread;
 import com.cn.wavetop.dataone.etl.extraction.Extraction;
 import com.cn.wavetop.dataone.etl.transformation.TransformationThread;
 import com.cn.wavetop.dataone.kafkahttputils.HttpClientKafkaUtil;
 import com.cn.wavetop.dataone.models.DataMap;
 import com.cn.wavetop.dataone.producer.Producer;
+import com.cn.wavetop.dataone.service.ErrorManageServerImpl;
 import com.cn.wavetop.dataone.util.JSONUtil;
 import com.cn.wavetop.dataone.utils.TopicsController;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
